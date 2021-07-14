@@ -6,14 +6,15 @@
 <h3 class="title"><i class="fas fa-users-cog"></i> {{ title }}</h3>
 
 <div>
-    <p class="p2"><label>Имя: </label><i class="i">{{ user1.first_name }}</i></p>
-    <p class="p2"><label>Фамилия: </label><i class="i">{{ user1.last_name }}</i></p>
-    <p class="p2"><label>Email: </label><i class="i">{{ user1.email }}</i></p>
-    <p class="p2"><label>Номер телефона: </label><i class="i">{{ user1.num_tel }}</i></p>
+    <p class="p2"><label>Имя: </label><i id="i1">{{ user1.first_name }}</i></p>
+    <p class="p2"><label>Фамилия: </label><i id="i2">{{ user1.last_name }}</i></p>
+    <p class="p2"><label>Email: </label><i id="i3">{{ user1.email }}</i></p>
+    <p class="p2"><label>Номер телефона: </label><i id="i4">{{ user1.num_tel }}</i></p>
 </div>
-
-<a href="#" class="a3"><i>Изменить пароль</i></a>
-
+<div id="id2">
+    <a href="{% url 'edit_profile' user.username %}" class="a3"><i>Редактировать профиль</i></a><br><br>
+    <a href="{% url 'password_change' user.username %}" class="a3"><i>Изменить пароль</i></a>
+</div>
 {% endblock content %}
 
 {% block groups %}{% endblock groups %}

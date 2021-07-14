@@ -1,12 +1,12 @@
 from django.contrib.auth import login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
-from django.contrib.auth.views import LoginView
-from django.shortcuts import render, redirect
-from django.views.generic import CreateView, DetailView
+from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
 
 from main.views import menu
 from users.form import *
+from users.models import Users
 
 
 class RegisterUser(CreateView):
@@ -16,7 +16,6 @@ class RegisterUser(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Регистрация'
-        context['menu'] = menu
         return context
 
     def form_valid(self, form):
@@ -55,3 +54,32 @@ class LoginUser(LoginView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Авторизация'
         return context
+
+
+class PasswordChangeUser(PasswordChangeView):
+    template_name = 'users/password_change.html'
+    form_class = PasswordChangeUserForm
+    success_url = reverse_lazy('news')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Изменить пароль'
+        context['menu'] = menu
+        return context
+
+
+def update(request, username):
+    us = Users.objects.get(username=username)
+    form = UpdateUserForm()
+    if request.method == 'POST':
+        form = UpdateUserForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)
+            us.first_name = request.POST['first_name']
+            us.last_name = request.POST['last_name']
+            us.email = request.POST['email']
+            us.num_tel = request.POST['num_tel']
+            us.save()
+            return redirect('news')
+    context = {'title': 'Изменить профиль', 'form': form, 'menu': menu}
+    return render(request, 'users/edit_profile.html', context)

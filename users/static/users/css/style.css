@@ -44,10 +44,50 @@ body {
 }
 
 .errors {
+    margin-bottom: 10px;
     margin-left: 600px;
     color: red;
 }
 
-.a3 {
+.p2 {
     font-size: 20px;
+    margin-left: 650px;
+    margin-bottom: 20px;
+}
+
+.p2 #i1 {
+    margin-left: 150px;
+}
+
+.p2 #i2 {
+    margin-left: 106px;
+}
+
+.p2 #i3 {
+    margin-left: 136px;
+}
+
+
+.p2 #i4 {
+    margin-left: 40px;
+}
+
+#id2 {
+    margin-top: 50px;
+    margin-left: 680px;
+}
+
+.a3 i{
+
+    font-size: 20px;
+    color: blue;
+
+}
+
+.a3 i:hover {
+    color: red;
+}
+
+.a3 {
+    text-decoration: None;
 }
