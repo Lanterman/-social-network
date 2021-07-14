@@ -8,15 +8,12 @@
     <img src="{{ users.photo." alt="">
     {% csrf_token %}
 
-    <p>{{ form.non_field_errors }}</p>
-
     {% for f in form %}
     <p class="form"><label>{{ f.label }}</label><i>{{ f }}</i></p>
     <div class="errors">{{ f.errors }}</div>
     {% endfor %}
     <button class="button" type="submit">Применить</button>
 </form>
-
 {% endblock content %}
 
 {% block groups %}{% endblock groups %}

@@ -1,5 +1,6 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.contrib.sessions.exceptions import SessionInterrupted
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -69,17 +70,18 @@ class PasswordChangeUser(PasswordChangeView):
 
 
 def update(request, username):
-    us = Users.objects.get(username=username)
-    form = UpdateUserForm()
-    if request.method == 'POST':
-        form = UpdateUserForm(request.POST)
-        if form.is_valid():
-            print(form.cleaned_data)
-            us.first_name = request.POST['first_name']
-            us.last_name = request.POST['last_name']
-            us.email = request.POST['email']
-            us.num_tel = request.POST['num_tel']
-            us.save()
-            return redirect('news')
-    context = {'title': 'Изменить профиль', 'form': form, 'menu': menu}
-    return render(request, 'users/edit_profile.html', context)
+    if request.user.is_authenticated:
+        us = Users.objects.get(username=username)
+        form = UpdateUserForm()
+        if request.method == 'POST':
+            form = UpdateUserForm(request.POST)
+            if form.is_valid():
+                us.first_name = request.POST['first_name']
+                us.last_name = request.POST['last_name']
+                us.email = request.POST['email']
+                us.num_tel = request.POST['num_tel']
+                us.save()
+                return redirect('news')
+        context = {'title': 'Изменить профиль', 'form': form, 'menu': menu}
+        return render(request, 'users/edit_profile.html', context)
+    raise SessionInterrupted
