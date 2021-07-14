@@ -1,0 +1,53 @@
+body {
+    background-color: #42cf17;
+}
+
+.title {
+    text-align: center;
+    font-size: 26px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.form {
+    margin-bottom: 20px;
+}
+
+.form label {
+    margin-left: 610px;
+    font-size: 17px;
+}
+
+.form i {
+    float: right;
+    margin-right: 600px;
+}
+
+.button {
+    float: left;
+    margin-top: 20px;
+    margin-left: 620px;
+    font-size: 17px;
+}
+
+.a {
+    font-size: 18px;
+    color: blue;
+    margin-left: 40px;
+    margin-top: 25px;
+    float: left;
+}
+
+.a:hover {
+    color: red;
+    text-decoration: None;
+}
+
+.errors {
+    margin-left: 600px;
+    color: red;
+}
+
+.a3 {
+    font-size: 20px;
+}

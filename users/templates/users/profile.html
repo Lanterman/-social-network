@@ -1,0 +1,19 @@
+{% extends 'main/base.html' %}
+
+{% block title%}{{ title }}{% endblock title %}
+
+{% block content %}
+<h3 class="title"><i class="fas fa-users-cog"></i> {{ title }}</h3>
+
+<div>
+    <p class="p2"><label>Имя: </label><i class="i">{{ user1.first_name }}</i></p>
+    <p class="p2"><label>Фамилия: </label><i class="i">{{ user1.last_name }}</i></p>
+    <p class="p2"><label>Email: </label><i class="i">{{ user1.email }}</i></p>
+    <p class="p2"><label>Номер телефона: </label><i class="i">{{ user1.num_tel }}</i></p>
+</div>
+
+<a href="#" class="a3"><i>Изменить пароль</i></a>
+
+{% endblock content %}
+
+{% block groups %}{% endblock groups %}

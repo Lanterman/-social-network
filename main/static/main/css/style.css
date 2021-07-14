@@ -1,0 +1,145 @@
+* {
+    margin: 0px;
+}
+
+body {
+    background-color: #42cf17;
+}
+
+.p {
+    padding: 10px;
+    margin: 50px 0 70px 400px;
+    width: 640px;
+}
+
+.p:hover {
+    border: solid 1px;
+}
+
+.a1 {
+    margin-left: 10px;
+    font-size: 23px;
+    text-decoration: None;
+    color: blue;
+}
+
+.p pre {
+    margin-left: 10px;
+}
+
+.a1:hover {
+    border-bottom: solid 3px black;
+    color: red;
+}
+
+.p p {
+    font-size: 18px;
+
+}
+
+.p img {
+    margin-left: 60px;
+    width: 500px;
+}
+
+#menu {
+    margin-left: 70px;
+    margin-right: 50px;
+    font-size: 20px;
+    color: blue;
+    text-decoration: None;
+}
+
+#menu:hover {
+  color: red;
+}
+
+.log {
+    float: right;
+    font-size: 20px;
+    margin-right: 50px;
+    color: red;
+}
+
+.log a{
+    text-decoration: None;
+    color: blue;
+}
+
+.log a:hover {
+  color: red;
+}
+
+header {
+    border-bottom: solid 5px gray;
+    padding: 20px;
+    background-color: black;
+}
+
+#as {
+    border-right: solid 5px gray;
+    border-bottom: solid 5px gray;
+    float: left;
+    padding: 30px;
+}
+
+#as img {
+    width: 100px;
+    height: 100px;
+}
+
+#as a {
+    text-decoration: None;
+    font-size: 17px;
+    color: blue;
+}
+
+#as p {
+    margin-bottom: 5px;
+    margin-left: 5px;
+}
+
+#as p:hover {
+    color: red;
+}
+
+#as div {
+    margin-bottom: 20px;
+    margin-left: 40px;
+    width: 100px;
+}
+
+#as div:hover {
+    border: solid 1px;
+}
+
+#as h3 {
+    margin-bottom: 20px;
+}
+
+.p #ap {
+    padding: 10px;
+}
+
+#aps a {
+    text-decoration: None;
+    font-size: 18px;
+    margin-left:95px;
+    margin-right: 30px;
+    color: blue;
+}
+
+#aps a:hover {
+    color: red;
+}
+
+#as #a {
+    color: yellow;
+    font-size: 20px;
+    margin-left: 45px;
+}
+
+#as #a:hover {
+    color: red;
+}
+

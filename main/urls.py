@@ -1,0 +1,14 @@
+from django.urls import path
+
+from main.views import *
+
+urlpatterns = [
+    path('', news, name='news'),
+    path('home/', home, name='home'),
+    path('messages/', messages, name='messages'),
+    path('friends/', friends, name='friends'),
+    path('groups/', groups, name='groups'),
+    path('publish/comments/', comments, name='comments'),
+    path('groups/<slug:group_slug>/', detail_group, name='detail_group'),
+    path('publish/<slug:publish_slug>/', detail_publish, name='detail_publish'),
+]

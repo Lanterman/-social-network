@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{% static 'users/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+    <script src="https://kit.fontawesome.com/adb6ee4607.js" crossorigin="anonymous"></script>
+    <title>{% block title%}Загрузка{% endblock title %}</title>
+</head>
+<body>
+<header>
+    {% for m in menu %}
+    <a id="menu" href="{% url m.url %}"><i class="fas fa-align-justify"></i> {{ m.name }}</a>
+    {% endfor %}
+
+    <div class="log">
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'profile' user.username %}"><i class="fas fa-user-circle"></i> {{ user.username }}</a> |
+        <a href="{% url 'logout' %}"> <i class="fas fa-sign-out-alt"></i> Выйти</a>
+        {% else %}
+        <a href="{% url 'register' %}"><i class="fas fa-fingerprint"></i> Регистрация</a> |
+        <a href="{% url 'login' %}"><i class="fas fa-address-card"></i> Войти</a>
+        {% endif %}
+    </div>
+</header>
+{% block groups %}
+<aside id="as">
+    <h3>Рекомендуемые группы</h3>
+    {% for g in group %}
+    <div>
+        <a href="{{ g.get_absolute_url }}"><p id="pc"><i class="fas fa-users"></i> {{ g.name }}</p></a>
+        <a href="{{ g.get_absolute_url }}"><img src="{{ g.photo.url }}"></a>
+    </div>
+    {% endfor %}
+    {% block admin %}
+    <h2><a id="a" href="/admin/"><i class="fas fa-user-shield"></i> Admin</a></h2>
+    {% endblock admin %}
+</aside>
+{% endblock groups %}
+{% block content%} {% endblock content %}
+</body>
+</html>
