@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 
 from users.models import Users
@@ -11,7 +11,7 @@ class AbstractForm(forms.Form):
         ab = '!@#$%^&*()_+"№:?-=*<>/\\|][{}1234567890'
         if len(first_name) > 20:
             raise ValidationError('Максимальное число символов 20, у вас %s' % len(first_name))
-        if len(first_name) < 3:
+        if len(first_name) < 3 and first_name:
             raise ValidationError('Минимальное число символов 3, у вас %s' % len(first_name))
         for n in first_name:
             if n in ab:
@@ -23,7 +23,7 @@ class AbstractForm(forms.Form):
         ab = '!@#$%^&*()_+"№:?-=*<>/\\|][{}1234567890'
         if len(last_name) > 25:
             raise ValidationError('Максимальное число символов 25, у вас %s' % len(last_name))
-        if len(last_name) < 3:
+        if len(last_name) < 3 and last_name:
             raise ValidationError('Минимальное число символов 3, у вас %s' % len(last_name))
         for n in last_name:
             if n in ab:
@@ -33,7 +33,7 @@ class AbstractForm(forms.Form):
     def clean_num_tel(self):
         num_tel = self.cleaned_data['num_tel']
         ab = '1234567890'
-        if len(num_tel) < 12:
+        if len(num_tel) < 12 and num_tel:
             raise ValidationError('Минимальное число символов 12, у вас %s' % len(num_tel))
         for n in num_tel:
             if n not in ab:
@@ -42,13 +42,17 @@ class AbstractForm(forms.Form):
 
 
 class RegisterUserForm(AbstractForm, UserCreationForm):
-    username = forms.CharField(label='Логин')
-    password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Повтор пароля', widget=forms.PasswordInput)
-    first_name = forms.CharField(label='Имя', required=False)
-    last_name = forms.CharField(label='Фамилия', required=False)
-    email = forms.EmailField(label='Email', required=False, widget=forms.EmailInput)
-    num_tel = forms.CharField(label='Номер телефона', required=False)
+    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'placeholder': 'Логин'}))
+    password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
+    password2 = forms.CharField(label='Повтор пароля',
+                                widget=forms.PasswordInput(attrs={'placeholder': 'Повтор пароль'}))
+    first_name = forms.CharField(label='Имя', required=False, widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
+    last_name = forms.CharField(label='Фамилия', required=False,
+                                widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
+    email = forms.EmailField(label='Email', required=False,
+                             widget=forms.EmailInput(attrs={'placeholder': 'Электронная почта'}))
+    num_tel = forms.CharField(label='Номер телефона', required=False,
+                              widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
     photo = forms.ImageField(label='Фото', required=False)
 
     class Meta:
@@ -56,17 +60,26 @@ class RegisterUserForm(AbstractForm, UserCreationForm):
         fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'email', 'num_tel', 'photo')
 
 
+class LoginUserForm(AuthenticationForm):
+    username = forms.CharField(label='Имя пользователя', widget=forms.TextInput(attrs={'placeholder': 'Логин'}))
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
+
+
 class PasswordChangeUserForm(PasswordChangeForm):
-    old_password = forms.CharField(label='Старый пароль', widget=forms.PasswordInput)
-    new_password1 = forms.CharField(label='Новый пароль', widget=forms.PasswordInput)
-    new_password2 = forms.CharField(label='Подтвердить пароль', widget=forms.PasswordInput)
+    old_password = forms.CharField(label='Старый пароль',
+                                   widget=forms.PasswordInput(attrs={'placeholder': 'Старый пароль'}))
+    new_password1 = forms.CharField(label='Новый пароль',
+                                    widget=forms.PasswordInput(attrs={'placeholder': 'Новый пароль'}))
+    new_password2 = forms.CharField(label='Подтвердить пароль',
+                                    widget=forms.PasswordInput(attrs={'placeholder': 'Подтвердить пароль'}))
 
 
 class UpdateUserForm(AbstractForm):
-    first_name = forms.CharField(label='Имя')
-    last_name = forms.CharField(label='Фамилия')
-    email = forms.EmailField(label='Email', widget=forms.EmailInput)
-    num_tel = forms.CharField(max_length=20, label='Номер телефона')
+    first_name = forms.CharField(label='Имя', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
+    last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
+    email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Email'}))
+    num_tel = forms.CharField(max_length=20, label='Номер телефона',
+                              widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
     # def __init__(self, *args, **kwargs):  # Если ModelForm
     #     super().__init__(*args, **kwargs)
     #     self.fields['email'].label = 'Email'

@@ -21,6 +21,8 @@ class RegisterUser(CreateView):
 
     def form_valid(self, form):
         user = form.save()
+        user.slug = user.username
+        user.save()
         login(self.request, user)
         return redirect('news')
 
@@ -50,6 +52,7 @@ def logout_view(request):
 
 class LoginUser(LoginView):
     template_name = 'users/login.html'
+    form_class = LoginUserForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -69,9 +72,9 @@ class PasswordChangeUser(PasswordChangeView):
         return context
 
 
-def update(request, username):
+def update(request, slug):
     if request.user.is_authenticated:
-        us = Users.objects.get(username=username)
+        us = Users.objects.get(slug=slug)
         form = UpdateUserForm()
         if request.method == 'POST':
             form = UpdateUserForm(request.POST)
