@@ -24,6 +24,7 @@ class Published(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
     like = models.IntegerField(default=0, verbose_name='Лайки')
     dislike = models.IntegerField(default=0, verbose_name='Дизлайки')
+    group = models.ForeignKey('Groups', on_delete=models.CASCADE, verbose_name='Группа')
 
     class Meta:
         verbose_name = 'Публикация'
@@ -36,9 +37,9 @@ class Published(Abstract):
 
 class Groups(Abstract):
     num_pub = models.IntegerField(default=0, verbose_name='Количество записей')
-    photo = models.ImageField(blank=True, upload_to='groups/', verbose_name='Аватарка')
-    published = models.ManyToManyField(Published, blank=True, verbose_name='Публикации')
+    photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
     users = models.ManyToManyField(User, blank=True, related_name='+', verbose_name='Пользователи')
+    # published = models.ManyToManyField(Published, verbose_name='Группа')
     biography = None
 
     class Meta:

@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'Sendji_004.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'Sendji_004',
+        'NAME': 'Sendji_005',
         'USER': 'postgres',
         'PASSWORD': 'karmavdele',
         'HOST': '127.0.0.1',

@@ -40,6 +40,14 @@ class AbstractForm(forms.Form):
                 raise ValidationError('Номер должен содержать только цифры!')
         return num_tel
 
+    # def clean_email(self):
+    #     email = self.cleaned_data['email']
+    #     emails = Users.objects.all()
+    #     for em in emails:
+    #         if em.email == email:
+    #             ValidationError('Пользователь с таким email уже существует.')
+    #     return email
+
 
 class RegisterUserForm(AbstractForm, UserCreationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'placeholder': 'Логин'}))

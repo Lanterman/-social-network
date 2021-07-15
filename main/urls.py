@@ -10,5 +10,5 @@ urlpatterns = [
     path('groups/', groups, name='groups'),
     path('publish/comments/', comments, name='comments'),
     path('groups/<slug:group_slug>/', detail_group, name='detail_group'),
-    path('publish/<slug:publish_slug>/', detail_publish, name='detail_publish'),
+    path('publish/<slug:publish_slug>/', DetailPublish.as_view(), name='detail_publish'),
 ]

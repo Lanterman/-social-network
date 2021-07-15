@@ -1,0 +1,17 @@
+{% extends 'main/base.html' %}
+
+{% block title %}{{ published.name }}{% endblock title %}
+
+{% block content %}
+<div class="p">
+    <p class="a1">{{ published.name }}</p>
+        <pre>{{ published.date }}</pre>
+        <p id="ap">{{ published.biography }}</p>
+        <img src="{{ published.photo.url }}" alt="photo"><br><br>
+        <p id="aps">
+            <a href=""><i class="fas fa-heart"></i> {{ published.like }}</a>
+            <i><a href="{% url 'comments' %}"><i class="fas fa-comments"></i> Комментарии</a></i>
+            <a href=""><i class="fas fa-heart-broken"></i> {{ published.dislike }}</a>
+        </p>
+</div>
+{% endblock content %}

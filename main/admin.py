@@ -17,14 +17,14 @@ class AbstractAdmin(admin.ModelAdmin):
 @admin.register(Groups)
 class GroupsAdmin(AbstractAdmin):
     list_display = ('id', 'name', 'slug', 'photo', 'num_pub')
-    fields = ('name', 'slug', 'photo', 'num_pub', 'users', 'published')
-    raw_id_fields = ('published', 'users')  # удобная вещь при связях
+    fields = ('name', 'slug', 'photo', 'num_pub', 'users')
+    raw_id_fields = ('users',)  # удобная вещь при связях
 
 
 @admin.register(Published)
 class PublishedAdmin(AbstractAdmin):
     list_display = ('id', 'name', 'slug', 'photo', 'date', 'like', 'dislike')
-    fields = ('name', 'slug', 'biography', 'photo', 'date', 'like', 'dislike')
+    fields = ('name', 'slug', 'biography', 'group', 'photo', 'date', 'like', 'dislike')
     date_hierarchy = 'date'
     readonly_fields = ('date', 'like', 'dislike')  # делает нередактиремым
     actions = ['not_dislike']

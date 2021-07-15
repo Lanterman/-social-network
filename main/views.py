@@ -1,5 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.generic import DetailView
+
 from main.models import *
 
 menu = [
@@ -13,7 +15,7 @@ menu = [
 
 def news(request):
     public = Published.objects.all()
-    group = Groups.objects.all()[:5]
+    group = Groups.objects.all()
     context = {'title': 'Новости', 'public': public, 'menu': menu, 'group': group}
     return render(request, 'main/index.html', context)
 
@@ -39,8 +41,19 @@ def detail_group(request, group_slug):
     return HttpResponse('Группа %s' % group_slug)
 
 
-def detail_publish(request, publish_slug):
-    return HttpResponse('Запись %s' % publish_slug)
+class DetailPublish(DetailView):
+    model = Published
+    slug_url_kwarg = 'publish_slug'
+    template_name = 'main/detail_publish.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        return context
+
+
+# def detail_publish(request, publish_slug):
+#     return render()
 
 
 def comments(request):
