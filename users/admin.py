@@ -12,5 +12,4 @@ class UsersAdmin(admin.ModelAdmin):
     list_filter = ('first_name', 'last_name', 'slug', 'email')
     list_max_show_all = 5
     list_per_page = 10
-    ordering = ('first_name', 'last_name',)
     prepopulated_fields = {'slug': ('username',)}

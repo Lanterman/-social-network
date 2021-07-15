@@ -8,12 +8,13 @@ body {
 
 .p {
     padding: 10px;
-    margin: 50px 0 70px 400px;
+    margin: 50px 0 50px 400px;
     width: 640px;
+    border: solid 2px gray;
 }
 
 .p:hover {
-    border: solid 1px;
+    border: solid 2px;
 }
 
 .a1 {
@@ -84,8 +85,8 @@ header {
 }
 
 #as img {
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
 }
 
 #as a {
@@ -106,7 +107,7 @@ header {
 #as div {
     margin-bottom: 20px;
     margin-left: 40px;
-    width: 100px;
+    width: 120px;
 }
 
 #as div:hover {
@@ -143,3 +144,34 @@ header {
     color: red;
 }
 
+.p3 {
+    margin-top: 20px;
+    margin-left: 70px;
+    margin-right: 100px;
+}
+
+.p3 #p1 {
+    text-align: center;
+    font-size: 35px;
+    margin-bottom: 50px;
+}
+
+.p3 img {
+    float: left;
+    width: 400px;
+    padding: 30px;
+}
+
+.p3 pre {
+    margin-left: 30px;
+}
+
+.p3 #ap1 {
+    font-size: 18px;
+    margin-top: 40px;
+}
+
+.aps {
+    margin-top 50px;
+    text-align: center;
+}

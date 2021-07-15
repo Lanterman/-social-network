@@ -8,7 +8,7 @@ class Users(User):
     photo = models.ImageField(verbose_name='Фото', blank=True, upload_to='users/')
 
     class Meta:
-        ordering = ['username']
+        ordering = ['-username']
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
