@@ -52,9 +52,19 @@ class DetailPublish(DetailView):
         return context
 
 
-# def detail_publish(request, publish_slug):
-#     return render()
+class CommentsPublished(DetailView):
+    model = Published
+    slug_url_kwarg = 'publish_slug'
+    template_name = 'main/comments.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        return context
 
 
-def comments(request):
-    return HttpResponse('asdaf')
+# def comments(request, publish_slug):
+#     public = Published.objects.get(slug=publish_slug)
+#     comment = public.comments_set.all()
+#     context = {'menu': menu, 'public': public, 'comment': comment}
+#     return render(request, 'main/comments.html', context)

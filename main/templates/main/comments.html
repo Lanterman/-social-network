@@ -3,4 +3,22 @@
 {% block title %}{{ published.name }}{% endblock title %}
 
 {% block content %}
+<div class="p3">
+    <p id="p1"><a href="{{ published.get_absolute_url }}">{{ published.name }}</a></p>
+    <pre><big>Обновленно </big>{{ published.date }}</pre>
+</div>
+<div id="comments">
+    <h1 id="h1">Комментарии</h1>
+    {% if published.comments_set.all %}
+    {% for c in published.comments_set.all %}
+    <div>
+        <p id="p"><a href="#">{{ c.users.first_name }} {{ c.users.last_name }}</a></p> {# Оптимизировать вывод пользователей(1 запрос - 1 пользователь, нехорошо) #}
+        <p id="p2"><i>{{ c.biography }}</i></p>
+        <p id="p3">{{ c.date }}</p>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p id="p5"><i>Комментарии отсутсвуют, но вы можете быть первым!</i></p>
+    {% endif %}
+</div>
 {% endblock content %}

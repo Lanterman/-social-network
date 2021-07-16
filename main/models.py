@@ -5,7 +5,7 @@ from django.utils import timezone
 
 
 class Abstract(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Название')
+    name = models.CharField(max_length=100, verbose_name='Название', unique=True)
     slug = models.SlugField(error_messages={'unique': 'Такой URL уже существует!!!'},
                             help_text='<i>Заполняется автоматически!</i>', max_length=150, unique=True,
                             verbose_name='URL')
