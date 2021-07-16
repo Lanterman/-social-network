@@ -186,22 +186,22 @@ color: blue;
 }
 
 #comments div {
-    margin: 40px 60px;
+    margin: 40px 150px;
     background-color: #ADFF2F;
     box-shadow: 0 0 10px black;
 }
 
-#comments #p a {
+#comments .p4 a {
     text-decoration: None;
     color: #0000CD;
     font-size: 18px;
 }
 
-#comments #p {
+#comments .p4 {
     padding: 12px;
 }
 
-#comments #p a:hover {
+#comments .p4 a:hover {
     color: #DC143C;
 }
 
@@ -226,4 +226,14 @@ color: blue;
     text-align: center;
     margin: 70px 0 70px 40px;
     font-size: 17px;
+}
+
+#p3 a {
+    color: blue;
+    text-decoration: None;
+    margin-right: 20px;
+}
+
+#p3 a:hover {
+    color: red;
 }

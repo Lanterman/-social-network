@@ -59,6 +59,7 @@ class Comments(Abstract):
     name, slug = None, None
 
     class Meta:
+        ordering = ['-date']
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         db_table = 'Комментарии'

@@ -1,20 +1,25 @@
 {% extends 'main/base.html' %}
 
-{% block title %}{{ published.name }}{% endblock title %}
+{% block title %}{{ public.name }}{% endblock title %}
 
 {% block content %}
 <div class="p3">
-    <p id="p1"><a href="{{ published.get_absolute_url }}">{{ published.name }}</a></p>
-    <pre><big>Обновленно </big>{{ published.date }}</pre>
+    <p id="p1"><a href="{{ published.get_absolute_url }}">{{ public.name }}</a></p>
+    <pre><big>Обновленно </big>{{ public.date }}</pre>
 </div>
 <div id="comments">
     <h1 id="h1">Комментарии</h1>
-    {% if published.comments_set.all %}
-    {% for c in published.comments_set.all %}
+    {% if comment %}
+    {% for c in comment %}
     <div>
-        <p id="p"><a href="#">{{ c.users.first_name }} {{ c.users.last_name }}</a></p> {# Оптимизировать вывод пользователей(1 запрос - 1 пользователь, нехорошо) #}
+        {% if c.users.first_name and c.users.last_name %}
+        <p class="p4"><a href="#">{{ c.users.first_name }} {{ c.users.last_name }}</a> {{ c.date }}</p> {# Оптимизировать вывод пользователей(1 запрос - 1 пользователь, нехорошо) #}
+        {% else %}
+        <p class="p4"><a href="#">{{ c.users.username }}</a> {{ c.date }}</p> {# Оптимизировать вывод пользователей(1 запрос - 1 пользователь, нехорошо) #}
+        {% endif %}
         <p id="p2"><i>{{ c.biography }}</i></p>
-        <p id="p3">{{ c.date }}</p>
+        <p id="p3"><a href="#"><i class="fas fa-heart"></i> {{ c.like }}</a><a href="#"> Ответить</a></p>
+
     </div>
     {% endfor %}
     {% else %}
