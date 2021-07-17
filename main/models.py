@@ -3,6 +3,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 
+from users.models import Users
+
 
 class Abstract(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название', unique=True)
@@ -55,7 +57,7 @@ class Comments(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
     like = models.IntegerField(default=0, verbose_name='Лайки')
     published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
-    users = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    users = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')
     name, slug = None, None
 
     class Meta:

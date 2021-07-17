@@ -237,3 +237,27 @@ color: blue;
 #p3 a:hover {
     color: red;
 }
+
+.nav  {
+    text-align: center;
+    font-size: 23px;
+    margin-bottom: 50px;
+}
+
+.nav a {
+    text-decoration: None;
+    margin-right: 20px;
+    color: blue;
+    border: solid 1px;
+    border-radius: 50px;
+    padding: 10px 16px;
+    box-shadow: 0 0 10px gray;
+}
+
+.nav .i {
+    margin-right: 20px;
+}
+
+.nav a:hover {
+    color: red;
+}

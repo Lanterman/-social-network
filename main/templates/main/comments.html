@@ -9,8 +9,8 @@
 </div>
 <div id="comments">
     <h1 id="h1">Комментарии</h1>
-    {% if comment %}
-    {% for c in comment %}
+    {% if page_obj %}
+    {% for c in page_obj %}
     <div>
         {% if c.users.first_name and c.users.last_name %}
         <p class="p4"><a href="#">{{ c.users.first_name }} {{ c.users.last_name }}</a> {{ c.date }}</p> {# Оптимизировать вывод пользователей(1 запрос - 1 пользователь, нехорошо) #}
@@ -19,11 +19,27 @@
         {% endif %}
         <p id="p2"><i>{{ c.biography }}</i></p>
         <p id="p3"><a href="#"><i class="fas fa-heart"></i> {{ c.like }}</a><a href="#"> Ответить</a></p>
-
     </div>
     {% endfor %}
     {% else %}
-    <p id="p5"><i>Комментарии отсутсвуют, но вы можете быть первым!</i></p>
+    <p id="p5"><i>Комментарии отсутствуют, но вы можете быть первым!</i></p>
     {% endif %}
 </div>
+<nav class="nav">
+    {% if page_obj.has_other_pages %}
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">&lt;</a>
+    {% endif %}
+    {% for p in page_obj.paginator.page_range %}
+    {% if page_obj.number == p %}
+    <i class="i">{{ p }}</i>
+    {% elif page_obj.number|add:-2 <= p and p <= page_obj.number|add:2 %}
+    <a href="?page={{ p }}">{{ p }}</a>
+    {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">&gt;</a>
+    {% endif %}
+    {% endif %}
+</nav>
 {% endblock content %}
