@@ -1,6 +1,6 @@
 {% extends 'main/base.html' %}
 
-{% block title %}{{ published.name }}{% endblock title %}
+{% block title %}{{ title }}{% endblock title %}
 
 {% block content %}
 <div class="p3">
@@ -25,6 +25,7 @@
     <p id="p5"><i>Комментарии отсутствуют, но вы можете быть первым!</i></p>
     {% endif %}
 </div>
+<p><a href="{% url 'add_comment' published.slug %}">Оставить комментарий</a></p>
 <nav class="nav">
     {% if page_obj.has_other_pages %}
     {% if page_obj.has_previous %}

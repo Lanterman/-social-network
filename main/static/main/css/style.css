@@ -261,3 +261,22 @@ color: blue;
 .nav a:hover {
     color: red;
 }
+
+.form1 {
+    font-size: 18px;
+    margin: 20px 20px 30px 560px;
+}
+
+.form1 label {
+    margin-right: 70px;
+}
+
+.button1 {
+    font-size: 18px;
+    margin: 0 0 0 580px;
+    color: blue;
+}
+
+.button1:hover {
+    color: red;
+}

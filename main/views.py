@@ -1,11 +1,11 @@
-from django.core.paginator import Paginator
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView
 from django.views.generic.detail import SingleObjectMixin
-from django.views.generic.edit import ModelFormMixin, FormMixin
 
-from main.form import CommentsUserForm
+from main.form import AddCommentForm
 from main.models import *
 
 menu = [
@@ -69,6 +69,7 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['published'] = self.object
+        context['title'] = 'Комментарии'
         return context
 
     def get_queryset(self):
@@ -83,3 +84,30 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 #     page_obj = paginator.get_page(page_number)
 #     context = {'menu': menu, 'public': public, 'page_obj': page_obj}
 #     return render(request, 'main/comments.html', context)
+
+
+class AddCommentView(LoginRequiredMixin, CreateView):  # Форматировать: пользователь и публикация выбиралась автоматом!
+    slug_url_kwarg = 'publish_slug'
+    form_class = AddCommentForm
+    template_name = 'main/add_comment.html'
+    success_url = reverse_lazy('news')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Добавить Комментарий'
+        context['menu'] = menu
+        return context
+
+
+# def add_comment(request, publish_slug):
+#     public = Published.objects.get(slug=publish_slug)
+#     if request.user.is_authenticated:
+#         form = AddCommentForm()
+#         if request.method == 'POST':
+#             form = AddCommentForm(request.POST)
+#             if form.is_valid():
+#                 form.save()
+#
+#         context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
+#         return render(request, 'main/add_comment.html', context)
+#     return HttpResponse('Необходимо войти в систему!')
