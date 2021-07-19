@@ -9,6 +9,6 @@ urlpatterns = [
     path('friends/', friends, name='friends'),
     path('groups/', groups, name='groups'),
     path('groups/<slug:group_slug>/', detail_group, name='detail_group'),
-    path('publish/<slug:publish_slug>/comments/', comments, name='comments'),
+    path('publish/<slug:publish_slug>/comments/', PublishedCommentsView.as_view(), name='comments'),
     path('publish/<slug:publish_slug>/', DetailPublish.as_view(), name='detail_publish'),
 ]

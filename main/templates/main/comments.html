@@ -1,11 +1,11 @@
 {% extends 'main/base.html' %}
 
-{% block title %}{{ public.name }}{% endblock title %}
+{% block title %}{{ published.name }}{% endblock title %}
 
 {% block content %}
 <div class="p3">
-    <p id="p1"><a href="{{ published.get_absolute_url }}">{{ public.name }}</a></p>
-    <pre><big>Обновленно </big>{{ public.date }}</pre>
+    <p id="p1"><a href="{{ published.get_absolute_url }}">{{ published.name }}</a></p>
+    <pre><big>Обновленно </big>{{ published.date }}</pre>
 </div>
 <div id="comments">
     <h1 id="h1">Комментарии</h1>

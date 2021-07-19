@@ -1,4 +1,5 @@
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.contrib.sessions.exceptions import SessionInterrupted
 from django.shortcuts import redirect, render
@@ -27,6 +28,7 @@ class RegisterUser(CreateView):
         return redirect('news')
 
 
+@login_required
 def profile(request, username):
     user1 = Users.objects.get(username=username)
     context = {'title': 'Мой профиль', 'menu': menu, 'user1': user1}
@@ -72,19 +74,18 @@ class PasswordChangeUser(PasswordChangeView):
         return context
 
 
+@login_required
 def update(request, slug):
-    if request.user.is_authenticated:
-        us = Users.objects.get(slug=slug)
-        form = UpdateUserForm()
-        if request.method == 'POST':
-            form = UpdateUserForm(request.POST)
-            if form.is_valid():
-                us.first_name = request.POST['first_name']
-                us.last_name = request.POST['last_name']
-                us.email = request.POST['email']
-                us.num_tel = request.POST['num_tel']
-                us.save()
-                return redirect('news')
-        context = {'title': 'Изменить профиль', 'form': form, 'menu': menu}
-        return render(request, 'users/edit_profile.html', context)
-    raise SessionInterrupted
+    us = Users.objects.get(slug=slug)
+    form = UpdateUserForm()
+    if request.method == 'POST':
+        form = UpdateUserForm(request.POST)
+        if form.is_valid():
+            us.first_name = request.POST['first_name']
+            us.last_name = request.POST['last_name']
+            us.email = request.POST['email']
+            us.num_tel = request.POST['num_tel']
+            us.save()
+            return redirect('news')
+    context = {'title': 'Изменить профиль', 'form': form, 'menu': menu}
+    return render(request, 'users/edit_profile.html', context)
