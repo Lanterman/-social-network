@@ -1,0 +1,47 @@
+{% extends 'main/base.html' %}
+
+{% block title %}{{ groups.name }}{% endblock title %}
+
+{% block content %}
+<div id="div">
+    {% if groups.photo %}
+    <img src="{{ groups.photo.url }}" alt="{{ group.photo }}"><br>
+    {% endif %}
+    <p id="title">{{ groups.name }}</p><br>
+    <p class="p1"><a href="#openModal">Подписчики: {{ groups.users.count }}</a></p>
+    <p class="p1" id="p1">Всего записей: {{ groups.published_set.count }}</p>
+</div>
+{% for p in groups.published_set.all %}
+<div class="p">
+    <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name }}</a>
+    <pre>{{ p.date }}</pre>
+    <p id="ap">{{ p.biography|linebreaksbr|truncatechars_html:200 }}</p>
+    {% if p.photo %}
+    <img src="{{ p.photo.url }}" alt="photo"><br><br>
+    {% endif %}
+    <p id="aps">
+        <a href="" title="Лайки"><i class="fas fa-thumbs-up"></i> {{ p.like }}</a>
+        <i><a href="{% url 'comments' p.slug %}"><i class="fas fa-comments"></i> Комментарии</a></i>
+        <a href="" title="Дизлайки"><i class="fas fa-thumbs-down"></i> {{ p.dislike }}</a>
+    </p>
+</div>
+{% endfor %}
+
+<div id="openModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Подписчики</h3>
+                <a href="#close" title="Close" class="close">×</a>
+            </div>
+            <div class="modal-body">
+                <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
+                {% for us in groups.users.all %}
+                <p id="users"><a href="#">{{ us.first_name }} {{ us.last_name }}</a><a id="a" href="#">{{ us.email }}</a></p><br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

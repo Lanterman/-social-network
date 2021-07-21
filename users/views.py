@@ -1,7 +1,6 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, PasswordChangeView
-from django.contrib.sessions.exceptions import SessionInterrupted
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -28,9 +27,9 @@ class RegisterUser(CreateView):
         return redirect('news')
 
 
-@login_required
-def profile(request, username):
-    user1 = Users.objects.get(username=username)
+@login_required(login_url='/users/login/')
+def profile(request, user_slug):
+    user1 = Users.objects.get(username=user_slug)
     context = {'title': 'Мой профиль', 'menu': menu, 'user1': user1}
     return render(request, 'users/profile.html', context)
 

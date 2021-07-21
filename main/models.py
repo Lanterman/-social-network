@@ -40,7 +40,7 @@ class Published(Abstract):
 class Groups(Abstract):
     num_pub = models.IntegerField(default=0, verbose_name='Количество записей')
     photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
-    users = models.ManyToManyField(User, blank=True, related_name='+', verbose_name='Пользователи')
+    users = models.ManyToManyField(Users, blank=True, related_name='+', verbose_name='Пользователи')
     # published = models.ManyToManyField(Published, verbose_name='Группа')
     biography = None
 
@@ -56,8 +56,8 @@ class Groups(Abstract):
 class Comments(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
     like = models.IntegerField(default=0, verbose_name='Лайки')
-    published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
-    users = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')
+    published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')  # , default='9'
+    users = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')  # , default='3'
     name, slug = None, None
 
     class Meta:

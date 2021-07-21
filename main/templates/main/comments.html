@@ -18,14 +18,17 @@
         <p class="p4"><a href="#">{{ c.users.username }}</a> {{ c.date }}</p> {# Оптимизировать вывод пользователей(1 запрос - 1 пользователь, нехорошо) #}
         {% endif %}
         <p id="p2"><i>{{ c.biography }}</i></p>
-        <p id="p3"><a href="#"><i class="fas fa-heart"></i> {{ c.like }}</a><a href="#"> Ответить</a></p>
+        <p id="p3">
+            <a href="#"><i class="fas fa-heart" title="Лайки"></i> {{ c.like }}</a>
+            <a href="{% url 'add_user_comment' c.users.slug %}"> Ответить</a>
+        </p>
     </div>
     {% endfor %}
     {% else %}
     <p id="p5"><i>Комментарии отсутствуют, но вы можете быть первым!</i></p>
     {% endif %}
+    <p><a id="com" href="{% url 'add_comment' published.slug %}">Оставить комментарий</a></p><br>
 </div>
-<p><a href="{% url 'add_comment' published.slug %}">Оставить комментарий</a></p>
 <nav class="nav">
     {% if page_obj.has_other_pages %}
     {% if page_obj.has_previous %}

@@ -12,9 +12,9 @@
     <img src="{{ p.photo.url }}" alt="photo"><br><br>
     {% endif %}
     <p id="aps">
-        <a href=""><i class="fas fa-thumbs-up"></i> {{ p.like }}</a>
+        <a href="" title="Лайки"><i class="fas fa-thumbs-up"></i> {{ p.like }}</a>
         <i><a href="{% url 'comments' p.slug %}"><i class="fas fa-comments"></i> Комментарии</a></i>
-        <a href=""><i class="fas fa-thumbs-down"></i> {{ p.dislike }}</a>
+        <a href="" title="Дизлайки"><i class="fas fa-thumbs-down"></i> {{ p.dislike }}</a>
     </p>
 </div>
 {% endfor %}

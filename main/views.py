@@ -41,8 +41,15 @@ def groups(request):
     return HttpResponse('Список групп')
 
 
-def detail_group(request, group_slug):
-    return HttpResponse('Группа %s' % group_slug)
+class DetailGroup(DetailView):
+    template_name = 'main/detail_group.html'
+    slug_url_kwarg = 'group_slug'
+    model = Groups
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        return context
 
 
 class DetailPublish(DetailView):
@@ -86,8 +93,23 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 #     return render(request, 'main/comments.html', context)
 
 
+# def add_user_comment_view(request, users_slug):
+#     user1 = Published.objects.get(slug=users_slug)
+#     if request.user.is_authenticated:
+#         form = AddCommentForm()
+#         if request.method == 'POST':
+#             form = AddCommentForm(request.POST)
+#             if form.is_valid():
+#                 form.save()
+#
+#             context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
+#             return render(request, 'main/add_comment.html', context)
+#         return HttpResponse('Необходимо войти в систему!')
+
+
 class AddCommentView(LoginRequiredMixin, CreateView):  # Форматировать: пользователь и публикация выбиралась автоматом!
-    slug_url_kwarg = 'publish_slug'
+    slug_url_kwarg = 'users_slug'
+    login_url = '/users/login/'
     form_class = AddCommentForm
     template_name = 'main/add_comment.html'
     success_url = reverse_lazy('news')
@@ -97,7 +119,6 @@ class AddCommentView(LoginRequiredMixin, CreateView):  # Форматирова�
         context['title'] = 'Добавить Комментарий'
         context['menu'] = menu
         return context
-
 
 # def add_comment(request, publish_slug):
 #     public = Published.objects.get(slug=publish_slug)
