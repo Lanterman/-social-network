@@ -6,9 +6,7 @@
 <h3 class="title">{{ title }}</h3>
 <form method="post" >
     {% csrf_token %}
-    {% for f in form %}
-    <p class="form1"><label>{{ f.label }}</label><i>{{ f }}</i></p>
-    {% endfor %}
+    <p class="form1"><label>{{ form.biography.label }}</label><i>{{ form.biography }}</i></p>
     <button type="submit" class="button1">Опубликовать</button>
 </form>
 

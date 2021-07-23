@@ -93,21 +93,20 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 #     return render(request, 'main/comments.html', context)
 
 
-# def add_user_comment_view(request, users_slug):
-#     user1 = Published.objects.get(slug=users_slug)
-#     if request.user.is_authenticated:
-#         form = AddCommentForm()
-#         if request.method == 'POST':
-#             form = AddCommentForm(request.POST)
-#             if form.is_valid():
-#                 form.save()
-#
-#             context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
-#             return render(request, 'main/add_comment.html', context)
-#         return HttpResponse('Необходимо войти в систему!')
+def add_comment_view(request, publish_slug):
+    public = Published.objects.get(slug=publish_slug)
+    form = AddCommentForm()
+    if request.method == 'POST':
+        form = AddCommentForm(request.POST)
+        if form.is_valid():
+            Comments.objects.create(biography=form.cleaned_data['biography'], published_id=public.id,
+                                    users_id=request.user.pk)
+            return redirect(public)
+    context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
+    return render(request, 'main/add_comment.html', context)
 
 
-class AddCommentView(LoginRequiredMixin, CreateView):  # Форматировать: пользователь и публикация выбиралась автоматом!
+class AddCommentView(LoginRequiredMixin, CreateView):  # Выбирал человека, наверно формочка
     slug_url_kwarg = 'users_slug'
     login_url = '/users/login/'
     form_class = AddCommentForm
@@ -119,16 +118,3 @@ class AddCommentView(LoginRequiredMixin, CreateView):  # Форматирова�
         context['title'] = 'Добавить Комментарий'
         context['menu'] = menu
         return context
-
-# def add_comment(request, publish_slug):
-#     public = Published.objects.get(slug=publish_slug)
-#     if request.user.is_authenticated:
-#         form = AddCommentForm()
-#         if request.method == 'POST':
-#             form = AddCommentForm(request.POST)
-#             if form.is_valid():
-#                 form.save()
-#
-#         context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
-#         return render(request, 'main/add_comment.html', context)
-#     return HttpResponse('Необходимо войти в систему!')

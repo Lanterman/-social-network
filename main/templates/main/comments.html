@@ -12,11 +12,7 @@
     {% if page_obj %}
     {% for c in page_obj %}
     <div>
-        {% if c.users.first_name and c.users.last_name %}
-        <p class="p4"><a href="#">{{ c.users.first_name }} {{ c.users.last_name }}</a> {{ c.date }}</p> {# Оптимизировать вывод пользователей(1 запрос - 1 пользователь, нехорошо) #}
-        {% else %}
-        <p class="p4"><a href="#">{{ c.users.username }}</a> {{ c.date }}</p> {# Оптимизировать вывод пользователей(1 запрос - 1 пользователь, нехорошо) #}
-        {% endif %}
+        <p class="p4"><a href="#">{{ c.users.username }}</a> {{ c.date }}</p>
         <p id="p2"><i>{{ c.biography }}</i></p>
         <p id="p3">
             <a href="#"><i class="fas fa-heart" title="Лайки"></i> {{ c.like }}</a>
