@@ -1,0 +1,10 @@
+{% extends 'main/base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+
+<p class="title">{{ title }}</p>
+
+<p class="quit"><a class="quit1" href="{% url 'detail_group' q.slug %}">Вернуться к группе</a></p>
+{% endblock content %}

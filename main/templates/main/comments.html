@@ -16,8 +16,8 @@
         <p id="p2"><i>{{ c.biography }}</i></p>
         <p id="p3">
             <a href="#"><i class="fas fa-heart" title="Лайки"></i> {{ c.like }}</a>
-            <a href="{% url 'add_user_comment' c.users.slug %}"> Ответить</a>
         </p>
+        {{ c.answer }}
     </div>
     {% endfor %}
     {% else %}

@@ -473,3 +473,21 @@ color: blue;
 #users #a {
     float: right;
 }
+
+.quit1 {
+    text-decoration: None;
+    color: black;
+    font-size: 20px;
+}
+
+.quit {
+    padding: 10px;
+    margin: 150px 682px 0 660px;
+    border: solid 2px white;
+    background-color: #ADFF2F;
+}
+
+.quit:hover {
+    background-color: red;
+    border: solid 2px black;
+}

@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -56,8 +55,8 @@ class Groups(Abstract):
 class Comments(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
     like = models.IntegerField(default=0, verbose_name='Лайки')
-    published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')  # , default='9'
-    users = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')  # , default='3'
+    published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
+    users = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')
     name, slug = None, None
 
     class Meta:

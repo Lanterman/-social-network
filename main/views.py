@@ -1,8 +1,7 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.views.generic import DetailView, ListView, CreateView
+from django.views.generic import DetailView, ListView
 from django.views.generic.detail import SingleObjectMixin
 
 from main.form import AddCommentForm
@@ -41,15 +40,42 @@ def groups(request):
     return HttpResponse('Список групп')
 
 
-class DetailGroup(DetailView):
-    template_name = 'main/detail_group.html'
-    slug_url_kwarg = 'group_slug'
-    model = Groups
+def group_quit(request, group_slug):
+    q = Groups.objects.get(slug=group_slug)
+    q.users.remove(request.user)
+    context = {'menu': menu, 'q': q, 'title': 'Выход выполнен успешно!'}
+    return render(request, 'main/group_quit.html', context)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['menu'] = menu
-        return context
+
+def group_enter(request, group_slug):
+    q = Groups.objects.get(slug=group_slug)
+    for user in Users.objects.all():
+        if user.username == request.user.username:
+            q.users.add(user)
+    context = {'menu': menu, 'q': q, 'title': 'Вход выполнен успешно!'}
+    return render(request, 'main/group_quit.html', context)
+
+
+@login_required(login_url='/users/login/')
+def detail_group(request, group_slug):
+    group = Groups.objects.get(slug=group_slug)
+    g = group.users.all()
+    context = {'menu': menu, 'group': group, 'g': g, 'q': ''}
+    for qi in g:
+        if qi.username == request.user.username:
+            context['q'] = qi.username
+    return render(request, 'main/detail_group.html', context)
+
+
+# class DetailGroup(DetailView):
+#     template_name = 'main/detail_group.html'
+#     slug_url_kwarg = 'group_slug'
+#     model = Groups
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['menu'] = menu
+#         return context
 
 
 class DetailPublish(DetailView):
@@ -83,16 +109,7 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         return self.object.comments_set.all().select_related('users')  # Жадный запрос
 
 
-# def comments(request, publish_slug):
-#     public = Published.objects.get(slug=publish_slug)
-#     comment = public.comments_set.all()
-#     paginator = Paginator(comment, 3)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-#     context = {'menu': menu, 'public': public, 'page_obj': page_obj}
-#     return render(request, 'main/comments.html', context)
-
-
+@login_required(login_url='/users/login/')
 def add_comment_view(request, publish_slug):
     public = Published.objects.get(slug=publish_slug)
     form = AddCommentForm()
@@ -104,17 +121,3 @@ def add_comment_view(request, publish_slug):
             return redirect(public)
     context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
     return render(request, 'main/add_comment.html', context)
-
-
-class AddCommentView(LoginRequiredMixin, CreateView):  # Выбирал человека, наверно формочка
-    slug_url_kwarg = 'users_slug'
-    login_url = '/users/login/'
-    form_class = AddCommentForm
-    template_name = 'main/add_comment.html'
-    success_url = reverse_lazy('news')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Добавить Комментарий'
-        context['menu'] = menu
-        return context
