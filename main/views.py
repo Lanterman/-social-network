@@ -1,10 +1,12 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, CreateView
 from django.views.generic.detail import SingleObjectMixin
 
-from main.form import AddCommentForm
+from main.form import AddCommentForm, AddGroupForm
 from main.models import *
 
 menu = [
@@ -18,8 +20,15 @@ menu = [
 
 def news(request):
     public = Published.objects.all()
-    group = Groups.objects.all()
-    context = {'title': 'Новости', 'public': public, 'menu': menu, 'group': group}
+    paginator = Paginator(public, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    if request.user.is_authenticated:
+        users = Users.objects.get(username=request.user.username)
+        group = Groups.objects.exclude(users=users)
+    else:
+        group = Groups.objects.all()
+    context = {'title': 'Новости', 'page_obj': page_obj, 'menu': menu, 'group': group}
     return render(request, 'main/index.html', context)
 
 
@@ -36,10 +45,32 @@ def friends(request):
     return HttpResponse('Список друзей')
 
 
+@login_required(login_url='/users/login/')
 def groups(request):
-    return HttpResponse('Список групп')
+    users = Users.objects.get(username=request.user.username)
+    group1 = Groups.objects.filter(users=users)
+    group = Groups.objects.exclude(users=users)
+    context = {'title': 'Мои группы', 'menu': menu, 'group': group, 'group1': group1}
+    return render(request, 'main/groups.html', context)
 
 
+class AddGroup(LoginRequiredMixin, CreateView):
+    login_url = '/users/login/'
+    form_class = AddGroupForm
+    template_name = 'main/add_group.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Создать группу'
+        context['menu'] = menu
+        return context
+
+    def form_valid(self, form):
+        form.save()
+        return redirect('news')
+
+
+@login_required(login_url='/users/login/')
 def group_quit(request, group_slug):
     q = Groups.objects.get(slug=group_slug)
     q.users.remove(request.user)
@@ -47,6 +78,7 @@ def group_quit(request, group_slug):
     return render(request, 'main/group_quit.html', context)
 
 
+@login_required(login_url='/users/login/')
 def group_enter(request, group_slug):
     q = Groups.objects.get(slug=group_slug)
     for user in Users.objects.all():
@@ -56,11 +88,14 @@ def group_enter(request, group_slug):
     return render(request, 'main/group_quit.html', context)
 
 
-@login_required(login_url='/users/login/')
 def detail_group(request, group_slug):
     group = Groups.objects.get(slug=group_slug)
     g = group.users.all()
-    context = {'menu': menu, 'group': group, 'g': g, 'q': ''}
+    group1 = group.published_set.all()
+    paginator = Paginator(group1, 3)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'menu': menu, 'group': group, 'g': g, 'q': '', 'page_obj': page_obj}
     for qi in g:
         if qi.username == request.user.username:
             context['q'] = qi.username

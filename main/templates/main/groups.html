@@ -3,22 +3,17 @@
 {% block title%}{{ title }}{% endblock title %}
 
 {% block content %}
-{% for p in page_obj %}
-<div class="p">
-    <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name }}</a>
-    <pre>{{ p.date }}</pre>
-    <p id="ap">{{ p.biography|linebreaksbr|truncatechars_html:200 }}</p>
-    {% if p.photo %}
-    <img src="{{ p.photo.url }}" alt="photo"><br><br>
-    {% endif %}
-    <p id="aps">
-        <a href="" title="Лайки"><i class="fas fa-thumbs-up"></i> {{ p.like }}</a>
-        <i><a href="{% url 'comments' p.slug %}"><i class="fas fa-comments"></i> Комментарии</a></i>
-        <a href="" title="Дизлайки"><i class="fas fa-thumbs-down"></i> {{ p.dislike }}</a>
-    </p>
+<h6 class="title"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+<p id="aps" class="pa">
+    <a href="#"><i class="fas fa-search"></i></a>
+    <a href="{% url 'add_group' %}"><i class="fas fa-plus"></i></a>
+</p>
+{% for p in group1 %}
+<div id="div1">
+    <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
+    <a href="{{ p.get_absolute_url }}"><i>{{ p.name }}</i></a>
 </div>
 {% endfor %}
-{{ block.super }}
 {% endblock content %}
 
 {% block groups %}

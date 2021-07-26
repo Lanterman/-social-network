@@ -44,15 +44,11 @@ class AbstractForm(forms.Form):
 class RegisterUserForm(AbstractForm, UserCreationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'placeholder': 'Логин'}))
     password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
-    password2 = forms.CharField(label='Повтор пароля',
-                                widget=forms.PasswordInput(attrs={'placeholder': 'Повтор пароль'}))
-    first_name = forms.CharField(label='Имя', required=False, widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
-    last_name = forms.CharField(label='Фамилия', required=False,
-                                widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
-    email = forms.EmailField(label='Email', required=False,
-                             widget=forms.EmailInput(attrs={'placeholder': 'Электронная почта'}))
-    num_tel = forms.CharField(label='Номер телефона', required=False,
-                              widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
+    password2 = forms.CharField(label='Повтор пароля', widget=forms.PasswordInput(attrs={'placeholder': 'Повтор пароль'}))
+    first_name = forms.CharField(label='Имя', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
+    last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Электронная почта'}))
+    num_tel = forms.CharField(label='Номер телефона', widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
     photo = forms.ImageField(label='Фото', required=False)
 
     class Meta:

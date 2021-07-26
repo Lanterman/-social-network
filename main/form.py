@@ -1,6 +1,6 @@
 from django import forms
 
-from main.models import Comments
+from main.models import *
 
 
 class AddCommentForm(forms.ModelForm):
@@ -10,3 +10,13 @@ class AddCommentForm(forms.ModelForm):
     class Meta:
         model = Comments
         fields = ('biography',)
+
+
+class AddGroupForm(forms.ModelForm):
+    name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
+    photo = forms.ImageField(label='Аватарка', required=False)
+    slug = forms.SlugField(label='URL', widget=forms.TextInput(attrs={'placeholder': 'Slug'}))
+
+    class Meta:
+        model = Groups
+        fields = ('name', 'slug', 'photo')

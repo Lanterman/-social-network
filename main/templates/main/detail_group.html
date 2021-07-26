@@ -6,17 +6,25 @@
 <div id="div">
     {% if group.photo %}
     <img src="{{ group.photo.url }}" alt="{{ group.photo }}"><br>
+    {% else %}
+    <i id="img"><a href="#"><i class="fas fa-users"></i>  Добавить фото</a></i>
     {% endif %}
     <p id="title">{{ group.name }}</p><br>
-    <p class="p1"><a href="#openModal">Подписчики: {{ group.users.count }}</a></p>
+    <p class="p1"><a href="#openModal">Подписчики: {{ g.count }}</a></p>
     <p class="p1" id="p1">Всего записей: {{ group.published_set.count }}</p>
-    {% if q == request.user.username %}
-    <p class="p1" id="p1"><a href="{% url 'group_quit' group.slug %}">Выйти</a></p>
-    {% else %}
-    <p class="p1" id="p1"><a href="{% url 'group_enter' group.slug %}">Войти</a></p>
-    {% endif %}
+    <p class="'p1" id="p2"><a href="#"><i class="fas fa-plus"></i> Добавить записть</a></p>
+    <div id="div2">
+        {% if request.user.is_authenticated %}
+        {% if q == request.user.username %}
+        <p class="p1"><a href="{% url 'group_quit' group.slug %}">Отписаться</a></p>
+        {% else %}
+        <p class="p1"><a href="{% url 'group_enter' group.slug %}">Подписаться</a></p>
+        {% endif %}
+        {% endif %}
+    </div>
 </div>
-{% for p in group.published_set.all %}
+{% if page_obj %}
+{% for p in page_obj %}
 <div class="p">
     <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name }}</a>
     <pre>{{ p.date }}</pre>
@@ -31,6 +39,9 @@
     </p>
 </div>
 {% endfor %}
+{% else %}
+<p id="foo"><i class="fas fa-poo"></i> Записи отсутствуют</p>
+{% endif %}
 
 <div id="openModal" class="modal">
     <div class="modal-dialog">
@@ -42,11 +53,14 @@
             <div class="modal-body">
                 <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
                 {% for us in g %}
-                <p id="users"><a href="#">{{ us.first_name }} {{ us.last_name }}</a><a id="a" href="#">{{ us.email }}</a></p><br>
+                <p id="users">
+                    <a href="#">{{ us.first_name }} {{ us.last_name }}</a>
+                    <a id="a" href="#">{{ us.email }}</a>
+                </p><br>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
-
+{{ block.super }}
 {% endblock content %}

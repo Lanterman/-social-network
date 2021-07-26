@@ -16,8 +16,8 @@ class AbstractAdmin(admin.ModelAdmin):
 
 @admin.register(Groups)
 class GroupsAdmin(AbstractAdmin):
-    list_display = ('id', 'name', 'slug', 'photo', 'num_pub')
-    fields = ('name', 'slug', 'photo', 'num_pub', 'users')
+    list_display = ('id', 'name', 'slug', 'photo')
+    fields = ('name', 'slug', 'photo', 'users')
     raw_id_fields = ('users',)  # удобная вещь при связях
 
 

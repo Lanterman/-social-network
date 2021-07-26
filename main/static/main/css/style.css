@@ -77,15 +77,15 @@ header {
 }
 
 #as {
-    border-right: solid 5px gray;
-    border-bottom: solid 5px gray;
+    border-right: solid 4px gray;
+    border-bottom: solid 4px gray;
     float: left;
-    padding: 30px;
+    padding: 20px 15px;
 }
 
 #as img {
-    width: 110px;
-    height: 110px;
+    width: 100px;
+    height: 100px;
 }
 
 #as a {
@@ -309,6 +309,15 @@ color: blue;
     height: 200px;
 }
 
+#div #img {
+    float: left;
+    margin-left: 150px;
+    font-size: 20px;
+    border-radius: 300px;
+    border: solid 4px red;
+    padding: 87px 17px;
+}
+
 #div #title {
     margin: 0 0 20px 720px;
     font-size: 35px;
@@ -330,6 +339,20 @@ color: blue;
 
 #div a:hover {
     color: red;
+}
+
+#div #p2 {
+    margin-left: 460px;
+}
+
+#foo  {
+    font-size: 20px;
+    text-align: center;
+    margin-top: 70px;
+}
+
+#foo i {
+    font-size: 30px;
 }
 
 #as3 {
@@ -490,4 +513,9 @@ color: blue;
 .quit:hover {
     background-color: red;
     border: solid 2px black;
+}
+
+#div2 .p1 {
+    float: right;
+    margin: -90px 150px 0 0;
 }

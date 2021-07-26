@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="{% static 'users/css/style.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'main/css/groups.css' %}">
     <script src="https://kit.fontawesome.com/adb6ee4607.js" crossorigin="anonymous"></script>
     <title>{% block title%}Загрузка{% endblock title %}</title>
 </head>
@@ -26,6 +27,25 @@
     </div>
 </header>
 {% block groups %}{% endblock groups %}
-{% block content%} {% endblock content %}
+{% block content %}
+<nav class="nav">
+    {% if page_obj.has_other_pages %}
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">&lt;</a>
+    {% endif %}
+    {% for p in page_obj.paginator.page_range %}
+    {% if page_obj.number == p %}
+    <i class="i">{{ p }}</i>
+    {% elif page_obj.number|add:-2 <= p and p <= page_obj.number|add:2 %}
+    <a href="?page={{ p }}">{{ p }}</a>
+    {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">&gt;</a>
+    {% endif %}
+    {% endif %}
+</nav>
+{% endblock content %}
+
 </body>
 </html>

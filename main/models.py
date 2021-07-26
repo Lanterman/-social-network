@@ -37,10 +37,8 @@ class Published(Abstract):
 
 
 class Groups(Abstract):
-    num_pub = models.IntegerField(default=0, verbose_name='Количество записей')
     photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
     users = models.ManyToManyField(Users, blank=True, related_name='+', verbose_name='Пользователи')
-    # published = models.ManyToManyField(Published, verbose_name='Группа')
     biography = None
 
     class Meta:

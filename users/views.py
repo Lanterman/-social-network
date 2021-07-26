@@ -28,7 +28,7 @@ class RegisterUser(CreateView):
 
 
 @login_required(login_url='/users/login/')
-def profile(request, username):
+def profile(request, username):  # Переделать через SingleObjectMixin
     user1 = Users.objects.get(username=username)
     context = {'title': 'Мой профиль', 'menu': menu, 'user1': user1}
     return render(request, 'users/profile.html', context)
