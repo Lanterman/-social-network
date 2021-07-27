@@ -10,12 +10,13 @@ class AbstractAdmin(admin.ModelAdmin):
     list_filter = ('name',)  # Фильтер справа
     list_max_show_all = 5  # Если больше этого значения экземпляров - появляется кнопка
     list_per_page = 10  # Разбиение на страницы
-    ordering = ('-id',)
+    ordering = ('-date',)
     prepopulated_fields = {'slug': ('name',)}  # Автозаполнение поля slug с помощью name
 
 
 @admin.register(Groups)
 class GroupsAdmin(AbstractAdmin):
+    ordering = ('-id',)
     list_display = ('id', 'name', 'slug', 'photo')
     fields = ('name', 'slug', 'photo', 'users')
     raw_id_fields = ('users',)  # удобная вещь при связях

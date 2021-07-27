@@ -49,7 +49,7 @@ class RegisterUserForm(AbstractForm, UserCreationForm):
     last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
     email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Электронная почта'}))
     num_tel = forms.CharField(label='Номер телефона', widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
-    photo = forms.ImageField(label='Фото', required=False)
+    photo = forms.ImageField(label='Фото')
 
     class Meta:
         model = Users

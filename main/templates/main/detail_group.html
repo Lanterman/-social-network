@@ -5,14 +5,14 @@
 {% block content %}
 <div id="div">
     {% if group.photo %}
-    <img src="{{ group.photo.url }}" alt="{{ group.photo }}"><br>
-    {% else %}
-    <i id="img"><a href="#"><i class="fas fa-users"></i>  Добавить фото</a></i>
+    <img src="{{ group.photo.url }}" alt="{{ group.photo }}">
     {% endif %}
     <p id="title">{{ group.name }}</p><br>
     <p class="p1"><a href="#openModal">Подписчики: {{ g.count }}</a></p>
-    <p class="p1" id="p1">Всего записей: {{ group.published_set.count }}</p>
-    <p class="'p1" id="p2"><a href="#"><i class="fas fa-plus"></i> Добавить записть</a></p>
+    <p class="p1" id="p1">Всего записей: {{ page_obj.paginator.count }}</p>
+    {% if q == request.user.username and request.user.is_authenticated %}
+    <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
+    {% endif %}
     <div id="div2">
         {% if request.user.is_authenticated %}
         {% if q == request.user.username %}
@@ -52,12 +52,16 @@
             </div>
             <div class="modal-body">
                 <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
+                {% if g %}
                 {% for us in g %}
                 <p id="users">
                     <a href="#">{{ us.first_name }} {{ us.last_name }}</a>
                     <a id="a" href="#">{{ us.email }}</a>
                 </p><br>
                 {% endfor %}
+                {% else %}
+                <h4>Подписчики отсутствуют</h4>
+                {% endif %}
             </div>
         </div>
     </div>

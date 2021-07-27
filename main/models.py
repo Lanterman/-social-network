@@ -13,7 +13,7 @@ class Abstract(models.Model):
     biography = models.TextField(blank=True, verbose_name='Биография')
 
     class Meta:
-        ordering = ['name']
+        ordering = ['-date']
         abstract = True
 
     def __str__(self):
@@ -42,6 +42,7 @@ class Groups(Abstract):
     biography = None
 
     class Meta:
+        ordering = ['name']
         verbose_name = 'Группа'
         verbose_name_plural = 'Группы'
         db_table = 'Группы'
@@ -58,7 +59,6 @@ class Comments(Abstract):
     name, slug = None, None
 
     class Meta:
-        ordering = ['date']
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         db_table = 'Комментарии'

@@ -4,6 +4,7 @@
 
 {% block content %}
 <div class="p3">
+    <p class="aps"><a id="group1" href="{{ published.group.get_absolute_url }}">{{ published.group.name }}</a></p>
     <p id="p1">{{ published.name }}</p>
     <pre><big>Обновленно </big>{{ published.date }}</pre>
     {% if published.photo %}

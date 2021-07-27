@@ -12,6 +12,7 @@ urlpatterns = [
     path('groups/<slug:group_slug>/enter/', group_enter, name='group_enter'),
     path('groups/add_group/', AddGroup.as_view(), name='add_group'),
     path('groups/<slug:group_slug>/', detail_group, name='detail_group'),
+    path('groups/<slug:group_slug>/add_published/', add_published, name='add_published'),
     path('publish/<slug:publish_slug>/', DetailPublish.as_view(), name='detail_publish'),
     path('publish/<slug:publish_slug>/comments/', PublishedCommentsView.as_view(), name='comments'),
     path('publish/<slug:publish_slug>/add_comment/', add_comment_view, name='add_comment'),

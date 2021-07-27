@@ -484,6 +484,10 @@ color: blue;
     float: right;
 }
 
+.modal-body h4 {
+    text-align: center;
+}
+
 #users a {
     text-decoration: None;
     color: blue;
@@ -518,4 +522,14 @@ color: blue;
 #div2 .p1 {
     float: right;
     margin: -90px 150px 0 0;
+}
+
+#group1 {
+    color: blue;
+    text-decoration: None;
+    font-size: 25px;
+}
+
+#group1:hover {
+    color: red;
 }

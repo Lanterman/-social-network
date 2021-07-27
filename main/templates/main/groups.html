@@ -8,12 +8,17 @@
     <a href="#"><i class="fas fa-search"></i></a>
     <a href="{% url 'add_group' %}"><i class="fas fa-plus"></i></a>
 </p>
+{% if group1 %}
 {% for p in group1 %}
 <div id="div1">
     <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
-    <a href="{{ p.get_absolute_url }}"><i>{{ p.name }}</i></a>
+    <a id="margin" href="{{ p.get_absolute_url }}"><i>{{ p.name }}</i></a>
 </div>
 {% endfor %}
+<br><br><br>
+{% else %}
+<p id="foo"><i class="fas fa-ban"></i> Вы не вступали в группы!</p>
+{% endif %}
 {% endblock content %}
 
 {% block groups %}

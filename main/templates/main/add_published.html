@@ -7,7 +7,7 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% if form.errors %}
-    <p class="errors" id="errors">Ошибка создания группы!</p>
+    <p class="errors" id="errors">Ошибка создания записи!</p>
     {% endif %}
 
     {% for f in form %}
