@@ -1,0 +1,61 @@
+#users1 {
+    margin: 80px 0 0 300px;
+}
+
+#users1 img {
+    height: 460px;
+    width: 360px;
+    float: left;
+    box-shadow: 0 0 10px #666;
+    margin-right: 70px;
+}
+
+#users1 .users {
+    margin: 0 50px 35px 0;
+    font-size: 19px;
+}
+
+#users1 .users #i1 {
+    margin-left: 137px;
+}
+
+#users1 .users #i2 {
+    margin-left: 93px;
+}
+
+#users1 .users #i3 {
+    margin-left: 120px;
+}
+
+#users1 .users #i4 {
+    margin-left: 30px;
+}
+
+#users1 .users #i5 {
+    margin-left: 125px;
+}
+
+#users1 .users #i6 {
+    margin-left: 43px;
+}
+
+#model {
+    float: left;
+    color: blue;
+    text-decoration: None;
+    margin: 90px 0 0 -310px;
+    font-size: 19px;
+}
+
+#model:hover {
+    color: red;
+}
+
+.modal-body #photo {
+    margin: 0 0 20px 110px;
+}
+
+.modal-body button {
+    margin-left: 125px;
+    font-size: 15px;
+}

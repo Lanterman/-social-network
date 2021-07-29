@@ -3,5 +3,39 @@
 {% block title %}{{ title }}{% endblock title %}
 
 {% block content %}
-{{ block.super }}
+<div id="users1">
+    {% if users.photo %}
+    <img src="{{ users.photo.url }}">
+    {% else %}
+    <img src="/media/users/slen/slen.png/">
+    {% endif %}
+    <br><br><br>
+    <p class="users"><label>Имя: </label><i id="i1">{{ users.first_name }}</i></p>
+    <p class="users"><label>Фамилия: </label><i id="i2">{{ users.last_name }}</i></p>
+    <p class="users"><label>Email: </label><i id="i3">{{ users.email }}</i></p>
+    <p class="users"><label>Номер телефона: </label><i id="i4">{{ users.num_tel }}</i></p>
+    <p class="users"><label>URL: </label><i id="i5">{{ users.slug }}</i></p>
+    <p class="users"><label>Статус админа: </label><i id="i6">{{ users.is_superuser }}</i></p>
+</div>
+
+<a id="model" href="#openModal">Изменить фото</a>
+
+<div id="openModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Загрузить фото</h3>
+                <a href="#close" title="Close" class="close">×</a>
+            </div>
+            <div class="modal-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <p id="photo">{{ form.photo }}</p>
+                    <button type="submit">Сохранить и продолжить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock content %}

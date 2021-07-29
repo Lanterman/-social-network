@@ -32,3 +32,9 @@ class AddPublishedForm(forms.ModelForm):
     class Meta:
         model = Published
         fields = ('name', 'slug', 'biography', 'photo')
+
+
+class AddPhotoForm(forms.ModelForm):
+    class Meta:
+        model = Users
+        fields = ('photo',)

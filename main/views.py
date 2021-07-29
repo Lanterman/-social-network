@@ -3,8 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.views.generic import DetailView, ListView, CreateView
-from django.views.generic.base import View
+from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.detail import SingleObjectMixin
 
 from main.form import *
@@ -19,18 +18,13 @@ menu = [
 ]
 
 
-def news(request):  # Оптимизировать (сейчас: список публикаций каждой группы - 1 запрос)
+def news(request):  # Записи только из групп, в которые вступил
     if request.user.is_authenticated:
         users = Users.objects.get(username=request.user.username)
-        group1 = Groups.objects.filter(users=users)
-        public = []
-        for p in group1:
-            public += p.published_set.all()
         group = Groups.objects.exclude(users=users)[:5]
     else:
         group = Groups.objects.all()
-        public = Published.objects.all()
-
+    public = Published.objects.all().order_by('-date')
     paginator = Paginator(public, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -38,13 +32,18 @@ def news(request):  # Оптимизировать (сейчас: список �
     return render(request, 'main/index.html', context)
 
 
+@login_required(login_url='/users/login/')
 def home(request):
-    context = {'title': 'Главная страница', 'menu': menu}
+    users = Users.objects.get(username=request.user.username)
+    form = AddPhotoForm()
+    if request.method == 'POST':
+        form = AddPhotoForm(request.FILES)
+        if form.is_valid():
+            users.photo = request.FILES['photo']
+            users.save()
+            return redirect('home')
+    context = {'title': 'Главная страница', 'menu': menu, 'users': users, 'form': form}
     return render(request, 'main/home.html', context)
-
-
-class HomeView(LoginRequiredMixin, CreateView):
-    pass
 
 
 def messages(request):
@@ -126,7 +125,7 @@ def add_published(request, group_slug):
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
             # if not form.cleaned_data['photo']:
-            #     form.cleaned_data['photo'] = 'published/Актуальные-требования-к-изображениям-Вконтакте3.png'
+            #     form.cleaned_data['photo'] = 'published/slen.png'
             Published.objects.create(**form.cleaned_data, group_id=group.pk)
             return redirect(group)
     context = {'menu': menu, 'title': 'Добавить запись', 'form': form}
