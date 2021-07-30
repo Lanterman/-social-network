@@ -7,7 +7,9 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
-    <p>{{ form.non_field_errors }}</p>
+    {% if form.errors %}
+    <p class="errors">Ошибка регистрации! Попробуйте еще раз.</p>
+    {% endif %}
 
     {% for f in form %}
     <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>

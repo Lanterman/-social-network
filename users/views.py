@@ -1,9 +1,10 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
 from main.views import menu
 from users.form import *
@@ -73,18 +74,33 @@ class PasswordChangeUser(PasswordChangeView):
         return context
 
 
-@login_required
-def update(request, slug):
-    us = Users.objects.get(slug=slug)
-    form = UpdateUserForm()
-    if request.method == 'POST':
-        form = UpdateUserForm(request.POST)
-        if form.is_valid():
-            us.first_name = request.POST['first_name']
-            us.last_name = request.POST['last_name']
-            us.email = request.POST['email']
-            us.num_tel = request.POST['num_tel']
-            us.save()
-            return redirect('news')
-    context = {'title': 'Изменить профиль', 'form': form, 'menu': menu}
-    return render(request, 'users/edit_profile.html', context)
+class UpdateUserView(LoginRequiredMixin, UpdateView):
+    login_url = '/users/login/'
+    model = Users
+    form_class = UpdateUserForm
+    template_name = 'users/edit_profile.html'
+    slug_url_kwarg = 'slug'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Изменить профиль'
+        context['menu'] = menu
+        return context
+
+
+# @login_required
+# def update(request, slug):
+#     us = Users.objects.get(slug=slug)
+#     form = UpdateUserForm()
+#     if request.method == 'POST':
+#         form = UpdateUserForm(request.POST)
+#         if form.is_valid():
+#             us.first_name = request.POST['first_name']
+#             us.last_name = request.POST['last_name']
+#             us.email = request.POST['email']
+#             us.num_tel = request.POST['num_tel']
+#             us.save()
+#             return redirect('home')
+#     context = {'title': 'Изменить профиль', 'form': form, 'menu': menu}
+#     return render(request, 'users/edit_profile.html', context)

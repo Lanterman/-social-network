@@ -40,6 +40,12 @@ class AbstractForm(forms.Form):
                 raise ValidationError('Номер должен содержать только цифры!')
         return num_tel
 
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if len(email) <= 11:
+            raise ValidationError('Email должен содержать более 3 символов перед @!')
+        return email
+
 
 class RegisterUserForm(AbstractForm, UserCreationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'placeholder': 'Логин'}))
@@ -49,7 +55,7 @@ class RegisterUserForm(AbstractForm, UserCreationForm):
     last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
     email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Электронная почта'}))
     num_tel = forms.CharField(label='Номер телефона', widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
-    photo = forms.ImageField(label='Фото')
+    photo = forms.ImageField(label='Фото', required=False)
 
     class Meta:
         model = Users
@@ -70,9 +76,13 @@ class PasswordChangeUserForm(PasswordChangeForm):
                                     widget=forms.PasswordInput(attrs={'placeholder': 'Подтвердить пароль'}))
 
 
-class UpdateUserForm(AbstractForm):
+class UpdateUserForm(AbstractForm, forms.ModelForm):
     first_name = forms.CharField(label='Имя', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
     last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
     email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Email'}))
     num_tel = forms.CharField(max_length=20, label='Номер телефона',
                               widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
+
+    class Meta:
+        model = Users
+        fields = ('first_name', 'last_name', 'num_tel', 'email')
