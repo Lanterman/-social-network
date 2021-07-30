@@ -13,7 +13,6 @@ class Abstract(models.Model):
     biography = models.TextField(blank=True, verbose_name='Биография')
 
     class Meta:
-        ordering = ['-date']
         abstract = True
 
     def __str__(self):
@@ -28,6 +27,7 @@ class Published(Abstract):
     group = models.ForeignKey('Groups', on_delete=models.CASCADE, verbose_name='Группа')
 
     class Meta:
+        ordering = ['-date']
         verbose_name = 'Публикация'
         verbose_name_plural = 'Публикации'
         db_table = 'Публикации'
@@ -59,6 +59,7 @@ class Comments(Abstract):
     name, slug = None, None
 
     class Meta:
+        ordering = ['-date']
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         db_table = 'Комментарии'

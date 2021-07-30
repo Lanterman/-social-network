@@ -4,10 +4,10 @@ from main.views import *
 
 urlpatterns = [
     path('', news, name='news'),
-    path('home/', home, name='home'),
-    path('messages/', messages, name='messages'),
-    path('friends/', friends, name='friends'),
-    path('groups/', groups, name='groups'),
+    path('home/<int:user_pk>/', HomeView.as_view(), name='home'),
+    path('messages/<int:user_pk>/', messages, name='messages'),
+    path('friends/<int:user_pk>/', friends, name='friends'),
+    path('groups/<int:user_pk>/', groups, name='groups'),
     path('groups/<slug:group_slug>/quit/', group_quit, name='group_quit'),
     path('groups/<slug:group_slug>/enter/', group_enter, name='group_enter'),
     path('groups/add_group/', AddGroup.as_view(), name='add_group'),

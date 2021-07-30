@@ -18,5 +18,5 @@ class Users(User):
     def __str__(self):
         return self.username
 
-    # def get_absolute_url(self):
-    #     return reverse('profile', kwargs={'user_slug': self.slug})
+    def get_absolute_url(self):
+        return reverse('home', kwargs={'user_pk': self.pk})

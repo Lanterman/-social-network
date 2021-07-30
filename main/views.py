@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.views.generic import DetailView, ListView, CreateView, UpdateView
+from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 
 from main.form import *
@@ -11,7 +11,6 @@ from main.models import *
 
 menu = [
     {'name': 'Главная страница', 'url': 'home'},
-    {'name': 'Новости', 'url': 'news'},
     {'name': 'Сообщения', 'url': 'messages'},
     {'name': 'Друзья', 'url': 'friends'},
     {'name': 'Группы', 'url': 'groups'}
@@ -32,33 +31,47 @@ def news(request):  # Записи только из групп, в которы
     return render(request, 'main/index.html', context)
 
 
-@login_required(login_url='/users/login/')
-def home(request):
-    users = Users.objects.get(username=request.user.username)
-    form = AddPhotoForm()
-    if request.method == 'POST':
-        form = AddPhotoForm(request.FILES)
-        if form.is_valid():
-            users.photo = request.FILES['photo']
-            users.save()
-            return redirect('home')
-    context = {'title': 'Главная страница', 'menu': menu, 'users': users, 'form': form}
-    return render(request, 'main/home.html', context)
+# @login_required(login_url='/users/login/')
+# def home(request):
+#     users = Users.objects.get(username=request.user.username)
+#     form = AddPhotoForm()
+#     if request.method == 'POST':
+#         form = AddPhotoForm(request.FILES)
+#         if form.is_valid():
+#             users.photo = request.FILES['photo']
+#             users.save()
+#             return redirect('home')
+#     context = {'title': 'Главная страница', 'menu': menu, 'users': users, 'form': form}
+#     return render(request, 'main/home.html', context)
 
 
-def messages(request):
+class HomeView(LoginRequiredMixin, UpdateView):
+    login_url = '/users/login/'
+    model = Users
+    form_class = AddPhotoForm
+    template_name = 'main/home.html'
+    pk_url_kwarg = 'user_pk'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Главная страница'
+        context['menu'] = menu
+        return context
+
+
+def messages(request, user_pk):
     return HttpResponse('Мои сообщения')
 
 
-def friends(request):
+def friends(request, user_pk):
     return HttpResponse('Список друзей')
 
 
 @login_required(login_url='/users/login/')
-def groups(request):
-    users = Users.objects.get(username=request.user.username)
+def groups(request, user_pk):
+    users = Users.objects.get(pk=user_pk)
     group1 = Groups.objects.filter(users=users)
-    group = Groups.objects.exclude(users=users)
+    group = Groups.objects.exclude(users=users)[:5]
     context = {'title': 'Мои группы', 'menu': menu, 'group': group, 'group1': group1}
     return render(request, 'main/groups.html', context)
 
@@ -107,15 +120,25 @@ def detail_group(request, group_slug):
     return render(request, 'main/detail_group.html', context)
 
 
-# class DetailGroup(DetailView):
+# class DetailGroup(LoginRequiredMixin, SingleObjectMixin, ListView):
+#     login_url = '/users/login/'
 #     template_name = 'main/detail_group.html'
+#     paginate_by = 3
 #     slug_url_kwarg = 'group_slug'
-#     model = Groups
+#
+#     def get(self, request, *args, **kwargs):
+#         self.object = self.get_object(queryset=Groups.objects.all())
+#         return super().get(request, *args, **kwargs)
 #
 #     def get_context_data(self, **kwargs):
 #         context = super().get_context_data(**kwargs)
 #         context['menu'] = menu
+#         context['group'] = self.object
 #         return context
+#
+#     def get_queryset(self):
+#         return self.object.published_set.all().select_related('group')
+
 
 @login_required(login_url='/users/login/')
 def add_published(request, group_slug):

@@ -52,7 +52,8 @@
 }
 
 .modal-body #photo {
-    margin: 0 0 20px 110px;
+    font-size: 15px;
+    margin: 0 0 20px 50px;
 }
 
 .modal-body button {

@@ -13,13 +13,14 @@
 </head>
 <body>
 <header>
+    <a class="menu" href="{% url 'news' %}"><i class="fas fa-align-justify"></i> Новости</a>
     {% for m in menu %}
-    <a id="menu" href="{% url m.url %}"><i class="fas fa-align-justify"></i> {{ m.name }}</a>
+    <a class="menu" href="{% url m.url user.pk %}"><i class="fas fa-align-justify"></i> {{ m.name }}</a>
     {% endfor %}
 
     <div class="log">
         {% if request.user.is_authenticated %}
-        <a href="{% url 'profile' user.username %}"><i class="fas fa-user-circle"></i> {{ user.username }}</a> |
+        <a href="{% url 'profile' user.pk %}"><i class="fas fa-user-circle"></i> {{ user.username }}</a> |
         <a href="{% url 'logout' %}"> <i class="fas fa-sign-out-alt"></i> Выйти</a>
         {% else %}
         <a href="{% url 'register' %}"><i class="fas fa-fingerprint"></i> Регистрация</a> |

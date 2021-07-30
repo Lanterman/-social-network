@@ -1,10 +1,9 @@
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, DetailView
 
 from main.views import menu
 from users.form import *
@@ -28,23 +27,24 @@ class RegisterUser(CreateView):
         return redirect('news')
 
 
-@login_required(login_url='/users/login/')
-def profile(request, username):  # Переделать через SingleObjectMixin
-    user1 = Users.objects.get(username=username)
-    context = {'title': 'Мой профиль', 'menu': menu, 'user1': user1}
-    return render(request, 'users/profile.html', context)
+# @login_required(login_url='/users/login/')
+# def profile(request, username):  # Переделать через SingleObjectMixin
+#     user1 = Users.objects.get(username=username)
+#     context = {'title': 'Мой профиль', 'menu': menu, 'user1': user1}
+#     return render(request, 'users/profile.html', context)
 
 
-# class ProfileUser(LoginRequiredMixin, DetailView):
-#     login_url = '/users/login/'
-#     model = Users
-#     template_name = 'users/profile.html'
-#     slug_url_kwarg = 'username'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['menu'] = menu
-#         context['title'] = 'Мой профиль'
+class ProfileUser(LoginRequiredMixin, DetailView):
+    login_url = '/users/login/'
+    model = Users
+    template_name = 'users/profile.html'
+    pk_url_kwarg = 'user_pk'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = 'Мой профиль'
+        return context
 
 
 def logout_view(request):
@@ -65,7 +65,7 @@ class LoginUser(LoginView):
 class PasswordChangeUser(PasswordChangeView):
     template_name = 'users/password_change.html'
     form_class = PasswordChangeUserForm
-    success_url = reverse_lazy('news')
+    success_url = reverse_lazy('home')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -80,7 +80,6 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
     form_class = UpdateUserForm
     template_name = 'users/edit_profile.html'
     slug_url_kwarg = 'slug'
-    success_url = reverse_lazy('home')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
