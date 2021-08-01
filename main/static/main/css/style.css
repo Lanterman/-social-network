@@ -98,7 +98,7 @@ header {
     margin: 0 0 5px 5px;
 }
 
-#as p:hover {
+#as a p:hover {
     color: red;
 }
 

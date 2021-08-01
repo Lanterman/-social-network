@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.detail import SingleObjectMixin
 
 from main.form import *
@@ -17,10 +17,9 @@ menu = [
 ]
 
 
-def news(request):  # Записи только из групп, в которые вступил
+def news(request):  # ?????????
     if request.user.is_authenticated:
-        users = Users.objects.get(username=request.user.username)
-        group = Groups.objects.exclude(users=users)[:5]
+        group = Groups.objects.exclude(users__username=request.user.username)[:5]
     else:
         group = Groups.objects.all()
     public = Published.objects.all().order_by('-date')
@@ -29,6 +28,19 @@ def news(request):  # Записи только из групп, в которы
     page_obj = paginator.get_page(page_number)
     context = {'title': 'Новости', 'page_obj': page_obj, 'menu': menu, 'group': group}
     return render(request, 'main/index.html', context)
+
+
+# class NewsView(ListView):
+#     template_name = 'main/index.html'
+#     model = Published
+#     paginate_by = 5
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['menu'] = menu
+#         context['title'] = 'Новости'
+#         context['group'] = Groups.objects.all
+#         return context
 
 
 # @login_required(login_url='/users/login/')
@@ -68,10 +80,9 @@ def friends(request, user_pk):
 
 
 @login_required(login_url='/users/login/')
-def groups(request, user_pk):
-    users = Users.objects.get(pk=user_pk)
-    group1 = Groups.objects.filter(users=users)
-    group = Groups.objects.exclude(users=users)[:5]
+def groups(request, user_pk):  # ?????????
+    group1 = Groups.objects.filter(users__pk=user_pk)
+    group = Groups.objects.exclude(users__pk=user_pk)[:5]
     context = {'title': 'Мои группы', 'menu': menu, 'group': group, 'group1': group1}
     return render(request, 'main/groups.html', context)
 
@@ -86,6 +97,12 @@ class AddGroup(LoginRequiredMixin, CreateView):
         context['title'] = 'Создать группу'
         context['menu'] = menu
         return context
+
+    def form_valid(self, form):
+        group = form.save()
+        group.slug = group.name
+        group.save()
+        return redirect(group)
 
 
 @login_required(login_url='/users/login/')
@@ -106,7 +123,7 @@ def group_enter(request, group_slug):
     return render(request, 'main/group_quit.html', context)
 
 
-def detail_group(request, group_slug):
+def detail_group(request, group_slug):  # ?????????
     group = Groups.objects.get(slug=group_slug)
     g = group.users.all()
     group1 = group.published_set.all().order_by('-date')
@@ -137,7 +154,7 @@ def detail_group(request, group_slug):
 #         return context
 #
 #     def get_queryset(self):
-#         return self.object.published_set.all().select_related('group')
+#         return self.object.users.all().select_related('group')
 
 
 @login_required(login_url='/users/login/')
@@ -147,8 +164,6 @@ def add_published(request, group_slug):
     if request.method == 'POST':
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
-            # if not form.cleaned_data['photo']:
-            #     form.cleaned_data['photo'] = 'published/slen.png'
             Published.objects.create(**form.cleaned_data, group_id=group.pk)
             return redirect(group)
     context = {'menu': menu, 'title': 'Добавить запись', 'form': form}

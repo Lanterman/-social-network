@@ -32,6 +32,8 @@
         <a href="{{ g.get_absolute_url }}"><img src="{{ g.photo.url }}"></a>
         {% endif %}
     </div>
+    {% empty %}
+    <p>Извините, таких групп нет!</p>
     {% endfor %}
     {% block admin %}
     <h2><a id="a" href="/admin/"><i class="fas fa-user-shield"></i> Admin</a></h2>

@@ -14,9 +14,11 @@
 <body>
 <header>
     <a class="menu" href="{% url 'news' %}"><i class="fas fa-align-justify"></i> Новости</a>
+    {% if request.user.is_authenticated %}
     {% for m in menu %}
     <a class="menu" href="{% url m.url user.pk %}"><i class="fas fa-align-justify"></i> {{ m.name }}</a>
     {% endfor %}
+    {% endif %}
 
     <div class="log">
         {% if request.user.is_authenticated %}
@@ -48,6 +50,5 @@
     {% endif %}
 </nav>
 {% endblock content %}
-
 </body>
 </html>

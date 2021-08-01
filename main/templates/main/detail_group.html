@@ -10,13 +10,11 @@
     <p id="title">{{ group.name }}</p><br>
     <p class="p1"><a href="#openModal">Подписчики: {{ g.count }}</a></p>
     <p class="p1" id="p1">Всего записей: {{ page_obj.paginator.count }}</p>
-    {% if q == request.user.username and request.user.is_authenticated %}
-    <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
-    {% endif %}
     <div id="div2">
         {% if request.user.is_authenticated %}
         {% if q == request.user.username %}
         <p class="p1"><a href="{% url 'group_quit' group.slug %}">Отписаться</a></p>
+        <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
         {% else %}
         <p class="p1"><a href="{% url 'group_enter' group.slug %}">Подписаться</a></p>
         {% endif %}
