@@ -5,9 +5,13 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.detail import SingleObjectMixin
+from rest_framework.mixins import UpdateModelMixin
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import GenericViewSet
 
 from main.form import *
 from main.models import *
+from main.serializers import UserPublishedSerializer
 
 menu = [
     {'name': 'Главная страница', 'url': 'home'},
@@ -174,14 +178,13 @@ class DetailPublish(DetailView):
     model = Published
     slug_url_kwarg = 'publish_slug'
     template_name = 'main/detail_publish.html'
+    queryset = Published.objects.all().select_related('group')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
+        context['star_form'] = RatingForm()
         return context
-
-    def get_queryset(self):
-        return Published.objects.all().select_related('group')
 
 
 class PublishedCommentsView(SingleObjectMixin, ListView):
@@ -215,3 +218,15 @@ def add_comment_view(request, publish_slug):
             return redirect(public)
     context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
     return render(request, 'main/add_comment.html', context)
+
+
+class UserPublishedRelationView(UpdateModelMixin, GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = UserPublishedRelation.objects.all()
+    serializer_class = UserPublishedSerializer
+    lookup_field = 'published'
+
+    def get_object(self):
+        obj, _ = UserPublishedRelation.objects.get_or_create(user=self.request.user,
+                                                             published_id=self.kwargs['published'])
+        return obj

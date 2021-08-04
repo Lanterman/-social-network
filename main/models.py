@@ -22,8 +22,10 @@ class Abstract(models.Model):
 class Published(Abstract):
     photo = models.ImageField(blank=True, upload_to='published/', verbose_name='Фото')
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
-    like = models.IntegerField(default=0, verbose_name='Лайки')
-    dislike = models.IntegerField(default=0, verbose_name='Дизлайки')
+    owner = models.ForeignKey(Users, verbose_name='Пользователь', on_delete=models.SET_NULL, null=True,
+                              related_name='my_published')
+    readers = models.ManyToManyField(Users, verbose_name='Читатель', through='UserPublishedRelation',
+                                     related_name='published')
     group = models.ForeignKey('Groups', on_delete=models.CASCADE, verbose_name='Группа')
 
     class Meta:
@@ -38,7 +40,7 @@ class Published(Abstract):
 
 class Groups(Abstract):
     photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
-    users = models.ManyToManyField(Users, blank=True, related_name='+', verbose_name='Пользователи')
+    users = models.ManyToManyField(Users, blank=True, related_name='groups_users', verbose_name='Пользователи')
     biography = None
 
     class Meta:
@@ -66,3 +68,26 @@ class Comments(Abstract):
 
     def __str__(self):
         return self.published.name
+
+
+class UserPublishedRelation(models.Model):
+    RATE_CHOICES = (
+        (1, 'Не очень'),
+        (2, 'Неплохая'),
+        (3, 'Хорошая'),
+        (4, 'Отличная'),
+        (5, 'Всем советую'),
+    )
+
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')
+    published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
+    like = models.BooleanField(default=False, verbose_name='Like')
+    in_mark = models.BooleanField(default=False, verbose_name='Закладки')
+    rate = models.SmallIntegerField(verbose_name='Рейтинг', null=True, choices=RATE_CHOICES)
+
+    class Meta:
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинги'
+
+    def __str__(self):
+        return f'{self.user.username}: {self.published} - Рейтинг: {self.rate}'

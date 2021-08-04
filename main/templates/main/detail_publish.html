@@ -13,7 +13,7 @@
     <p id="ap1">{{ published.biography|linebreaksbr }}</p><br><br>
 </div>
 <p id="aps" class="aps">
-    <a href="" title="Лайки"><i class="fas fa-thumbs-up"></i> {{ published.like }}</a>
+    <a href="" title="Лайки"><i class="fas fa-thumbs-up"></i> {{ published.userpublishedrelationrate_set.all }}</a>
     <a href="{% url 'comments' published.slug %}"><i id="ia1"><i class="fas fa-comments"></i> {{ published.comments_set.count }}</i></a>
     <a href="" title="Дизлайки"><i class="fas fa-thumbs-down"></i> {{ published.dislike }}</a>
 </p>

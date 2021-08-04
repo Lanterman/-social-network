@@ -40,3 +40,11 @@ class AddPhotoForm(forms.ModelForm):
     class Meta:
         model = Users
         fields = ('photo',)
+
+
+class RatingForm(forms.ModelForm):
+    rate1 = forms.ModelChoiceField(queryset=UserPublishedRelation.objects.all(), widget=forms.RadioSelect(), empty_label=None)
+
+    class Meta:
+        model = UserPublishedRelation
+        fields = ('rate1',)

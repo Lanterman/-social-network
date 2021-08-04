@@ -24,20 +24,20 @@ class GroupsAdmin(AbstractAdmin):
 
 @admin.register(Published)
 class PublishedAdmin(AbstractAdmin):
-    list_display = ('id', 'name', 'slug', 'photo', 'date', 'like', 'dislike')
-    fields = ('name', 'slug', 'biography', 'group', 'photo', 'date', 'like', 'dislike')
+    list_display = ('id', 'name', 'slug', 'photo', 'date', 'owner')
+    fields = ('name', 'slug', 'biography', 'group', 'photo', 'date', 'owner')
     date_hierarchy = 'date'
-    readonly_fields = ('date', 'like', 'dislike')  # делает нередактиремым
-    actions = ['not_dislike']
+    readonly_fields = ('date',)  # делает нередактиремым
+    # actions = ['not_dislike']
 
-    @admin.action(description='Анилировать лайки и дизлайки')
-    def not_dislike(self, request, queryset):
-        rows = queryset.update(dislike=0, like=0)
-        if rows == 1:
-            messages = 'Лайки и дизлайки 1 публикации были анулированы'
-        else:
-            messages = 'Лайки и дизлайки %s публикации были анулированы' % rows
-        self.message_user(request, messages)
+    # @admin.action(description='Анилировать лайки и дизлайки')
+    # def not_dislike(self, request, queryset):
+    #     rows = queryset.update(dislike=0, like=0)
+    #     if rows == 1:
+    #         messages = 'Лайки и дизлайки 1 публикации были анулированы'
+    #     else:
+    #         messages = 'Лайки и дизлайки %s публикации были анулированы' % rows
+    #     self.message_user(request, messages)
 
 
 @admin.register(Comments)
@@ -63,3 +63,8 @@ class CommentsAdmin(admin.ModelAdmin):
         else:
             message_bit = "Дизлайки %s публикаций были анулированы" % rows
         self.message_user(request, message_bit)
+
+
+@admin.register(UserPublishedRelation)
+class UserPublishedRelationAdmin(admin.ModelAdmin):
+    pass
