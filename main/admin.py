@@ -65,6 +65,11 @@ class CommentsAdmin(admin.ModelAdmin):
         self.message_user(request, message_bit)
 
 
-@admin.register(UserPublishedRelation)
-class UserPublishedRelationAdmin(admin.ModelAdmin):
+@admin.register(RatingStar)
+class RatingStarAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ('published', 'star', 'ip')

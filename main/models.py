@@ -24,8 +24,6 @@ class Published(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
     owner = models.ForeignKey(Users, verbose_name='Пользователь', on_delete=models.SET_NULL, null=True,
                               related_name='my_published')
-    readers = models.ManyToManyField(Users, verbose_name='Читатель', through='UserPublishedRelation',
-                                     related_name='published')
     group = models.ForeignKey('Groups', on_delete=models.CASCADE, verbose_name='Группа')
 
     class Meta:
@@ -70,24 +68,26 @@ class Comments(Abstract):
         return self.published.name
 
 
-class UserPublishedRelation(models.Model):
-    RATE_CHOICES = (
-        (1, 'Не очень'),
-        (2, 'Неплохая'),
-        (3, 'Хорошая'),
-        (4, 'Отличная'),
-        (5, 'Всем советую'),
-    )
+class RatingStar(models.Model):
+    value = models.SmallIntegerField(verbose_name='Рейтинг', default=0)
 
-    user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')
+    class Meta:
+        verbose_name = 'Звезда Рейтинг'
+        verbose_name_plural = 'Звезда Рейтинги'
+        ordering = ['-value']
+
+    def __str__(self):
+        return f'{self.value}'
+
+
+class Rating(models.Model):
+    ip = models.CharField('IP адрес', max_length=15)
     published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
-    like = models.BooleanField(default=False, verbose_name='Like')
-    in_mark = models.BooleanField(default=False, verbose_name='Закладки')
-    rate = models.SmallIntegerField(verbose_name='Рейтинг', null=True, choices=RATE_CHOICES)
+    star = models.ForeignKey(RatingStar, on_delete=models.CASCADE, verbose_name='Звезда')
 
     class Meta:
         verbose_name = 'Рейтинг'
         verbose_name_plural = 'Рейтинги'
 
     def __str__(self):
-        return f'{self.user.username}: {self.published} - Рейтинг: {self.rate}'
+        return f'{self.star} - {self.published}'

@@ -1,17 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
+from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
-from rest_framework.mixins import UpdateModelMixin
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import GenericViewSet
 
 from main.form import *
 from main.models import *
-from main.serializers import UserPublishedSerializer
 
 menu = [
     {'name': 'Главная страница', 'url': 'home'},
@@ -168,7 +165,7 @@ def add_published(request, group_slug):
     if request.method == 'POST':
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
-            Published.objects.create(**form.cleaned_data, group_id=group.pk)
+            Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
             return redirect(group)
     context = {'menu': menu, 'title': 'Добавить запись', 'form': form}
     return render(request, 'main/add_published.html', context)
@@ -220,13 +217,17 @@ def add_comment_view(request, publish_slug):
     return render(request, 'main/add_comment.html', context)
 
 
-class UserPublishedRelationView(UpdateModelMixin, GenericViewSet):
-    permission_classes = [IsAuthenticated]
-    queryset = UserPublishedRelation.objects.all()
-    serializer_class = UserPublishedSerializer
-    lookup_field = 'published'
-
-    def get_object(self):
-        obj, _ = UserPublishedRelation.objects.get_or_create(user=self.request.user,
-                                                             published_id=self.kwargs['published'])
-        return obj
+class AddStarRating(View):
+    def post(self, request):
+        form = RatingForm(request.POST)
+        if request.user.is_authenticated:
+            if form.is_valid():
+                print('asd')
+                Rating.objects.update_or_create(
+                    ip=self.request.user.username,
+                    published_id=int(request.POST.get("published")),
+                    defaults={'star_id': int(request.POST.get("star"))}
+                    )
+                return HttpResponse(status=201)
+            else:
+                return HttpResponse(status=400)

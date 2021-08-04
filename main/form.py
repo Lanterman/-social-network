@@ -26,8 +26,8 @@ class AddPublishedForm(forms.ModelForm):
     name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
     photo = forms.ImageField(label='Аватарка', required=False)
     slug = forms.SlugField(label='URL', widget=forms.TextInput(attrs={'placeholder': 'Slug'}))
-    biography = forms.CharField(label='Комментарий',
-                                widget=forms.Textarea(attrs={'placeholder': 'Написать комментарий', 'rows': 5}))
+    biography = forms.CharField(label='Биография',
+                                widget=forms.Textarea(attrs={'placeholder': 'Написать биографию', 'rows': 5}))
 
     class Meta:
         model = Published
@@ -43,8 +43,8 @@ class AddPhotoForm(forms.ModelForm):
 
 
 class RatingForm(forms.ModelForm):
-    rate1 = forms.ModelChoiceField(queryset=UserPublishedRelation.objects.all(), widget=forms.RadioSelect(), empty_label=None)
+    star = forms.ModelChoiceField(queryset=RatingStar.objects.all(), widget=forms.RadioSelect(), empty_label=None)
 
     class Meta:
-        model = UserPublishedRelation
-        fields = ('rate1',)
+        model = Rating
+        fields = ('star',)

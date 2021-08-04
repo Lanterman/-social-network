@@ -8,16 +8,30 @@
     <p id="p1">{{ published.name }}</p>
     <pre><big>Обновленно </big>{{ published.date }}</pre>
     {% if published.photo %}
+
+    <div class="div123">
+        <form action="{% url 'add_rating' %}" method="post" name="rating">
+            <b>Рейтинг:</b>
+            {% csrf_token %}
+            <input type="hidden" value="{{ published.id }}" name="published">
+            <span class="rating">
+        {% for k, v in star_form.fields.star.choices %}
+            <input id="rating{{ v }}" type="radio" name="star" value="{{ k }}">
+            <label for="rating{{ v }}">{{ k }}</label>
+        {% endfor %}
+            </span>
+            <span class="editContent">4.0</span>
+        </form>
+    </div>
+
     <img src="{{ published.photo.url }}" alt="photo">
     {% endif %}
-    <p id="ap1">{{ published.biography|linebreaksbr }}</p><br><br>
+    <p id="ap1">{{ published.biography|linebreaksbr }}</p>
 </div>
-<p id="aps" class="aps">
-    <a href="" title="Лайки"><i class="fas fa-thumbs-up"></i> {{ published.userpublishedrelationrate_set.all }}</a>
-    <a href="{% url 'comments' published.slug %}"><i id="ia1"><i class="fas fa-comments"></i> {{ published.comments_set.count }}</i></a>
-    <a href="" title="Дизлайки"><i class="fas fa-thumbs-down"></i> {{ published.dislike }}</a>
-</p>
-<p id="ia">
-
+<p id="p123">Автор: <i>{{ published.owner }}</i></p>
+<p id="aps1" class="aps">
+    <a href="{% url 'comments' published.slug %}">
+        <i id="ia1"><i class="fas fa-comments"></i> Комментариев: {{ published.comments_set.count }}</i>
+    </a>
 </p>
 {% endblock content %}
