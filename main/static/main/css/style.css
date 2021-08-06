@@ -24,6 +24,13 @@ body {
     color: blue;
 }
 
+.p .span1 {
+    float: left;
+    margin-left: 10px;
+    width: 270px;
+
+}
+
 .p pre {
     margin-left: 10px;
 }
@@ -119,7 +126,6 @@ header {
     padding: 10px;
 }
 
-
 #aps1 {
     margin: 70px 100px 60px 0;
 }
@@ -129,6 +135,20 @@ header {
     font-size: 18px;
     margin: 0 30px 0 88px;
     color: blue;
+}
+
+#aps .ia32 {
+    margin: 0 0 0 0px;
+}
+
+#aps .a32 {
+    margin: 0px;
+    float:right;
+    width: 180px;
+}
+
+#aps .a34 {
+    margin: 0 0 0 5px;
 }
 
 #aps a:hover, #aps1 a:hover {
@@ -562,16 +582,16 @@ color: blue;
 }
 
 .b1 {
-    font-size:18px;
-    margin:0 5px 0 0;
+    font-size:17px;
+    margin:0 1px 0 0;
 }
 
 #pb {
-    margin:10px 0 0 0;
+    margin: 10px 0 0 0;
 }
 
 .editContent {
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .rating > input {

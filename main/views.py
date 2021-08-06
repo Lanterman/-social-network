@@ -1,8 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.db.models import Avg
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.base import View
@@ -19,30 +18,34 @@ menu = [
 ]
 
 
-def news(request):  # ?????????
-    if request.user.is_authenticated:
-        group = Groups.objects.exclude(users__username=request.user.username)[:5]
-    else:
-        group = Groups.objects.all()
-    public = Published.objects.all().order_by('-date')
-    paginator = Paginator(public, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {'title': 'Новости', 'page_obj': page_obj, 'menu': menu, 'group': group}
-    return render(request, 'main/index.html', context)
+class NewsView(ListView):
+    template_name = 'main/index.html'
+    model = Published
+    paginate_by = 5
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = 'Новости'
+        context['group'] = self.group
+        return context
 
-# class NewsView(ListView):
-#     template_name = 'main/index.html'
-#     model = Published
-#     paginate_by = 5
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['menu'] = menu
-#         context['title'] = 'Новости'
-#         context['group'] = Groups.objects.all
-#         return context
+    def get(self, request, *args, **kwargs):
+        self.public = []
+        if request.user.is_authenticated:
+            self.group = Groups.objects.exclude(users__username=request.user.username)[:5]
+            self.group1 = Groups.objects.filter(users__username=request.user.username)
+            for public in self.group1:
+                for p in public.published_set.all().select_related('owner'):
+                    self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
+        else:
+            self.group = Groups.objects.all()[:5]
+            for p in Published.objects.all().select_related('owner'):
+                self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.public
 
 
 # @login_required(login_url='/users/login/')
@@ -176,7 +179,7 @@ class DetailPublish(DetailView):
     model = Published
     slug_url_kwarg = 'publish_slug'
     template_name = 'main/detail_publish.html'
-    queryset = Published.objects.all().select_related('group')
+    queryset = Published.objects.all().select_related('group', 'owner')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -187,8 +190,7 @@ class DetailPublish(DetailView):
                 context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related().get(ip=self.user1)
             except Exception:
                 pass
-        context['average_value'] = Rating.objects.filter(published_id__name=self.object).select_related().aggregate(
-            avg=Avg('star_id'))
+        context['average'] = self.object.average(self.object)
         return context
 
     def get(self, request, *args, **kwargs):
@@ -237,7 +239,6 @@ class AddStarRating(View):
         form = RatingForm(request.POST)
         if request.user.is_authenticated:
             if form.is_valid():
-                print('asd')
                 Rating.objects.update_or_create(
                     ip=self.request.user.username,
                     published_id=int(request.POST.get("published")),

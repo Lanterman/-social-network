@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 from django.urls import reverse
 from django.utils import timezone
 
@@ -34,6 +35,10 @@ class Published(Abstract):
 
     def get_absolute_url(self):
         return reverse('detail_publish', kwargs={'publish_slug': self.slug})
+
+    def average(self, p):
+        a = Rating.objects.filter(published_id__name=p).aggregate(avg=Avg('star_id'))
+        return a
 
 
 class Groups(Abstract):
