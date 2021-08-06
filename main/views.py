@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
+from django.db.models import Avg
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
@@ -181,7 +182,21 @@ class DetailPublish(DetailView):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['star_form'] = RatingForm()
+        if self.user1:
+            try:
+                context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related().get(ip=self.user1)
+            except Exception:
+                pass
+        context['average_value'] = Rating.objects.filter(published_id__name=self.object).select_related().aggregate(
+            avg=Avg('star_id'))
         return context
+
+    def get(self, request, *args, **kwargs):
+        self.user1 = ''
+        self.object = self.get_object(queryset=Published.objects.all())
+        if request.user.is_authenticated:
+            self.user1 = request.user.username
+        return super().get(request, *args, **kwargs)
 
 
 class PublishedCommentsView(SingleObjectMixin, ListView):
@@ -227,7 +242,7 @@ class AddStarRating(View):
                     ip=self.request.user.username,
                     published_id=int(request.POST.get("published")),
                     defaults={'star_id': int(request.POST.get("star"))}
-                    )
+                )
                 return HttpResponse(status=201)
             else:
                 return HttpResponse(status=400)

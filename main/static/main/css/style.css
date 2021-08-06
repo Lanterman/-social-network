@@ -121,7 +121,7 @@ header {
 
 
 #aps1 {
-    margin: 70px 0 60px 0;
+    margin: 70px 100px 60px 0;
 }
 
 #aps a, #aps1 a {
@@ -561,12 +561,26 @@ color: blue;
   height: 30px;
 }
 
+.b1 {
+    font-size:18px;
+    margin:0 5px 0 0;
+}
+
+#pb {
+    margin:10px 0 0 0;
+}
+
+.editContent {
+    font-size: 20px;
+}
+
 .rating > input {
   opacity: 0;
   margin-right: -100%;
 }
 
 .rating > label {
+  cursor: pointer;
   position: relative;
   display: block;
   float: right;

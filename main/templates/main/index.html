@@ -14,7 +14,7 @@
     <p id="aps">
         <a href="" title="Лайки"><i class="fas fa-thumbs-up"></i> {{ p.like }}</a>
         <i><a href="{% url 'comments' p.slug %}"><i class="fas fa-comments"></i> Комментарии</a></i>
-        <a href="" title="Дизлайки"><i class="fas fa-thumbs-down"></i> {{ p.dislike }}</a>
+        <a href="" title="Создатель">Автор: <i>{{ p.owner }}</i></a>
     </p>
 </div>
 {% endfor %}

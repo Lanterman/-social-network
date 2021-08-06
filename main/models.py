@@ -90,4 +90,4 @@ class Rating(models.Model):
         verbose_name_plural = 'Рейтинги'
 
     def __str__(self):
-        return f'{self.star} - {self.published}'
+        return f'{self.star} - {self.published}: {self.ip}'
