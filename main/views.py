@@ -1,7 +1,6 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
@@ -200,7 +199,7 @@ class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
 #     return render(request, 'main/add_published.html', context)
 
 
-class AddPublished(LoginRequiredMixin, CreateView):  # Сделать перенаправление после создания
+class AddPublished(LoginRequiredMixin, CreateView):
     login_url = '/users/login/'
     form_class = AddPublishedForm
     template_name = 'main/add_published.html'
@@ -213,18 +212,14 @@ class AddPublished(LoginRequiredMixin, CreateView):  # Сделать перен
         return context
 
     def post(self, request, *args, **kwargs):
-        self.group = Groups.objects.all()
+        group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
-            Published.objects.create(**form.cleaned_data, group_id=self.group[0].pk, owner_id=request.user.pk)
-        return super().post(self, request, *args, **kwargs)
-
-    def form_valid(self, form):
-        form.save()
-        return redirect(self.group)
+            Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
+        return redirect(group)
 
 
-class DetailPublish(DetailView):
+class DetailPublish(DetailView):  # Оптимизировать рейтинг
     model = Published
     slug_url_kwarg = 'publish_slug'
     template_name = 'main/detail_publish.html'
@@ -270,17 +265,36 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         return self.object.comments_set.all().select_related('users')  # Жадный запрос
 
 
-@login_required(login_url='/users/login/')
-def add_comment_view(request, publish_slug):
-    public = Published.objects.get(slug=publish_slug)
-    form = AddCommentForm()
-    if request.method == 'POST':
+# @login_required(login_url='/users/login/')
+# def add_comment_view(request, publish_slug):
+#     public = Published.objects.get(slug=publish_slug)
+#     form = AddCommentForm()
+#     if request.method == 'POST':
+#         form = AddCommentForm(request.POST)
+#         if form.is_valid():
+#             Comments.objects.create(**form.cleaned_data, published_id=public.id, users_id=request.user.pk)
+#             return redirect(public)
+#     context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
+#     return render(request, 'main/add_comment.html', context)
+
+
+class AddCommentView(CreateView):
+    template_name = 'main/add_comment.html'
+    slug_url_kwarg = 'publish_slug'
+    form_class = AddCommentForm
+
+    def post(self, request, *args, **kwargs):
+        published = Published.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddCommentForm(request.POST)
         if form.is_valid():
-            Comments.objects.create(**form.cleaned_data, published_id=public.id, users_id=request.user.pk)
-            return redirect(public)
-    context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
-    return render(request, 'main/add_comment.html', context)
+            Comments.objects.create(**form.cleaned_data, published_id=published.id, users_id=request.user.pk)
+        return redirect(published)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = 'Добавить комментарий'
+        return context
 
 
 class AddStarRating(View):
