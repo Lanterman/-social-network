@@ -8,38 +8,19 @@
     <img src="{{ group.photo.url }}" alt="{{ group.photo }}">
     {% endif %}
     <p id="title">{{ group.name }}</p><br>
-    <p class="p1"><a href="#openModal">Подписчики: {{ g.count }}</a></p>
+    <p class="p1"><a href="#openModal">Подписчики: {{ users.count }}</a></p>
     <p class="p1" id="p1">Всего записей: {{ page_obj.paginator.count }}</p>
     <div id="div2">
-        {% if request.user.is_authenticated %}
-        {% if q == request.user.username %}
+        {% if subscriber %}
         <p class="p1"><a href="{% url 'group_quit' group.slug %}">Отписаться</a></p>
         <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
         {% else %}
         <p class="p1"><a href="{% url 'group_enter' group.slug %}">Подписаться</a></p>
         {% endif %}
-        {% endif %}
     </div>
 </div>
-{% if page_obj %}
-{% for p in page_obj %}
-<div class="p">
-    <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name }}</a>
-    <pre>{{ p.date }}</pre>
-    <p id="ap">{{ p.biography|linebreaksbr|truncatechars_html:200 }}</p>
-    {% if p.photo %}
-    <img src="{{ p.photo.url }}" alt="photo"><br><br>
-    {% endif %}
-    <p id="aps">
-        <a href="" title="Лайки"><i class="fas fa-thumbs-up"></i> {{ p.like }}</a>
-        <i><a href="{% url 'comments' p.slug %}"><i class="fas fa-comments"></i> Комментарии</a></i>
-        <a href="" title="Дизлайки"><i class="fas fa-thumbs-down"></i> {{ p.dislike }}</a>
-    </p>
-</div>
-{% endfor %}
-{% else %}
-<p id="foo"><i class="fas fa-poo"></i> Записи отсутствуют</p>
-{% endif %}
+
+{% include 'main/include/average_value.html' %}
 
 <div id="openModal" class="modal">
     <div class="modal-dialog">
@@ -50,8 +31,8 @@
             </div>
             <div class="modal-body">
                 <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
-                {% if g %}
-                {% for us in g %}
+                {% if users %}
+                {% for us in users %}
                 <p id="users">
                     <a href="#">{{ us.first_name }} {{ us.last_name }}</a>
                     <a id="a" href="#">{{ us.email }}</a>

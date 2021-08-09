@@ -3,25 +3,7 @@
 {% block title%}{{ title }}{% endblock title %}
 
 {% block content %}
-{% if page_obj %}
-{% for p, average in page_obj %}
-<div class="p">
-    <span><a id="a12" class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:20 }}</a></span>
-    <pre>{{ p.date }}</pre>
-    <p id="ap">{{ p.biography|linebreaksbr|truncatechars_html:200 }}</p>
-    {% if p.photo %}
-    <img src="{{ p.photo.url }}" alt="photo"><br><br>
-    {% endif %}
-    <p id="aps">
-        <span class="span1">{% include 'main/include/average_value.html' %}</span>
-        <i><a class="ia32" href="{% url 'comments' p.slug %}"><i class="fas fa-comments"></i> Комментарии</a></i>
-        <span class="a32">Автор:  <a class="a34" href="" title="Создатель"><i>{{ p.owner|truncatechars_html:10 }}</i></a></span>
-    </p>
-</div>
-{% endfor %}
-{% else %}
-    <p id="foo"><i class="fas fa-poo"></i> Новости отсутствуют</p>
-{% endif %}
+{% include 'main/include/average_value.html' %}
 {{ block.super }}
 {% endblock content %}
 

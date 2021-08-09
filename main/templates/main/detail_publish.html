@@ -27,7 +27,12 @@
                 <p id="pb"></p>
             </form>
         {% endif %}
-        {% include 'main/include/average_value.html' %}
+        <b class="b1">Оценка пользователей:</b>
+        {% if average.avg %}
+            <span class="editContent">{{ average.avg }} / 5,0</span>
+        {% else%}
+            <span class="editContent">Нет</span>
+        {% endif %}
     </div>
     {% if published.photo %}
         <img src="{{ published.photo.url }}" alt="photo">

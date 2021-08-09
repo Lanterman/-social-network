@@ -8,32 +8,29 @@
     <a href="#"><i class="fas fa-search"></i></a>
     <a href="{% url 'add_group' %}"><i class="fas fa-plus"></i></a>
 </p>
-{% if group1 %}
 {% for p in group1 %}
-<div id="div1">
-    <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
-    <a id="margin" href="{{ p.get_absolute_url }}"><i>{{ p.name }}</i></a>
-</div>
+    <div id="div1">
+        <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
+        <a id="margin" href="{{ p.get_absolute_url }}"><i>{{ p.name }}</i></a>
+    </div>
+{% empty %}
+    <p id="foo" class="foo"><i class="fas fa-ban"></i> Вы не вступали в группы!</p>
 {% endfor %}
-<br><br><br>
-{% else %}
-<p id="foo"><i class="fas fa-ban"></i> Вы не вступали в группы!</p>
-{% endif %}
 {% endblock content %}
 
 {% block groups %}
 <aside id="as">
     <h3>Рекомендуемые группы</h3>
     {% for g in group %}
-    <div>
-        <a href="{{ g.get_absolute_url }}"><p id="pc"><i class="fas fa-users"></i> {{ g.name|default:"nothing" }}</p>
-        </a>
-        {% if g.photo %}
-        <a href="{{ g.get_absolute_url }}"><img src="{{ g.photo.url }}"></a>
-        {% endif %}
-    </div>
+        <div>
+            <a href="{{ g.get_absolute_url }}"><p id="pc"><i class="fas fa-users"></i> {{ g.name|default:"nothing" }}</p>
+            </a>
+            {% if g.photo %}
+                <a href="{{ g.get_absolute_url }}"><img src="{{ g.photo.url }}"></a>
+            {% endif %}
+        </div>
     {% empty %}
-    <p>Извините, таких групп нет!</p>
+        <p>Извините, таких групп нет!</p>
     {% endfor %}
     {% block admin %}
     <h2><a id="a" href="/admin/"><i class="fas fa-user-shield"></i> Admin</a></h2>

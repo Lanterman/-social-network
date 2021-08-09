@@ -1,6 +1,24 @@
-<b class="b1">Оценка пользователей:</b>
-{% if average.avg %}
-    <span class="editContent">{{ average.avg }} / 5,0</span>
-{% else%}
-    <span class="editContent">Нет</span>
-{% endif %}
+{% for p, average in page_obj %}
+    <div class="p">
+        <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:20  }}</a>
+        <pre>{{ p.date }}</pre>
+        <p id="ap">{{ p.biography|linebreaksbr|truncatechars_html:200 }}</p>
+        {% if p.photo %}
+            <img src="{{ p.photo.url }}" alt="photo"><br><br>
+        {% endif %}
+        <p id="aps">
+            <span class="span1">
+                <b class="b1">Оценка пользователей:</b>
+                {% if average.avg %}
+                    <span class="editContent">{{ average.avg }} / 5,0</span>
+                {% else%}
+                    <span class="editContent">Нет</span>
+                {% endif %}
+            </span>
+            <i><a class="ia32" href="{% url 'comments' p.slug %}"><i class="fas fa-comments"></i> Комментарии</a></i>
+            <span class="a32">Автор:  <a class="a34" href="" title="Создатель"><i>{{ p.owner|truncatechars_html:10 }}</i></a></span>
+        </p>
+    </div>
+{% empty %}
+    <p id="foo"><i class="fas fa-poo"></i> {{ empty }}</p>
+{% endfor %}

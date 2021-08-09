@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
@@ -28,6 +27,7 @@ class NewsView(ListView):
         context['menu'] = menu
         context['title'] = 'Новости'
         context['group'] = self.group
+        context['empty'] = 'Новости отсутствуют'
         return context
 
     def get(self, request, *args, **kwargs):
@@ -45,7 +45,7 @@ class NewsView(ListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.public
+        return self.public  # Сделать чтоб записи шли вне зависимости от группы по дате
 
 
 # @login_required(login_url='/users/login/')
@@ -84,12 +84,32 @@ def friends(request, user_pk):
     return HttpResponse('Список друзей')
 
 
-@login_required(login_url='/users/login/')
-def groups(request, user_pk):  # ?????????
-    group1 = Groups.objects.filter(users__pk=user_pk)
-    group = Groups.objects.exclude(users__pk=user_pk)[:5]
-    context = {'title': 'Мои группы', 'menu': menu, 'group': group, 'group1': group1}
-    return render(request, 'main/groups.html', context)
+# @login_required(login_url='/users/login/')
+# def groups(request, user_pk):  # ?????????
+#     group1 = Groups.objects.filter(users__pk=user_pk)
+#     group = Groups.objects.exclude(users__pk=user_pk)[:5]
+#     context = {'title': 'Мои группы', 'menu': menu, 'group': group, 'group1': group1}
+#     return render(request, 'main/groups.html', context)
+
+
+class GroupsView(LoginRequiredMixin, DetailView):
+    login_url = '/users/login/'
+    template_name = 'main/groups.html'
+    pk_url_kwarg = 'user_pk'
+    model = Users
+
+    def get(self, request, *args, **kwargs):
+        self.group1 = Groups.objects.filter(users__pk=request.user.pk)
+        self.group = Groups.objects.exclude(users__pk=request.user.pk)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = 'Мои группы'
+        context['group1'] = self.group1
+        context['group'] = self.group
+        return context
 
 
 class AddGroup(LoginRequiredMixin, CreateView):
@@ -110,69 +130,98 @@ class AddGroup(LoginRequiredMixin, CreateView):
         return redirect(group)
 
 
-@login_required(login_url='/users/login/')
 def group_quit(request, group_slug):
     q = Groups.objects.get(slug=group_slug)
     q.users.remove(request.user)
-    context = {'menu': menu, 'q': q, 'title': 'Выход выполнен успешно!'}
-    return render(request, 'main/group_quit.html', context)
+    return redirect(q)
 
 
-@login_required(login_url='/users/login/')
 def group_enter(request, group_slug):
     q = Groups.objects.get(slug=group_slug)
     for user in Users.objects.all():
         if user.username == request.user.username:
             q.users.add(user)
-    context = {'menu': menu, 'q': q, 'title': 'Вход выполнен успешно!'}
-    return render(request, 'main/group_quit.html', context)
+    return redirect(q)
 
 
-def detail_group(request, group_slug):  # ?????????
-    group = Groups.objects.get(slug=group_slug)
-    g = group.users.all()
-    group1 = group.published_set.all().order_by('-date')
-    paginator = Paginator(group1, 3)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {'menu': menu, 'group': group, 'g': g, 'q': '', 'page_obj': page_obj}
-    for qi in g:
-        if qi.username == request.user.username:
-            context['q'] = qi.username
-    return render(request, 'main/detail_group.html', context)
+# def detail_group(request, group_slug):  # ?????????
+#     group = Groups.objects.get(slug=group_slug)
+#     g = group.users.all()
+#     group1 = group.published_set.all().order_by('-date')
+#     paginator = Paginator(group1, 3)
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+#     context = {'menu': menu, 'group': group, 'g': g, 'q': '', 'page_obj': page_obj}
+#     for qi in g:
+#         if qi.username == request.user.username:
+#             context['q'] = qi.username
+#     return render(request, 'main/detail_group.html', context)
 
 
-# class DetailGroup(LoginRequiredMixin, SingleObjectMixin, ListView):
-#     login_url = '/users/login/'
-#     template_name = 'main/detail_group.html'
-#     paginate_by = 3
-#     slug_url_kwarg = 'group_slug'
-#
-#     def get(self, request, *args, **kwargs):
-#         self.object = self.get_object(queryset=Groups.objects.all())
-#         return super().get(request, *args, **kwargs)
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['menu'] = menu
-#         context['group'] = self.object
-#         return context
-#
-#     def get_queryset(self):
-#         return self.object.users.all().select_related('group')
+class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
+    login_url = '/users/login/'
+    template_name = 'main/detail_group.html'
+    paginate_by = 3
+    slug_url_kwarg = 'group_slug'
+
+    def get(self, request, *args, **kwargs):
+        self.user1 = Users.objects.get(pk=request.user.pk)
+        self.object = self.get_object(queryset=Groups.objects.all())
+        self.users = self.object.users.all()
+        self.published = []
+        for p in self.object.published_set.all().select_related('owner'):
+            self.published += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['group'] = self.object
+        context['users'] = self.users
+        context['empty'] = 'Записи отсутствуют'
+        if self.user1 in self.users:
+            context['subscriber'] = 'Yes'
+        return context
+
+    def get_queryset(self):
+        return self.published
 
 
-@login_required(login_url='/users/login/')
-def add_published(request, group_slug):
-    form = AddPublishedForm()
-    group = Groups.objects.get(slug=group_slug)
-    if request.method == 'POST':
+# @login_required(login_url='/users/login/')
+# def add_published(request, group_slug):
+#     form = AddPublishedForm()
+#     group = Groups.objects.get(slug=group_slug)
+#     if request.method == 'POST':
+#         form = AddPublishedForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
+#             return redirect(group)
+#     context = {'menu': menu, 'title': 'Добавить запись', 'form': form}
+#     return render(request, 'main/add_published.html', context)
+
+
+class AddPublished(LoginRequiredMixin, CreateView):  # Сделать перенаправление после создания
+    login_url = '/users/login/'
+    form_class = AddPublishedForm
+    template_name = 'main/add_published.html'
+    slug_url_kwarg = 'group_slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Создать группу'
+        context['menu'] = menu
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.group = Groups.objects.all()
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
-            Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
-            return redirect(group)
-    context = {'menu': menu, 'title': 'Добавить запись', 'form': form}
-    return render(request, 'main/add_published.html', context)
+            Published.objects.create(**form.cleaned_data, group_id=self.group[0].pk, owner_id=request.user.pk)
+        return super().post(self, request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.save()
+        return redirect(self.group)
 
 
 class DetailPublish(DetailView):
@@ -237,13 +286,12 @@ def add_comment_view(request, publish_slug):
 class AddStarRating(View):
     def post(self, request):
         form = RatingForm(request.POST)
-        if request.user.is_authenticated:
-            if form.is_valid():
-                Rating.objects.update_or_create(
-                    ip=self.request.user.username,
-                    published_id=int(request.POST.get("published")),
-                    defaults={'star_id': int(request.POST.get("star"))}
-                )
-                return HttpResponse(status=201)
-            else:
-                return HttpResponse(status=400)
+        if form.is_valid():
+            Rating.objects.update_or_create(
+                ip=self.request.user.username,
+                published_id=int(request.POST.get("published")),
+                defaults={'star_id': int(request.POST.get("star"))}
+            )
+            return HttpResponse(status=201)
+        else:
+            return HttpResponse(status=400)
