@@ -42,7 +42,7 @@ class PublishedAdmin(AbstractAdmin):
 
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'published', 'users', 'date', 'like')
+    list_display = ('id', 'published', 'users', 'date')
     list_display_links = ('id', 'published', 'users')
     fields = ('biography', 'published', 'users', 'date', 'like')
     search_fields = ('published', 'date', 'users')
@@ -50,19 +50,9 @@ class CommentsAdmin(admin.ModelAdmin):
     list_max_show_all = 5
     list_per_page = 10
     ordering = ('-date',)
-    raw_id_fields = ('published', 'users')
+    raw_id_fields = ('published', 'users', 'like')
     date_hierarchy = 'date'
-    readonly_fields = ('date', 'like')
-    actions = ['not_like']
-
-    @admin.action(description='Анилировать лайки')
-    def not_like(self, request, queryset):
-        rows = queryset.update(like=0)
-        if rows == 1:
-            message_bit = "дизлайки 1 публикации была анулированы"
-        else:
-            message_bit = "Дизлайки %s публикаций были анулированы" % rows
-        self.message_user(request, message_bit)
+    readonly_fields = ('date',)
 
 
 @admin.register(RatingStar)

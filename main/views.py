@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -251,7 +252,11 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
     slug_url_kwarg = 'publish_slug'
 
     def get(self, request, *args, **kwargs):
+        self.user = ''
+        if request.user.is_authenticated:
+            self.user = Users.objects.get(username=request.user.username)
         self.object = self.get_object(queryset=Published.objects.all())
+        self.comments = Comments.objects.filter(published=self.object).select_related('users')  # Жадный запрос
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -259,10 +264,11 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         context['menu'] = menu
         context['published'] = self.object
         context['title'] = 'Комментарии'
+        context['user1'] = self.user
         return context
 
     def get_queryset(self):
-        return self.object.comments_set.all().select_related('users')  # Жадный запрос
+        return self.comments
 
 
 # @login_required(login_url='/users/login/')
@@ -278,7 +284,8 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 #     return render(request, 'main/add_comment.html', context)
 
 
-class AddCommentView(CreateView):
+class AddCommentView(LoginRequiredMixin, CreateView):
+    login_url = '/users/login/'
     template_name = 'main/add_comment.html'
     slug_url_kwarg = 'publish_slug'
     form_class = AddCommentForm
@@ -287,8 +294,8 @@ class AddCommentView(CreateView):
         published = Published.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddCommentForm(request.POST)
         if form.is_valid():
-            Comments.objects.create(**form.cleaned_data, published_id=published.id, users_id=request.user.pk)
-        return redirect(published)
+            comment = Comments.objects.create(**form.cleaned_data, published_id=published.id, users_id=request.user.pk)
+            return redirect(comment)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -301,11 +308,23 @@ class AddStarRating(View):
     def post(self, request):
         form = RatingForm(request.POST)
         if form.is_valid():
+            self.user = Users.objects.get(username=request.user.username)
             Rating.objects.update_or_create(
-                ip=self.request.user.username,
+                ip=self.user,
                 published_id=int(request.POST.get("published")),
                 defaults={'star_id': int(request.POST.get("star"))}
             )
             return HttpResponse(status=201)
         else:
             return HttpResponse(status=400)
+
+
+@login_required(login_url='/users/login/')
+def like_view(request, com_id):
+    comment = Comments.objects.get(id=com_id)
+    user = Users.objects.get(username=request.user.username)
+    if user in comment.like.all():
+        comment.like.remove(user)
+    else:
+        comment.like.add(user)
+    return redirect(comment)

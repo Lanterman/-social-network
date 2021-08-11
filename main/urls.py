@@ -17,4 +17,5 @@ urlpatterns = [
     path('publish/<slug:publish_slug>/comments/', PublishedCommentsView.as_view(), name='comments'),
     path('publish/<slug:publish_slug>/add_comment/', AddCommentView.as_view(), name='add_comment'),
     path("add-rating/", AddStarRating.as_view(), name='add_rating'),
+    path('like_view/<int:com_id>/', like_view, name='like_view'),
 ]

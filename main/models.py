@@ -36,8 +36,8 @@ class Published(Abstract):
     def get_absolute_url(self):
         return reverse('detail_publish', kwargs={'publish_slug': self.slug})
 
-    def average(self, p):
-        a = Rating.objects.filter(published_id__name=p).aggregate(avg=Avg('star_id'))
+    def average(self, published):
+        a = Rating.objects.filter(published_id__name=published).aggregate(avg=Avg('star_id'))  # Возможно через annotate
         return a
 
 
@@ -58,7 +58,7 @@ class Groups(Abstract):
 
 class Comments(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
-    like = models.IntegerField(default=0, verbose_name='Лайки')
+    like = models.ManyToManyField(Users, verbose_name='Лайки', related_name='likes')
     published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
     users = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')
     name, slug = None, None
@@ -71,6 +71,9 @@ class Comments(Abstract):
 
     def __str__(self):
         return self.published.name
+
+    def get_absolute_url(self):
+        return reverse('comments', kwargs={'publish_slug': self.published.slug})
 
 
 class RatingStar(models.Model):
@@ -86,7 +89,7 @@ class RatingStar(models.Model):
 
 
 class Rating(models.Model):
-    ip = models.CharField('IP адрес', max_length=15)
+    ip = models.CharField('Пользователь', max_length=150)
     published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
     star = models.ForeignKey(RatingStar, on_delete=models.CASCADE, verbose_name='Звезда')
 

@@ -273,7 +273,7 @@ color: blue;
     margin-right: 20px;
 }
 
-#p3 a:hover {
+#p3 a:hover, #p3 #like {
     color: red;
 }
 
