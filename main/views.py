@@ -29,6 +29,7 @@ class NewsView(ListView):
         context['group'] = self.group
         context['empty'] = 'Новости отсутствуют'
         context['name'] = 'Поиск записи'
+        context['act'] = 'search_published'
         return context
 
     def get(self, request, *args, **kwargs):
@@ -93,11 +94,11 @@ def friends(request, user_pk):
 #     return render(request, 'main/groups.html', context)
 
 
-class GroupsView(LoginRequiredMixin, DetailView):
+class GroupsView(LoginRequiredMixin, ListView):
     login_url = '/users/login/'
     template_name = 'main/groups.html'
-    pk_url_kwarg = 'user_pk'
-    model = Users
+    model = Groups
+    context_object_name = 'groups'
 
     def get(self, request, *args, **kwargs):
         self.group1 = Groups.objects.filter(users__pk=request.user.pk)
@@ -108,27 +109,27 @@ class GroupsView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['title'] = 'Мои группы'
-        context['group1'] = self.group1
         context['group'] = self.group
+        context['name'] = 'Поиск группы'
+        context['act'] = 'search_group'
+        context['empty'] = 'Вы не вступали в группы'
         return context
+
+    def get_queryset(self):
+        return self.group1
 
 
 class AddGroup(LoginRequiredMixin, CreateView):
     login_url = '/users/login/'
     form_class = AddGroupForm
-    template_name = 'main/add_group.html'
+    template_name = 'main/add_pub_group.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Создать группу'
         context['menu'] = menu
+        context['add'] = 'Ошибка создания группы!'
         return context
-
-    def form_valid(self, form):
-        group = form.save()
-        group.slug = group.name
-        group.save()
-        return redirect(group)
 
 
 def group_quit(request, group_slug):
@@ -204,16 +205,17 @@ class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
 class AddPublished(LoginRequiredMixin, CreateView):
     login_url = '/users/login/'
     form_class = AddPublishedForm
-    template_name = 'main/add_published.html'
+    template_name = 'main/add_pub_group.html'
     slug_url_kwarg = 'group_slug'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Создать группу'
+        context['title'] = 'Создать запись'
         context['menu'] = menu
+        context['add'] = 'Ошибка создания записи!'
         return context
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # Показывать валидаторы
         group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
@@ -331,7 +333,7 @@ def like_view(request, com_id):
     return redirect(comment)
 
 
-class Search(NewsView):
+class SearchPublished(NewsView):
     def get(self, request, *args, **kwargs):
         self.published = []
         self.public = Published.objects.filter(name__icontains=self.request.GET.get('search'))
@@ -344,5 +346,15 @@ class Search(NewsView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['menu'] = menu
+        context['empty'] = 'Нет записей соответствующих запросу'
+        return context
+
+
+class SearchGroups(GroupsView):
+    def get_queryset(self):
+        return Groups.objects.filter(name__icontains=self.request.GET.get('search'))
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['empty'] = 'Нет групп соответствующих запросу'
         return context

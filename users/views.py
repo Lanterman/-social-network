@@ -63,7 +63,7 @@ class LoginUser(LoginView):
 
 
 class PasswordChangeUser(PasswordChangeView):
-    template_name = 'users/password_change.html'
+    template_name = 'users/edit_profile.html'
     form_class = PasswordChangeUserForm
     success_url = reverse_lazy('home')
 
@@ -71,6 +71,7 @@ class PasswordChangeUser(PasswordChangeView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Изменить пароль'
         context['menu'] = menu
+        context['button'] = 'Изменить'
         return context
 
 
@@ -85,6 +86,7 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Изменить профиль'
         context['menu'] = menu
+        context['button'] = 'Применить'
         return context
 
 

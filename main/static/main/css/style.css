@@ -636,6 +636,10 @@ color: blue;
     padding: 4px;
 }
 
+.form .input:hover {
+    background-color: yellow;
+}
+
 .form .buttonForm {
     margin-left: 10px;
     padding: 6px 8px 6px 8px;

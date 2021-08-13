@@ -3,37 +3,36 @@
 {% block title%}{{ title }}{% endblock title %}
 
 {% block content %}
-<h6 class="title"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+
+
+<h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }} |</h6>
 <p id="aps" class="pa">
-    <span>{% include 'main/include/search.html' %}</span>
-    <a href="{% url 'add_group' %}"><i class="fas fa-plus"></i></a>
-</p>
-{% for p in group1 %}
-    <div id="div1">
-        <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
-        <a id="margin" href="{{ p.get_absolute_url }}"><i>{{ p.name }}</i></a>
+    <div class="ss">
+        <a href="{% url 'add_group' %}"> <i class="fas fa-plus"></i></a>
     </div>
-{% empty %}
-    <p id="foo" class="foo"><i class="fas fa-ban"></i> Вы не вступали в группы!</p>
-{% endfor %}
+</p>
+<br><br>
+
+<div class="block">
+    <div class="search">
+        {% include 'main/include/search.html' %}
+    </div>
+</div>
+
+<div class="mar">
+    {% for p in groups %}
+        <div id="div1">
+            <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
+            <a id="margin" href="{{ p.get_absolute_url }}"><i>{{ p.name }}</i></a>
+        </div>
+    {% empty %}
+        <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>
+    {% endfor %}
+</div>
 {% endblock content %}
 
 {% block groups %}
-<aside id="as">
-    <h3>Рекомендуемые группы</h3>
-    {% for g in group %}
-        <div>
-            <a href="{{ g.get_absolute_url }}"><p id="pc"><i class="fas fa-users"></i> {{ g.name|default:"nothing" }}</p>
-            </a>
-            {% if g.photo %}
-                <a href="{{ g.get_absolute_url }}"><img src="{{ g.photo.url }}"></a>
-            {% endif %}
-        </div>
-    {% empty %}
-        <p>Извините, таких групп нет!</p>
-    {% endfor %}
-    {% block admin %}
-    <h2><a id="a" href="/admin/"><i class="fas fa-user-shield"></i> Admin</a></h2>
-    {% endblock admin %}
-</aside>
+
+{% include 'main/include/aside.html' %}
+
 {% endblock groups %}

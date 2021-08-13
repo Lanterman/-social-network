@@ -1,9 +1,24 @@
 .pa {
-    margin: -30px 0 -20px 760px;
+    margin: -30px 0 -70px 760px;
 }
 
 .pa i {
     margin-right: -70px;
+}
+
+.ss a {
+    float: right;
+    margin: -5px 670px 0 0;
+    font-size: 22px;
+    color: blue;
+}
+
+.ss a:hover {
+    color: red;
+}
+
+.mar {
+    margin: 0px 0 150px 0;
 }
 
 #div1 {
@@ -39,4 +54,8 @@
 #errors {
     text-align: center;
     margin-left: 0px;
+}
+
+#groups {
+    margin-right: 300px;
 }

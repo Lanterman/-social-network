@@ -1,0 +1,19 @@
+{% extends 'main/base.html' %}
+
+{% block title%}{{ title }}{% endblock title %}
+
+{% block content %}
+<h6 class="title"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if form.errors %}
+    <p class="errors" id="errors">{{ add }}</p>
+    {% endif %}
+
+    {% for f in form %}
+    <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>
+    <div class="errors">{{ f.errors }}</div>
+    {% endfor %}
+    <button class="button" type="submit">Создать</button>
+</form>
+{% endblock content %}
