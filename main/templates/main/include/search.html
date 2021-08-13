@@ -1,0 +1,7 @@
+<h3 class="Content">{{ name }}</h3>
+<form action="{% url 'search' %}" method="get" class="form">
+    <input type="search" name="search" class="input" required="">
+    <button type="submit" class="buttonForm">
+        <span class="fa fa-search" aria-hidden="true"></span>
+    </button>
+</form>

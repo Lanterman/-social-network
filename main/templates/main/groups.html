@@ -5,7 +5,7 @@
 {% block content %}
 <h6 class="title"><i class="fas fa-user-friends"></i> {{ title }}</h6>
 <p id="aps" class="pa">
-    <a href="#"><i class="fas fa-search"></i></a>
+    <span>{% include 'main/include/search.html' %}</span>
     <a href="{% url 'add_group' %}"><i class="fas fa-plus"></i></a>
 </p>
 {% for p in group1 %}

@@ -28,6 +28,7 @@ class NewsView(ListView):
         context['title'] = 'Новости'
         context['group'] = self.group
         context['empty'] = 'Новости отсутствуют'
+        context['name'] = 'Поиск записи'
         return context
 
     def get(self, request, *args, **kwargs):
@@ -36,7 +37,7 @@ class NewsView(ListView):
             self.group = Groups.objects.exclude(users__username=request.user.username)[:5]
             self.group1 = Groups.objects.filter(users__username=request.user.username)
             for public in self.group1:
-                for p in public.published_set.all().select_related('owner'):
+                for p in public.published_set.select_related('owner', 'group'):  # Оптимизировать публикации по группам
                     self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
         else:
             self.group = Groups.objects.all()[:5]
@@ -248,7 +249,7 @@ class DetailPublish(DetailView):  # Оптимизировать рейтинг
 
 class PublishedCommentsView(SingleObjectMixin, ListView):
     template_name = 'main/comments.html'
-    paginate_by = 3
+    paginate_by = 5
     slug_url_kwarg = 'publish_slug'
 
     def get(self, request, *args, **kwargs):
@@ -256,7 +257,7 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         if request.user.is_authenticated:
             self.user = Users.objects.get(username=request.user.username)
         self.object = self.get_object(queryset=Published.objects.all())
-        self.comments = Comments.objects.filter(published=self.object).select_related('users')  # Жадный запрос
+        self.comments = Comments.objects.filter(published=self.object).select_related('users') .prefetch_related('like')  # Жадный запрос
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -328,3 +329,20 @@ def like_view(request, com_id):
     else:
         comment.like.add(user)
     return redirect(comment)
+
+
+class Search(NewsView):
+    def get(self, request, *args, **kwargs):
+        self.published = []
+        self.public = Published.objects.filter(name__icontains=self.request.GET.get('search'))
+        for p in self.public:
+            self.published += [[p, p.average(p.name)]]
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.published
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['menu'] = menu
+        return context

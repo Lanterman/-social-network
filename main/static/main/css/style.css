@@ -620,3 +620,28 @@ color: blue;
 }
 
 .rating > label:hover:before,  .rating > label:hover ~ label:before,  .rating:not(:hover) > :checked ~ label:before { opacity: 1; }
+
+.search {
+    margin: 20px 650px 0px 600px;
+    padding: 10px 0px 0px 23px;
+    border: solid 4px gray;
+}
+
+.search .Content {
+    font-size: 19px;
+    margin-bottom: 10px;
+}
+
+.form .input {
+    padding: 4px;
+}
+
+.form .buttonForm {
+    margin-left: 10px;
+    padding: 6px 8px 6px 8px;
+    border-radius: 30px;
+}
+
+.form .buttonForm:hover {
+    background-color: yellow;
+}
