@@ -3,7 +3,7 @@
     {% for g in group %}
         <div>
             <a href="{{ g.get_absolute_url }}">
-                <p id="pc"><i class="fas fa-users"></i> {{ g.name }}</p>
+                <p id="pc"><i class="fas fa-users"></i> {{ g.name|title|truncatechars_html:7 }}</p>
             </a>
             {% if g.photo %}
                 <a href="{{ g.get_absolute_url }}"><img src="{{ g.photo.url }}"></a>

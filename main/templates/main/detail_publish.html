@@ -4,8 +4,8 @@
 
 {% block content %}
 <div class="p3">
-    <p class="aps"><a id="group1" href="{{ published.group.get_absolute_url }}">{{ published.group.name }}</a></p>
-    <p id="p1">{{ published.name }}</p>
+    <p class="aps"><a id="group1" href="{{ published.group.get_absolute_url }}">{{ published.group.name|capfirst }}</a></p>
+    <p id="p1">{{ published.name|capfirst }}</p>
     <pre><big>Обновленно </big>{{ published.date }}</pre>
     <div class="div123">
         {% if request.user.is_authenticated %}
@@ -37,7 +37,7 @@
     {% if published.photo %}
         <img src="{{ published.photo.url }}" alt="photo">
     {% endif %}
-    <p id="ap1">{{ published.biography|linebreaksbr }}</p>
+    <p id="ap1">{{ published.biography|linebreaksbr|capfirst }}</p>
 </div>
 <p id="p123">Автор: <i>{{ published.owner }}</i></p>
 <p id="aps1" class="aps">

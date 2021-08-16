@@ -1,6 +1,6 @@
 {% for p, average in page_obj %}
     <div class="p">
-        <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:20  }}</a>
+        <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:20|capfirst  }}</a>
         <pre>{{ p.date }}</pre>
         <p id="ap">{{ p.biography|linebreaksbr|truncatechars_html:200 }}</p>
         {% if p.photo %}

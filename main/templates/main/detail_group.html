@@ -7,7 +7,7 @@
     {% if group.photo %}
     <img src="{{ group.photo.url }}" alt="{{ group.photo }}">
     {% endif %}
-    <p id="title">{{ group.name }}</p><br>
+    <p id="title">{{ group.name|capfirst }}</p><br>
     <p class="p1"><a href="#openModal">Подписчики: {{ users.count }}</a></p>
     <p class="p1" id="p1">Всего записей: {{ page_obj.paginator.count }}</p>
     <div id="div2">

@@ -34,20 +34,21 @@ class NewsView(ListView):
 
     def get(self, request, *args, **kwargs):
         self.public = []
+        published = Published.objects.all().select_related('owner', 'group')
         if request.user.is_authenticated:
             self.group = Groups.objects.exclude(users__username=request.user.username)[:5]
             self.group1 = Groups.objects.filter(users__username=request.user.username)
-            for public in self.group1:
-                for p in public.published_set.select_related('owner', 'group'):  # Оптимизировать публикации по группам
+            for p in published:
+                if p.group in self.group1:
                     self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
         else:
             self.group = Groups.objects.all()[:5]
-            for p in Published.objects.all().select_related('owner'):
+            for p in published:
                 self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.public  # Сделать чтоб записи шли вне зависимости от группы по дате
+        return self.public
 
 
 # @login_required(login_url='/users/login/')
@@ -215,12 +216,13 @@ class AddPublished(LoginRequiredMixin, CreateView):
         context['add'] = 'Ошибка создания записи!'
         return context
 
-    def post(self, request, *args, **kwargs):  # Показывать валидаторы
+    def post(self, request, *args, **kwargs):
         group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
+        print(form.errors)
         if form.is_valid():
             Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
-        return redirect(group)
+        return super().post(request, *args, **kwargs)
 
 
 class DetailPublish(DetailView):  # Оптимизировать рейтинг
@@ -235,7 +237,7 @@ class DetailPublish(DetailView):  # Оптимизировать рейтинг
         context['star_form'] = RatingForm()
         if self.user1:
             try:
-                context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related().get(ip=self.user1)
+                context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related('').get(ip=self.user1)
             except Exception:
                 pass
         context['average'] = self.object.average(self.object)
