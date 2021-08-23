@@ -20,8 +20,10 @@
     <div class="mar">
         {% for p in groups %}
             <div id="div1">
-                <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
-                <a id="margin" href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a>
+                <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a>
+                <p id="margin"><a href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a></p>
+                <a id="del" href="{% url 'group_quit_primary' p.slug %}"><i class="fas fa-backspace"></i></a>
+                <p id="p">Подписчиков: {{ p.users.count }}</p>
             </div>
         {% empty %}
             <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>

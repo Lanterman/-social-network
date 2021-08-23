@@ -33,8 +33,7 @@ body {
 .a {
     font-size: 18px;
     color: blue;
-    margin-left: 40px;
-    margin-top: 25px;
+    margin: 25px 0 100px 40px;
     float: left;
 }
 

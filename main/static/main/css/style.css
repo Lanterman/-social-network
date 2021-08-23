@@ -649,3 +649,12 @@ color: blue;
 .form .buttonForm:hover {
     background-color: yellow;
 }
+
+.owner {
+    color: blue;
+    text-decoration: None;
+}
+
+.owner:hover {
+    color: red;
+}

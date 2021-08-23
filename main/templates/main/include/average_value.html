@@ -20,7 +20,11 @@
                 {% endif %}
             </span>
             <i><a class="ia32" href="{% url 'comments' p.slug %}"><i class="fas fa-comments"></i> Комментарии</a></i>
-            <span class="a32">Автор:  <a class="a34" href="" title="Создатель"><i>{{ p.owner|truncatechars_html:10 }}</i></a></span>
+            <span class="a32">Автор:
+                <a class="a34" href="{{ p.owner.get_absolute_url }}" title="Создатель">
+                    <i>{{ p.owner|truncatechars_html:10 }}</i>
+                </a>
+            </span>
         </p>
     </div>
 {% empty %}

@@ -22,19 +22,22 @@
 }
 
 #div1 {
-    padding: 20px 30px 90px 20px;;
-    margin: 50px 190px -20px 350px;
+    width: 920px;
+    height: 30px;
+    padding: 10px 30px 100px 20px;;
+    margin: 50px 190px -20px 370px;
     background-color: #ADFF2F;
     box-shadow: 0 0 10px #666;
 }
 
 #div1 img {
-    margin-right: 80px;
+    margin-right: 70px;
     float: left;
     border-radius: 140px;
     box-shadow: 0 0 19px #666;
-    width: 140px;
-    height: 140px;
+    width: 120px;
+    height: 120px;
+    border: solid 1px black;
 }
 
 #div1 a {
@@ -43,12 +46,34 @@
     text-decoration: None;
 }
 
-#div1 a:hover {
+#div1 a:hover, #div1 #del:hover {
     color: red;
 }
 
 #div1 img:hover {
-    transform: scale(1.01);
+    transform: scale(1.03);
+}
+
+#div1 #del {
+    float: right;
+    margin: -65px -11px 0 0;
+    color: black;
+}
+
+#div1 #margin {
+    margin: 24px 0 17px 0;
+}
+
+#div1 #p {
+    font-size: 18px;
+}
+
+#div1 .us-mes {
+    font-size: 19px;
+}
+
+#div1 #mag{
+    margin-left: 60px;
 }
 
 #errors {

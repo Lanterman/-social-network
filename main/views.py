@@ -36,7 +36,7 @@ class NewsView(ListView):
         self.public = []
         published = Published.objects.all().select_related('owner', 'group')
         if request.user.is_authenticated:
-            self.group = Groups.objects.exclude(users__username=request.user.username)[:5]
+            self.group = Groups.objects.exclude(users__username=request.user.username)[:3]
             self.group1 = Groups.objects.filter(users__username=request.user.username)
             for p in published:
                 if p.group in self.group1:
@@ -95,11 +95,14 @@ class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
         context['title'] = 'Мои друзья'
         context['empty'] = 'У вас нет друзей!'
         context['act'] = 'search_friends'
+        context['group'] = self.group
+        context['name'] = 'Поиск друзей'
         return context
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Users.objects.all())
         self.users = Users.objects.filter(friends__pk=request.user.pk)
+        self.group = Groups.objects.exclude(users__pk=request.user.pk)[:3]
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
@@ -120,8 +123,8 @@ class GroupsView(LoginRequiredMixin, ListView):
     context_object_name = 'groups'
 
     def get(self, request, *args, **kwargs):
-        self.group1 = Groups.objects.filter(users__pk=request.user.pk)
-        self.group = Groups.objects.exclude(users__pk=request.user.pk)
+        self.group1 = Groups.objects.filter(users__pk=request.user.pk).prefetch_related('users')
+        self.group = Groups.objects.exclude(users__pk=request.user.pk)[:3]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -155,6 +158,13 @@ def group_quit(request, group_slug):
     q = Groups.objects.get(slug=group_slug)
     q.users.remove(request.user)
     return redirect(q)
+
+
+def group_quit_primary(request, group_slug):
+    q = Groups.objects.get(slug=group_slug)
+    user = Users.objects.get(pk=request.user.pk)
+    q.users.remove(request.user)
+    return redirect(reverse('groups', kwargs={'user_pk': user.pk}))
 
 
 def group_enter(request, group_slug):
@@ -279,7 +289,7 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         if request.user.is_authenticated:
             self.user = Users.objects.get(username=request.user.username)
         self.object = self.get_object(queryset=Published.objects.all())
-        self.comments = Comments.objects.filter(published=self.object).select_related('users') .prefetch_related('like')  # Жадный запрос
+        self.comments = Comments.objects.filter(published=self.object).select_related('users').prefetch_related('like')  # Жадный запрос
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

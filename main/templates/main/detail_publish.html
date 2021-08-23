@@ -39,7 +39,7 @@
     {% endif %}
     <p id="ap1">{{ published.biography|linebreaksbr|capfirst }}</p>
 </div>
-<p id="p123">Автор: <i>{{ published.owner }}</i></p>
+<p id="p123">Автор: <a class="owner" id="a1" href="{{ published.owner.get_absolute_url }}"><i>{{ published.owner }}</i></a></p>
 <p id="aps1" class="aps">
     <a href="{% url 'comments' published.slug %}">
         <i id="ia1"><i class="fas fa-comments"></i> Комментарии: {{ published.comments_set.count }}</i>
