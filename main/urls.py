@@ -6,7 +6,7 @@ urlpatterns = [
     path('', NewsView.as_view(), name='news'),
     path('home/<int:user_pk>/', HomeView.as_view(), name='home'),
     path('messages/<int:user_pk>/', messages, name='messages'),
-    path('friends/<int:user_pk>/', friends, name='friends'),
+    path('friends/<int:user_pk>/', FriendsView.as_view(), name='friends'),
     path('groups/<int:user_pk>/', GroupsView.as_view(), name='groups'),
     path('groups/<slug:group_slug>/quit/', group_quit, name='group_quit'),  # quit
     path('groups/<slug:group_slug>/enter/', group_enter, name='group_enter'),  # entry
@@ -20,4 +20,5 @@ urlpatterns = [
     path('like_view/<int:com_id>/', like_view, name='like_view'),
     path('p/', SearchPublished.as_view(), name='search_published'),
     path('g/', SearchGroups.as_view(), name='search_group'),
+    path('f-<int:user_pk>/', SearchFriends.as_view(), name='search_friends'),
 ]

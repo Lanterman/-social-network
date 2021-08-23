@@ -1,0 +1,42 @@
+{% extends 'main/base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+    <p id="aps" class="pa">
+
+    <div class="block">
+        <div class="search">
+            <h3 class="Content">{{ name }}</h3>
+            <form action="{% url act request.user.pk %}" method="get" class="form">
+                <input type="search" name="search" class="input" required="">
+                <button type="submit" class="buttonForm">
+                    <span class="fa fa-search" aria-hidden="true"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="mar">
+        {% for friend in object_list %}
+            {% if friend.username != request.user.username %}
+                <div id="div1">
+                    {% if friend.photo %}
+                        <a id='a' href="{{ friend.get_absolute_url }}"><img src="{{ friend.photo.url }}"></a><br><br>
+                    {% else %}
+                        <img src="/media/users/slen/slen.png/">
+                    {% endif %}
+                    <a id="margin" href="{{ friend.get_absolute_url }}"><i>{{ friend.first_name|capfirst }} {{ friend.username|capfirst }}</i></a>
+                </div>
+            {% elif friend.username == request.user.username and object_list.count == 1 %}
+                <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>
+            {% endif %}
+        {% empty %}
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>
+        {% endfor %}
+    </div>
+{% endblock content %}
+
+{% block groups %}
+    {% include 'main/include/aside.html' %}
+{% endblock groups %}

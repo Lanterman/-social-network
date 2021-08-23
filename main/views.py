@@ -83,9 +83,27 @@ def messages(request, user_pk):
     return HttpResponse('Мои сообщения')
 
 
-def friends(request, user_pk):
-    return HttpResponse('Список друзей')
+class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
+    Model = Users
+    login_url = 'users/login'
+    template_name = 'main/friends.html'
+    pk_url_kwarg = 'user_pk'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menu'] = menu
+        context['title'] = 'Мои друзья'
+        context['empty'] = 'У вас нет друзей!'
+        context['act'] = 'search_friends'
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=Users.objects.all())
+        self.users = Users.objects.filter(friends__pk=request.user.pk)
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.users
 
 # @login_required(login_url='/users/login/')
 # def groups(request, user_pk):  # ?????????
@@ -219,9 +237,9 @@ class AddPublished(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
-        print(form.errors)
         if form.is_valid():
             Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
+            return redirect('news')
         return super().post(request, *args, **kwargs)
 
 
@@ -301,6 +319,7 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         if form.is_valid():
             comment = Comments.objects.create(**form.cleaned_data, published_id=published.id, users_id=request.user.pk)
             return redirect(comment)
+        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -335,10 +354,10 @@ def like_view(request, com_id):
     return redirect(comment)
 
 
-class SearchPublished(NewsView):
+class SearchPublished(NewsView):  # Оптимизировать дубли и рейтинг
     def get(self, request, *args, **kwargs):
         self.published = []
-        self.public = Published.objects.filter(name__icontains=self.request.GET.get('search'))
+        self.public = Published.objects.filter(name__icontains=self.request.GET.get('search'))  # Только из вступивших групп
         for p in self.public:
             self.published += [[p, p.average(p.name)]]
         return super().get(request, *args, **kwargs)
@@ -349,14 +368,25 @@ class SearchPublished(NewsView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['empty'] = 'Нет записей соответствующих запросу'
+        context['search'] = f'search={self.request.GET.get("search")}&'
         return context
 
 
 class SearchGroups(GroupsView):
     def get_queryset(self):
-        return Groups.objects.filter(name__icontains=self.request.GET.get('search'))
+        return Groups.objects.filter(name__icontains=self.request.GET.get('search'))  # Только вступившие группы
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['empty'] = 'Нет групп соответствующих запросу'
+        return context
+
+
+class SearchFriends(FriendsView):
+    def get_queryset(self):  # Выводить только друзей соответствующих запросу(сейчас проверяет всех пользователей)
+        return Users.objects.filter(username__icontains=self.request.GET.get('search'))
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['empty'] = 'Нет друзей соответствующих запросу'
         return context

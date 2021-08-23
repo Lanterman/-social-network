@@ -3,36 +3,32 @@
 {% block title%}{{ title }}{% endblock title %}
 
 {% block content %}
-
-
-<h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }} |</h6>
-<p id="aps" class="pa">
-    <div class="ss">
-        <a href="{% url 'add_group' %}"> <i class="fas fa-plus"></i></a>
-    </div>
-</p>
-<br><br>
-
-<div class="block">
-    <div class="search">
-        {% include 'main/include/search.html' %}
-    </div>
-</div>
-
-<div class="mar">
-    {% for p in groups %}
-        <div id="div1">
-            <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
-            <a id="margin" href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a>
+    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }} |</h6>
+    <p id="aps" class="pa">
+        <div class="ss">
+            <a href="{% url 'add_group' %}"> <i class="fas fa-plus"></i></a>
         </div>
-    {% empty %}
-        <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>
-    {% endfor %}
-</div>
+    </p>
+    <br><br>
+
+    <div class="block">
+        <div class="search">
+            {% include 'main/include/search.html' %}
+        </div>
+    </div>
+
+    <div class="mar">
+        {% for p in groups %}
+            <div id="div1">
+                <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a><br><br>
+                <a id="margin" href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a>
+            </div>
+        {% empty %}
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>
+        {% endfor %}
+    </div>
 {% endblock content %}
 
 {% block groups %}
-
-{% include 'main/include/aside.html' %}
-
+    {% include 'main/include/aside.html' %}
 {% endblock groups %}

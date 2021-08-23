@@ -7,9 +7,10 @@ from users.models import *
 class UsersAdmin(admin.ModelAdmin):
     list_display = ('username', 'first_name', 'last_name', 'slug', 'email', 'num_tel')
     list_display_links = ('username', 'first_name', 'last_name',)
-    fields = ('username', 'first_name', 'last_name', 'slug', 'email', 'num_tel', 'photo',)
+    fields = ('username', 'first_name', 'last_name', 'slug', 'email', 'num_tel', 'friends', 'photo',)
     search_fields = ('username', 'first_name', 'last_name', 'slug', 'email')
     list_filter = ('first_name', 'last_name', 'slug', 'email')
     list_max_show_all = 5
     list_per_page = 10
     prepopulated_fields = {'slug': ('username',)}
+    raw_id_fields = ('friends',)
