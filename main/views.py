@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
@@ -26,8 +27,7 @@ class NewsView(ListView):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['title'] = 'Новости'
-        context['group'] = self.group
-        context['empty'] = 'Новости отсутствуют'
+        context['object'] = self.object
         context['name'] = 'Поиск записи'
         context['act'] = 'search_published'
         return context
@@ -36,13 +36,13 @@ class NewsView(ListView):
         self.public = []
         published = Published.objects.all().select_related('owner', 'group')
         if request.user.is_authenticated:
-            self.group = Groups.objects.exclude(users__username=request.user.username)[:3]
+            self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
             self.group1 = Groups.objects.filter(users__username=request.user.username)
             for p in published:
                 if p.group in self.group1:
                     self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
         else:
-            self.group = Groups.objects.all()[:5]
+            self.object = Groups.objects.all()[:3]
             for p in published:
                 self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
         return super().get(request, *args, **kwargs)
@@ -51,31 +51,36 @@ class NewsView(ListView):
         return self.public
 
 
-# @login_required(login_url='/users/login/')
-# def home(request):
-#     users = Users.objects.get(username=request.user.username)
-#     form = AddPhotoForm()
-#     if request.method == 'POST':
-#         form = AddPhotoForm(request.FILES)
-#         if form.is_valid():
-#             users.photo = request.FILES['photo']
-#             users.save()
-#             return redirect('home')
-#     context = {'title': 'Главная страница', 'menu': menu, 'users': users, 'form': form}
-#     return render(request, 'main/home.html', context)
-
-
-class HomeView(LoginRequiredMixin, UpdateView):
+class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в друзья только с согласием юзера и вывод групп
     login_url = '/users/login/'
     model = Users
     form_class = AddPhotoForm
     template_name = 'main/home.html'
     pk_url_kwarg = 'user_pk'
+    context_object_name = 'user'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=Users.objects.all())
+        self.users = self.object.friends.all()
+        self.user = ''
+        if self.object.pk != request.user.pk:
+            self.user = Users.objects.get(pk=request.user.pk)
+        published = Published.objects.filter(owner=self.object).select_related('owner')
+        self.public = []
+        for p in published:
+                self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Главная страница'
         context['menu'] = menu
+        context['users'] = self.users
+        context['users_init'] = 'друзей'
+        context['center_friends'] = 'Друзья'
+        context['page_obj'] = self.public
+        if self.user in self.users:
+            context['yes'] = 'Yes'
         return context
 
 
@@ -95,25 +100,18 @@ class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
         context['title'] = 'Мои друзья'
         context['empty'] = 'У вас нет друзей!'
         context['act'] = 'search_friends'
-        context['group'] = self.group
+        context['object'] = self.object
         context['name'] = 'Поиск друзей'
+        context['recommendation'] = 'друзья'
         return context
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Users.objects.all())
         self.users = Users.objects.filter(friends__pk=request.user.pk)
-        self.group = Groups.objects.exclude(users__pk=request.user.pk)[:3]
+        self.object = Users.objects.exclude(friends=request.user.pk).exclude(pk=request.user.pk)[:3]
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         return self.users
-
-# @login_required(login_url='/users/login/')
-# def groups(request, user_pk):  # ?????????
-#     group1 = Groups.objects.filter(users__pk=user_pk)
-#     group = Groups.objects.exclude(users__pk=user_pk)[:5]
-#     context = {'title': 'Мои группы', 'menu': menu, 'group': group, 'group1': group1}
-#     return render(request, 'main/groups.html', context)
 
 
 class GroupsView(LoginRequiredMixin, ListView):
@@ -124,17 +122,16 @@ class GroupsView(LoginRequiredMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         self.group1 = Groups.objects.filter(users__pk=request.user.pk).prefetch_related('users')
-        self.group = Groups.objects.exclude(users__pk=request.user.pk)[:3]
+        self.object = Groups.objects.exclude(users__pk=request.user.pk)[:3]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['title'] = 'Мои группы'
-        context['group'] = self.group
+        context['object'] = self.object
         context['name'] = 'Поиск группы'
         context['act'] = 'search_group'
-        context['empty'] = 'Вы не вступали в группы'
         return context
 
     def get_queryset(self):
@@ -152,41 +149,6 @@ class AddGroup(LoginRequiredMixin, CreateView):
         context['menu'] = menu
         context['add'] = 'Ошибка создания группы!'
         return context
-
-
-def group_quit(request, group_slug):
-    q = Groups.objects.get(slug=group_slug)
-    q.users.remove(request.user)
-    return redirect(q)
-
-
-def group_quit_primary(request, group_slug):
-    q = Groups.objects.get(slug=group_slug)
-    user = Users.objects.get(pk=request.user.pk)
-    q.users.remove(request.user)
-    return redirect(reverse('groups', kwargs={'user_pk': user.pk}))
-
-
-def group_enter(request, group_slug):
-    q = Groups.objects.get(slug=group_slug)
-    for user in Users.objects.all():
-        if user.username == request.user.username:
-            q.users.add(user)
-    return redirect(q)
-
-
-# def detail_group(request, group_slug):  # ?????????
-#     group = Groups.objects.get(slug=group_slug)
-#     g = group.users.all()
-#     group1 = group.published_set.all().order_by('-date')
-#     paginator = Paginator(group1, 3)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-#     context = {'menu': menu, 'group': group, 'g': g, 'q': '', 'page_obj': page_obj}
-#     for qi in g:
-#         if qi.username == request.user.username:
-#             context['q'] = qi.username
-#     return render(request, 'main/detail_group.html', context)
 
 
 class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
@@ -209,26 +171,12 @@ class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
         context['menu'] = menu
         context['group'] = self.object
         context['users'] = self.users
-        context['empty'] = 'Записи отсутствуют'
         if self.user1 in self.users:
             context['subscriber'] = 'Yes'
         return context
 
     def get_queryset(self):
         return self.published
-
-
-# @login_required(login_url='/users/login/')
-# def add_published(request, group_slug):
-#     form = AddPublishedForm()
-#     group = Groups.objects.get(slug=group_slug)
-#     if request.method == 'POST':
-#         form = AddPublishedForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
-#             return redirect(group)
-#     context = {'menu': menu, 'title': 'Добавить запись', 'form': form}
-#     return render(request, 'main/add_published.html', context)
 
 
 class AddPublished(LoginRequiredMixin, CreateView):
@@ -265,7 +213,7 @@ class DetailPublish(DetailView):  # Оптимизировать рейтинг
         context['star_form'] = RatingForm()
         if self.user1:
             try:
-                context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related('').get(ip=self.user1)
+                context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related().get(ip=self.user1)
             except Exception:
                 pass
         context['average'] = self.object.average(self.object)
@@ -275,7 +223,7 @@ class DetailPublish(DetailView):  # Оптимизировать рейтинг
         self.user1 = ''
         self.object = self.get_object(queryset=Published.objects.all())
         if request.user.is_authenticated:
-            self.user1 = request.user.username
+            self.user1 = request.user
         return super().get(request, *args, **kwargs)
 
 
@@ -304,19 +252,6 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         return self.comments
 
 
-# @login_required(login_url='/users/login/')
-# def add_comment_view(request, publish_slug):
-#     public = Published.objects.get(slug=publish_slug)
-#     form = AddCommentForm()
-#     if request.method == 'POST':
-#         form = AddCommentForm(request.POST)
-#         if form.is_valid():
-#             Comments.objects.create(**form.cleaned_data, published_id=public.id, users_id=request.user.pk)
-#             return redirect(public)
-#     context = {'menu': menu, 'title': 'Добавить комментарий', 'form': form}
-#     return render(request, 'main/add_comment.html', context)
-
-
 class AddCommentView(LoginRequiredMixin, CreateView):
     login_url = '/users/login/'
     template_name = 'main/add_comment.html'
@@ -336,6 +271,48 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         context['menu'] = menu
         context['title'] = 'Добавить комментарий'
         return context
+
+
+# Logic
+
+def friend_del_primary(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
+    q.friends.remove(request.user)
+    return redirect(q)
+
+
+def friend_add_primary(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    user.friends.add(q)
+    return redirect(q)
+
+
+def friend_del(request, friend_pk):
+    q = Users.objects.get(pk=friend_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    user.friends.remove(q)
+    return redirect(reverse('friends', kwargs={'user_pk': user.pk}))
+
+
+def group_quit(request, group_slug):
+    q = Groups.objects.get(slug=group_slug)
+    q.users.remove(request.user)
+    return redirect(q)
+
+
+def group_quit_primary(request, group_slug):
+    q = Groups.objects.get(slug=group_slug)
+    user = Users.objects.get(pk=request.user.pk)
+    q.users.remove(request.user)
+    return redirect(reverse('groups', kwargs={'user_pk': user.pk}))
+
+
+def group_enter(request, group_slug):
+    q = Groups.objects.get(slug=group_slug)
+    user = Users.objects.get(pk=request.user.pk)
+    q.users.add(user)
+    return redirect(q)
 
 
 class AddStarRating(View):
@@ -367,7 +344,10 @@ def like_view(request, com_id):
 class SearchPublished(NewsView):  # Оптимизировать дубли и рейтинг
     def get(self, request, *args, **kwargs):
         self.published = []
-        self.public = Published.objects.filter(name__icontains=self.request.GET.get('search'))  # Только из вступивших групп
+        self.public = Published.objects.filter(
+            Q(name__icontains=self.request.GET.get('search')) |
+            Q(owner__username__icontains=self.request.GET.get('search'))
+        )  # Только из вступивших групп
         for p in self.public:
             self.published += [[p, p.average(p.name)]]
         return super().get(request, *args, **kwargs)
@@ -394,7 +374,12 @@ class SearchGroups(GroupsView):
 
 class SearchFriends(FriendsView):
     def get_queryset(self):  # Выводить только друзей соответствующих запросу(сейчас проверяет всех пользователей)
-        return Users.objects.filter(username__icontains=self.request.GET.get('search'))
+        queryset = Users.objects.filter(
+            Q(username__icontains=self.request.GET.get('search')) |
+            Q(first_name__icontains=self.request.GET.get('search')) |
+            Q(last_name__icontains=self.request.GET.get('search'))
+        )
+        return queryset
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)

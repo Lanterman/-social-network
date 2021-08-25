@@ -3,13 +3,7 @@
 {% block title %}{{ title }}{% endblock title %}
 
 {% block content %}
-    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }} | </h6>
-    <p id="aps" class="pa">
-        <div class="ss">
-            <a href="{% url 'add_group' %}"> <i class="fas fa-plus"></i></a>
-        </div>
-    </p>
-    <br><br>
+    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }}</h6>
     <div class="block">
         <div class="search">
             <h3 class="Content">{{ name }}</h3>
@@ -32,15 +26,11 @@
                             <img src="/media/users/slen/slen.png/">
                         {% endif %}
                     </a>
-                    <p id="margin"><a href="{{ friend.get_absolute_url }}">
-                        {% if friend.first_name and friend.last_name %}
-                            <i>{{ friend.first_name|capfirst }} {{ friend.last_name|capfirst }}</i>
-                        {% else %}
-                            <i>{{ friend.username|capfirst }}</i>
-                        {% endif %}
-                    </a></p>
+                    <p id="margin">
+                        <a href="{{ friend.get_absolute_url }}"><i>{{ friend.get_full_name|capfirst|default:'None' }}</i></a>
+                    </p>
                     <a class="us-mes" href="#">Отправить сообщение</a>
-                    <a id="mag" class="us-mes" href="#">Удалить из друзей</a>
+                    <a id="mag" class="us-mes" href="{% url 'friend_del' friend.pk %}">Удалить из друзей</a>
                 </div>
             {% elif friend.username == request.user.username and object_list.count == 1 %}
                 <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>

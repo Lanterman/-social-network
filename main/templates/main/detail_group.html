@@ -8,7 +8,7 @@
     <img src="{{ group.photo.url }}" alt="{{ group.photo }}">
     {% endif %}
     <p id="title">{{ group.name|capfirst }}</p><br>
-    <p class="p1"><a href="#openModal">Подписчики: {{ users.count }}</a></p>
+    <p class="p1"><a href="#openModalSub">Подписчики: {{ users.count }}</a></p>
     <p class="p1" id="p1">Всего записей: {{ page_obj.paginator.count }}</p>
     <div id="div2">
         {% if subscriber %}
@@ -19,31 +19,7 @@
         {% endif %}
     </div>
 </div>
-
 {% include 'main/include/average_value.html' %}
-
-<div id="openModal" class="modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Подписчики</h3>
-                <a href="#close" title="Close" class="close">×</a>
-            </div>
-            <div class="modal-body">
-                <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
-                {% if users %}
-                {% for us in users %}
-                <p id="users">
-                    <a href="#">{{ us.first_name }} {{ us.last_name }}</a>
-                    <a id="a" href="#">{{ us.email }}</a>
-                </p><br>
-                {% endfor %}
-                {% else %}
-                <h4>Подписчики отсутствуют</h4>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+{% include 'main/include/modal_user.html' %}
 {{ block.super }}
 {% endblock content %}

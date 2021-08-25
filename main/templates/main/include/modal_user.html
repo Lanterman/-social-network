@@ -1,0 +1,23 @@
+<div id="openModalSub" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">{{ center_friends|default:"Подписчики" }}</h3>
+                <a href="#close" title="Close" class="close">×</a>
+            </div>
+            <div class="modal-body">
+                <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
+                {% if users %}
+                    {% for us in users %}
+                        <p id="users">
+                            <a href="{{ us.get_absolute_url }}">{{ us.get_full_name|default:'Аноним' }}</a>
+                            <a id="a" href="{{ us.get_absolute_url }}">{{ us.email }}</a>
+                        </p><br>
+                    {% endfor %}
+                {% else %}
+                    <h4>Нет {{ users_init|default:"подписчиков" }}</h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,5 +1,12 @@
+#home {
+    padding: 10px 30px 30px 20px;;
+    margin: 12px;
+    box-shadow: 0 0 10px #666;
+    border: solid 2px green
+}
+
 #users1 {
-    margin: 80px 0 0 300px;
+    margin: 40px 0 130px 300px;
 }
 
 #users1 img {
@@ -39,16 +46,35 @@
     margin-left: 43px;
 }
 
-#model {
-    float: left;
+.model, .model_user {
     color: blue;
     text-decoration: None;
-    margin: 90px 0 0 -310px;
     font-size: 19px;
 }
 
-#model:hover {
+.model:hover, .model_user:hover {
     color: red;
+}
+
+.model, .user_pk {
+    margin: 20px 0px 20px 390px;
+}
+
+#button_home {
+    margin-top: 25px;
+}
+
+.button_home {
+    padding: 5px;
+    font-size: 18px;
+    border: solid 2px gray;
+    color: black;
+    background-color: white;
+    text-decoration: None;
+}
+
+.button_home:hover {
+    background-color: yellow;
 }
 
 .modal-body #photo {
@@ -59,4 +85,11 @@
 .modal-body button {
     margin-left: 125px;
     font-size: 15px;
+}
+
+#public {
+    font-size: 20px;
+    opacity: 0.5;
+    text-align: center;
+    margin: 30px 0 -15px 0;
 }

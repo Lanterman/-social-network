@@ -26,7 +26,7 @@
                 <p id="p">Подписчиков: {{ p.users.count }}</p>
             </div>
         {% empty %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> Вы не вступали в группы</p>
         {% endfor %}
     </div>
 {% endblock content %}

@@ -3,22 +3,42 @@
 {% block title %}{{ title }}{% endblock title %}
 
 {% block content %}
-<div id="users1">
-    {% if users.photo %}
-    <img src="{{ users.photo.url }}">
-    {% else %}
-    <img src="/media/users/slen/slen.png/">
-    {% endif %}
-    <br><br><br>
-    <p class="users"><label>Имя: </label><i id="i1">{{ users.first_name }}</i></p>
-    <p class="users"><label>Фамилия: </label><i id="i2">{{ users.last_name }}</i></p>
-    <p class="users"><label>Email: </label><i id="i3">{{ users.email }}</i></p>
-    <p class="users"><label>Номер телефона: </label><i id="i4">{{ users.num_tel }}</i></p>
-    <p class="users"><label>URL: </label><i id="i5">{{ users.slug }}</i></p>
-    <p class="users"><label>Статус админа: </label><i id="i6">{{ users.is_superuser }}</i></p>
+<div id="home">
+    <div id="users1">
+        {% if user.photo %}
+        <img src="{{ user.photo.url }}">
+        {% else %}
+        <img src="/media/users/slen/slen.png/">
+        {% endif %}
+        <br><br><br>
+        <p class="users"><label>Имя: </label><i id="i1">{{ user.first_name|default:'None' }}</i></p>
+        <p class="users"><label>Фамилия: </label><i id="i2">{{ user.last_name|default:'None' }}</i></p>
+        <p class="users"><label>Email: </label><i id="i3">{{ user.email }}</i></p>
+        <p class="users"><label>Номер телефона: </label><i id="i4">{{ user.num_tel }}</i></p>
+        <p class="users"><label>URL: </label><i id="i5">{{ user.slug }}</i></p>
+        <p class="users"><label>Статус админа: </label><i id="i6">{{ user.is_superuser }}</i></p>
+    </div>
+    <div class="user_pk">
+        {% if user.pk == request.user.pk %}
+            <a class="model_user" href="#openModal">Изменить фото</a>
+        {% else %}
+            <a class="button_home" href="#">Отправить сообщение</a>
+            <div id="button_home">
+                {% if yes %}
+                    <a class="model_user" href="{% url 'friend_del_primary' user.pk %}"><i class="fas fa-user-check"></i> Удалить из друзей</a>
+                {% else %}
+                    <a class="button_home" type="button" href="{% url 'friend_add_primary' user.pk %}">Добавить в друзья</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <p><a class="model" href="#openModalSub">Друзья ({{ users.count }})</a></p>
+    <p><a class="model" href="#openModal1">Группы ({{ group.count }})</a></p>
 </div>
+<p id="public">Записи пользователя</p>
 
-<a id="model" href="#openModal">Изменить фото</a>
+{% include 'main/include/average_value.html' %}
+{% include 'main/include/modal_user.html' %}
 
 <div id="openModal" class="modal">
     <div class="modal-dialog">
@@ -37,5 +57,5 @@
         </div>
     </div>
 </div>
-
+{{ block.super }}
 {% endblock content %}
