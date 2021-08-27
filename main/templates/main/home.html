@@ -20,7 +20,7 @@
     </div>
     <div class="user_pk">
         {% if user.pk == request.user.pk %}
-            <a class="model_user" href="#openModal">Изменить фото</a>
+        <p id="edit"><a class="model_user" href="#editPhoto">Изменить фото</a></p>
         {% else %}
             <a class="button_home" href="#">Отправить сообщение</a>
             <div id="button_home">
@@ -33,14 +33,15 @@
         {% endif %}
     </div>
     <p><a class="model" href="#openModalSub">Друзья ({{ users.count }})</a></p>
-    <p><a class="model" href="#openModal1">Группы ({{ group.count }})</a></p>
+    <br>
+    <p><a class="model" href="#openModalGroup">Группы ({{ groups.count }})</a></p>
 </div>
 <p id="public">Записи пользователя</p>
 
 {% include 'main/include/average_value.html' %}
 {% include 'main/include/modal_user.html' %}
 
-<div id="openModal" class="modal">
+<div id="editPhoto" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -57,5 +58,29 @@
         </div>
     </div>
 </div>
+
+<div id="openModalGroup" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Группы</h3>
+                <a href="#close" title="Close" class="close">×</a>
+            </div>
+            <div class="modal-body">
+                {% for group in groups %}
+                    <p id="users_home">
+                        <a class="group" href="{{ group.get_absolute_url }}">
+                            <img src="{{ group.photo.url }}">
+                            <span class="group_name">{{ group.name|truncatechars_html:14|title  }}</span>
+                        </a>
+                    <p id="group_count" class="group_name">Подписчиков {{ groups.count }}</p>
+                {% empty %}
+                    <h4>Нет групп</h4>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
 {{ block.super }}
 {% endblock content %}

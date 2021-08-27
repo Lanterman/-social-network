@@ -27,7 +27,7 @@ class AddPublishedForm(forms.ModelForm):
     photo = forms.ImageField(label='Аватарка', required=False)
     slug = forms.SlugField(label='URL', widget=forms.TextInput(attrs={'placeholder': 'Slug'}))
     biography = forms.CharField(label='Биография',
-                                widget=forms.Textarea(attrs={'placeholder': 'Написать биографию', 'rows': 5}))
+                                widget=forms.Textarea(attrs={'placeholder': 'Написать биографию', 'rows': 5, 'cols': 35}))
 
     class Meta:
         model = Published

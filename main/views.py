@@ -62,6 +62,7 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в дру�
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Users.objects.all())
         self.users = self.object.friends.all()
+        self.group = Groups.objects.filter(users=self.object)
         self.user = ''
         if self.object.pk != request.user.pk:
             self.user = Users.objects.get(pk=request.user.pk)
@@ -76,9 +77,11 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в дру�
         context['title'] = 'Главная страница'
         context['menu'] = menu
         context['users'] = self.users
+        context['groups'] = self.group
         context['users_init'] = 'друзей'
         context['center_friends'] = 'Друзья'
         context['page_obj'] = self.public
+        context['primary'] = 'home'
         if self.user in self.users:
             context['yes'] = 'Yes'
         return context
@@ -275,6 +278,39 @@ class AddCommentView(LoginRequiredMixin, CreateView):
 
 # Logic
 
+def del_published(request, pub_slug):
+    user = Users.objects.get(pk=request.user.pk)
+    q = Published.objects.get(slug=pub_slug).delete()
+    return redirect(user)
+
+
+class UpdatePublished(LoginRequiredMixin, UpdateView):
+    model = Published
+    login_url = '/users/login/'
+    form_class = AddPublishedForm
+    template_name = 'main/add_pub_group.html'
+    slug_url_kwarg = 'pub_slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Создать запись'
+        context['menu'] = menu
+        context['add'] = 'Ошибка создания записи!'
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.user = Users.objects.get(pk=request.user.pk)
+        published = Published.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
+        form = AddPublishedForm(request.POST, request.FILES)
+        if form.is_valid():
+            published.update(request.FILES, request.POST)
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.save()
+        return redirect(self.user)
+
+
 def friend_del_primary(request, user_pk):
     q = Users.objects.get(pk=user_pk)
     q.friends.remove(request.user)
@@ -347,7 +383,7 @@ class SearchPublished(NewsView):  # Оптимизировать дубли и �
         self.public = Published.objects.filter(
             Q(name__icontains=self.request.GET.get('search')) |
             Q(owner__username__icontains=self.request.GET.get('search'))
-        )  # Только из вступивших групп
+        ).select_related('owner')  # Только из вступивших групп
         for p in self.public:
             self.published += [[p, p.average(p.name)]]
         return super().get(request, *args, **kwargs)
@@ -359,12 +395,13 @@ class SearchPublished(NewsView):  # Оптимизировать дубли и �
         context = super().get_context_data(*args, **kwargs)
         context['empty'] = 'Нет записей соответствующих запросу'
         context['search'] = f'search={self.request.GET.get("search")}&'
+        context['count'] = len(self.published)
         return context
 
 
 class SearchGroups(GroupsView):
     def get_queryset(self):
-        return Groups.objects.filter(name__icontains=self.request.GET.get('search'))  # Только вступившие группы
+        return Groups.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related('users')  # Только вступившие группы
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)

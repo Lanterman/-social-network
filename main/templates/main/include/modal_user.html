@@ -7,16 +7,14 @@
             </div>
             <div class="modal-body">
                 <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
-                {% if users %}
-                    {% for us in users %}
-                        <p id="users">
-                            <a href="{{ us.get_absolute_url }}">{{ us.get_full_name|default:'Аноним' }}</a>
-                            <a id="a" href="{{ us.get_absolute_url }}">{{ us.email }}</a>
-                        </p><br>
-                    {% endfor %}
-                {% else %}
+                {% for us in users %}
+                    <p id="users">
+                        <a href="{{ us.get_absolute_url }}">{{ us.get_full_name|default:'Аноним'|truncatechars_html:23|title }}</a>
+                        <a id="a" href="{{ us.get_absolute_url }}">{{ us.email|truncatechars_html:23 }}</a>
+                    </p><br>
+                {% empty %}
                     <h4>Нет {{ users_init|default:"подписчиков" }}</h4>
-                {% endif %}
+                {% endfor %}
             </div>
         </div>
     </div>

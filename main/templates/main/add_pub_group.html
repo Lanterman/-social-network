@@ -11,8 +11,20 @@
     {% endif %}
 
     {% for f in form %}
-    <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>
-    <div class="errors">{{ f.errors }}</div>
+        {% if form.photo == f and form.photo.value %}
+            <p class="form">
+                    <br><br><br><br>
+                <label>{{ f.label }}</label>
+                <i id="form_photo">{{ f.value|truncatechars_html:25 }}</i><br><br>
+                <label for="photo-clear_id">Удалить фото</label>
+                <input type="checkbox" name="photo-clear" id="photo-clear_id"><br><br>
+                <label for="id_photo">Изменить фото </label>
+                <input type="file" name="photo" accept="image/*" id="id_photo">
+            </p>
+        {% else %}
+            <p class="form"><label>{{ f.label }}</label><i>{{ f }}</i></p>
+            <div class="errors">{{ f.errors }}</div>
+        {% endif %}
     {% endfor %}
     <button class="button" type="submit">Создать</button>
 </form>

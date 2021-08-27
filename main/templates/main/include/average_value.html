@@ -1,10 +1,14 @@
-{% if q %}
-<h1>Найдено записей: {{ q }} </h1>
+{% if search %}
+<h1>Найдено записей: {{ count }} </h1>
 {% endif %}
 
 {% for p, average in page_obj %}
     <div class="p">
-        <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:20|capfirst  }}</a>
+        <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:30|capfirst  }}</a>
+        {% if user.pk == request.user.pk and primary %}
+            <a class="pub_menu" id="del" href="{% url 'del_published' p.slug %}"><i class="fas fa-backspace"></i></a>
+            <a class="pub_menu" href="{% url 'update_pub' p.slug %}"><i class="fas fa-pen"></i></a>
+        {% endif %}
         <pre>{{ p.date }}</pre>
         <p id="ap">{{ p.biography|linebreaksbr|truncatechars_html:200 }}</p>
         {% if p.photo %}

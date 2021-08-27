@@ -57,7 +57,11 @@
 }
 
 .model, .user_pk {
-    margin: 20px 0px 20px 390px;
+    margin: 0px 0px 20px 390px;
+}
+
+.user_pk #edit {
+    margin: -20px 0 30px 0;
 }
 
 #button_home {
@@ -92,4 +96,59 @@
     opacity: 0.5;
     text-align: center;
     margin: 30px 0 -15px 0;
+}
+
+#users_home {
+    width: 350px;
+    height: 102px;
+    padding: 10px;
+    border: solid 2px;
+    margin: 0px 0 10px 30px;
+}
+
+#users_home img {
+    float: left;
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
+    border: solid 1px black;
+    margin: 0px 30px -5px 10px;
+}
+
+#users_home img:hover, .group_name:hover {
+    transform: scale(1.05);
+    color: red;
+}
+
+.group_name {
+    font-size: 20px;
+    color: blue;
+    float: left;
+    margin: 20px 0px 0px 0px;
+}
+
+#group_count {
+    margin: -78px 0 0 185px;
+    font-size: 15px;
+    color: gray;
+}
+
+#group_count:hover {
+    transform: None;
+}
+
+.pub_menu {
+    float: right;
+    padding: 4px;
+    color: black;
+    font-size: 17px;
+    margin-left: 5px;
+}
+
+#del {
+    font-size: 18px;
+}
+
+.pub_menu:hover {
+    color: red;
 }
