@@ -14,7 +14,11 @@ urlpatterns = [
     path('publish/<slug:publish_slug>/', DetailPublish.as_view(), name='detail_publish'),
     path('publish/<slug:publish_slug>/comments/', PublishedCommentsView.as_view(), name='comments'),
     path('publish/<slug:publish_slug>/add_comment/', AddCommentView.as_view(), name='add_comment'),
+    # logic
+    path('groups/<slug:group_slug>/del_group/', del_group, name='del_group'), # del group
+    path('groups/<slug:pub_slug>/<slug:group_slug>/del_published/', del_pub_group, name='del_pub_group'),  # del pub_group
     path('groups/<slug:pub_slug>/del_published/', del_published, name='del_published'),  # del published
+    path('groups/<slug:group_slug>/update_group/', UpdateGroup.as_view(), name='update_group'),  # update group
     path('groups/<slug:pub_slug>/update_pub/', UpdatePublished.as_view(), name='update_pub'),  # update published
     path('groups/<int:user_pk>/add_friend_primary/', friend_del_primary, name='friend_del_primary'),  # del friend primary
     path('groups/<int:user_pk>/del_friend_primary/', friend_add_primary, name='friend_add_primary'),  # add friend primary

@@ -84,3 +84,41 @@
 #groups {
     margin-right: 300px;
 }
+
+#title .pub_menu {
+    float: None;
+    color: gray;
+    padding: 0px;
+    font-size: 15px;
+    margin-left: 0px;
+}
+
+#conf .modal-dialog {
+    margin-top: 200px;
+}
+
+#conf .modal-body  {
+    text-align: center;
+
+}
+
+#conf .modal-body p {
+    margin-bottom: 20px;
+}
+
+#conf .modal-body a {
+    font-size: 21px;
+}
+
+#conf .modal-body #yes {
+    padding: 5px 10px;
+    margin: 0 50px 0 -17px;
+}
+
+#openModalSub .modal-title {
+    margin-left: 175px;
+}
+
+#openModalGroup .modal-title {
+    margin-left: 190px;
+}

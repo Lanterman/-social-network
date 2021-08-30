@@ -41,6 +41,7 @@
 {% include 'main/include/average_value.html' %}
 {% include 'main/include/modal_user.html' %}
 
+<!-- modal_edit_photo -->
 <div id="editPhoto" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -59,6 +60,7 @@
     </div>
 </div>
 
+<!-- modal_edit_group -->
 <div id="openModalGroup" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -67,13 +69,28 @@
                 <a href="#close" title="Close" class="close">×</a>
             </div>
             <div class="modal-body">
+                {% if user.pk == request.user.pk %}
+                    <p class="groups_home">Мои группы</p>
+                    {% for group in my_groups %}
+                        <p id="users_home">
+                            <a class="group" href="{{ group.get_absolute_url }}">
+                                <img src="{{ group.photo.url }}">
+                                <span class="group_name">{{ group.name|truncatechars_html:14|title }}</span>
+                            </a>
+                        <p id="group_count" class="group_name">Подписчиков {{ group.users.count }}</p>
+                    {% empty %}
+                        <h4>Нет групп</h4>
+                    {% endfor %}
+                    <hr>
+                    <p class="groups_home">Группы на которые подписан</p>
+                {% endif %}
                 {% for group in groups %}
                     <p id="users_home">
                         <a class="group" href="{{ group.get_absolute_url }}">
                             <img src="{{ group.photo.url }}">
                             <span class="group_name">{{ group.name|truncatechars_html:14|title  }}</span>
                         </a>
-                    <p id="group_count" class="group_name">Подписчиков {{ groups.count }}</p>
+                    <p id="group_count" class="group_name">Подписчиков {{ group.users.count }}</p>
                 {% empty %}
                     <h4>Нет групп</h4>
                 {% endfor %}
@@ -81,6 +98,5 @@
         </div>
     </div>
 </div>
-
 {{ block.super }}
 {% endblock content %}

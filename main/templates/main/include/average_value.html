@@ -5,8 +5,11 @@
 {% for p, average in page_obj %}
     <div class="p">
         <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:30|capfirst  }}</a>
-        {% if user.pk == request.user.pk and primary %}
-            <a class="pub_menu" id="del" href="{% url 'del_published' p.slug %}"><i class="fas fa-backspace"></i></a>
+        {% if  user.pk == request.user.pk and primary %}
+            <a class="pub_menu" id="del" href="{% if group %}{% url 'del_pub_group' p.slug  group.slug %}
+                    {% else %}{% url 'del_published' p.slug %}{% endif %}">
+                <i class="fas fa-backspace"></i>
+            </a>
             <a class="pub_menu" href="{% url 'update_pub' p.slug %}"><i class="fas fa-pen"></i></a>
         {% endif %}
         <pre>{{ p.date }}</pre>

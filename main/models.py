@@ -44,6 +44,8 @@ class Published(Abstract):
 class Groups(Abstract):
     photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
     users = models.ManyToManyField(Users, blank=True, related_name='groups_users', verbose_name='Пользователи')
+    owner = models.ForeignKey(Users, verbose_name='Создатель группы', on_delete=models.SET_NULL, null=True,
+                              related_name='my_group')
     biography = None
 
     class Meta:

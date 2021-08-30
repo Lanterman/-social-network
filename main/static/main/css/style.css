@@ -482,6 +482,7 @@ color: blue;
     border-bottom: 1px solid #eceeef;
 }
 .modal-title {
+    margin-left: 150px;
     margin-top: 0;
     margin-bottom: 0;
     line-height: 1.5;

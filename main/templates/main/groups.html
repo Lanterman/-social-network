@@ -10,24 +10,33 @@
         </div>
     </p>
     <br><br>
-
     <div class="block">
         <div class="search">
             {% include 'main/include/search.html' %}
         </div>
     </div>
-
     <div class="mar">
-        {% for p in groups %}
-            <div id="div1">
-                <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a>
-                <p id="margin"><a href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a></p>
-                <a id="del" href="{% url 'group_quit_primary' p.slug %}"><i class="fas fa-backspace"></i></a>
-                <p id="p">Подписчиков: {{ p.users.count }}</p>
-            </div>
-        {% empty %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> Вы не вступали в группы</p>
-        {% endfor %}
+        {% if groups or global %}
+            {% for p in groups %}
+                <div id="div1">
+                    <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a>
+                    <p id="margin"><a href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a></p>
+                    <a id="del" href="{% url 'group_quit_primary' p.slug %}"><i class="fas fa-backspace"></i></a>
+                    <p id="p">Подписчиков: {{ p.users.count }}</p>
+                </div>
+            {% endfor %}
+            <p>Глобальный поиск</p>
+            {% for p in global %}
+                <div id="div1">
+                    <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a>
+                    <p id="margin"><a href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a></p>
+                    <a id="del" href="{% url 'group_quit_primary' p.slug %}"><i class="fas fa-backspace"></i></a>
+                    <p id="p">Подписчиков: {{ p.users.count }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> Нет таких групп!</p>
+        {% endif %}
     </div>
 {% endblock content %}
 

@@ -152,3 +152,12 @@
 .pub_menu:hover {
     color: red;
 }
+
+#openModalGroup .modal-body {
+    margin-top: -20px;
+}
+
+.groups_home {
+    text-align: center;
+    margin: 10px 0 15px 0;
+}

@@ -18,7 +18,7 @@ class AbstractAdmin(admin.ModelAdmin):
 class GroupsAdmin(AbstractAdmin):
     ordering = ('-id',)
     list_display = ('id', 'name', 'slug', 'photo')
-    fields = ('name', 'slug', 'photo', 'users')
+    fields = ('name', 'slug', 'photo', 'users', 'owner')
     raw_id_fields = ('users',)  # удобная вещь при связях
 
 
