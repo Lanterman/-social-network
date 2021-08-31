@@ -1,102 +1,90 @@
 {% extends 'main/base.html' %}
 
-{% block title %}{{ title }}{% endblock title %}
-
 {% block content %}
-<div id="home">
-    <div id="users1">
-        {% if user.photo %}
-        <img src="{{ user.photo.url }}">
-        {% else %}
-        <img src="/media/users/slen/slen.png/">
-        {% endif %}
-        <br><br><br>
-        <p class="users"><label>Имя: </label><i id="i1">{{ user.first_name|default:'None' }}</i></p>
-        <p class="users"><label>Фамилия: </label><i id="i2">{{ user.last_name|default:'None' }}</i></p>
-        <p class="users"><label>Email: </label><i id="i3">{{ user.email }}</i></p>
-        <p class="users"><label>Номер телефона: </label><i id="i4">{{ user.num_tel }}</i></p>
-        <p class="users"><label>URL: </label><i id="i5">{{ user.slug }}</i></p>
-        <p class="users"><label>Статус админа: </label><i id="i6">{{ user.is_superuser }}</i></p>
+    <div id="home">
+        <div id="users1">
+            {% if user.photo %}
+                <img src="{{ user.photo.url }}">
+            {% else %}
+                <img src="/media/users/slen/slen.png/">
+            {% endif %}
+            <br><br><br>
+            <p class="users"><label>Имя: </label><i id="i1">{{ user.first_name|default:'None' }}</i></p>
+            <p class="users"><label>Фамилия: </label><i id="i2">{{ user.last_name|default:'None' }}</i></p>
+            <p class="users"><label>Email: </label><i id="i3">{{ user.email }}</i></p>
+            <p class="users"><label>Номер телефона: </label><i id="i4">{{ user.num_tel }}</i></p>
+            <p class="users"><label>URL: </label><i id="i5">{{ user.slug }}</i></p>
+            <p class="users"><label>Статус админа: </label><i id="i6">{{ user.is_superuser }}</i></p>
+        </div>
+        <div class="user_pk">
+            {% if user.pk == request.user.pk %}
+                <p id="edit"><a class="model_user" href="#editPhoto">Изменить фото</a></p>
+            {% else %}
+                <a class="button_home" href="#">Отправить сообщение</a>
+                <div id="button_home">
+                    {% if yes %}
+                        <a class="model_user" href="{% url 'friend_del_primary' user.pk %}"><i class="fas fa-user-check"></i> Удалить из друзей</a>
+                    {% else %}
+                        <a class="button_home" type="button" href="{% url 'friend_add_primary' user.pk %}">Добавить в друзья</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        <p><a class="model" href="#openModalSub">Друзья ({{ users.count }})</a></p>
+        <br>
+        <p><a class="model" href="#openModalGroup">Группы ({{ groups.count }})</a></p>
     </div>
-    <div class="user_pk">
-        {% if user.pk == request.user.pk %}
-        <p id="edit"><a class="model_user" href="#editPhoto">Изменить фото</a></p>
-        {% else %}
-            <a class="button_home" href="#">Отправить сообщение</a>
-            <div id="button_home">
-                {% if yes %}
-                    <a class="model_user" href="{% url 'friend_del_primary' user.pk %}"><i class="fas fa-user-check"></i> Удалить из друзей</a>
-                {% else %}
-                    <a class="button_home" type="button" href="{% url 'friend_add_primary' user.pk %}">Добавить в друзья</a>
-                {% endif %}
-            </div>
-        {% endif %}
-    </div>
-    <p><a class="model" href="#openModalSub">Друзья ({{ users.count }})</a></p>
-    <br>
-    <p><a class="model" href="#openModalGroup">Группы ({{ groups.count }})</a></p>
-</div>
-<p id="public">Записи пользователя</p>
+    <p id="public">Записи пользователя</p>
 
-{% include 'main/include/average_value.html' %}
-{% include 'main/include/modal_user.html' %}
+    {% include 'main/include/average_value.html' %}
+    {% include 'main/include/modal_user.html' %}
 
-<!-- modal_edit_photo -->
-<div id="editPhoto" class="modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Загрузить фото</h3>
-                <a href="#close" title="Close" class="close">×</a>
-            </div>
-            <div class="modal-body">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <p id="photo">{{ form.photo }}</p>
-                    <button type="submit">Сохранить и продолжить</button>
-                </form>
+    <!-- modal_edit_photo -->
+    <div id="editPhoto" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Загрузить фото</h3>
+                    <a href="#close" title="Close" class="close">×</a>
+                </div>
+                <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <p id="photo">{{ form.photo }}</p>
+                        <button type="submit">Сохранить и продолжить</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- modal_edit_group -->
-<div id="openModalGroup" class="modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Группы</h3>
-                <a href="#close" title="Close" class="close">×</a>
-            </div>
-            <div class="modal-body">
-                {% if user.pk == request.user.pk %}
-                    <p class="groups_home">Мои группы</p>
-                    {% for group in my_groups %}
-                        <p id="users_home">
-                            <a class="group" href="{{ group.get_absolute_url }}">
-                                <img src="{{ group.photo.url }}">
-                                <span class="group_name">{{ group.name|truncatechars_html:14|title }}</span>
-                            </a>
-                        <p id="group_count" class="group_name">Подписчиков {{ group.users.count }}</p>
+    <!-- modal_edit_group -->
+    <div id="openModalGroup" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Группы</h3>
+                    <a href="#close" title="Close" class="close">×</a>
+                </div>
+                <div class="modal-body">
+                    {% if user.pk == request.user.pk %}
+                        <p class="groups_home">Мои группы</p>
+                        {% for group in my_groups %}
+                            {% include 'main/include/home_include.html' %}
+                        {% empty %}
+                            <h4>Нет групп</h4>
+                        {% endfor %}
+                        <hr>
+                        <p class="groups_home">Группы на которые подписан</p>
+                    {% endif %}
+                    {% for group in groups %}
+                        {% include 'main/include/home_include.html' %}
                     {% empty %}
                         <h4>Нет групп</h4>
                     {% endfor %}
-                    <hr>
-                    <p class="groups_home">Группы на которые подписан</p>
-                {% endif %}
-                {% for group in groups %}
-                    <p id="users_home">
-                        <a class="group" href="{{ group.get_absolute_url }}">
-                            <img src="{{ group.photo.url }}">
-                            <span class="group_name">{{ group.name|truncatechars_html:14|title  }}</span>
-                        </a>
-                    <p id="group_count" class="group_name">Подписчиков {{ group.users.count }}</p>
-                {% empty %}
-                    <h4>Нет групп</h4>
-                {% endfor %}
+                </div>
             </div>
         </div>
     </div>
-</div>
-{{ block.super }}
+    {{ block.super }}
 {% endblock content %}

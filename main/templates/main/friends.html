@@ -1,7 +1,5 @@
 {% extends 'main/base.html' %}
 
-{% block title %}{{ title }}{% endblock title %}
-
 {% block content %}
     <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }}</h6>
     <div class="block">
@@ -16,28 +14,19 @@
         </div>
     </div>
     <div class="mar">
-        {% for friend in object_list %}
-            {% if friend.username != request.user.username %}
-                <div id="div1">
-                    <a id='a' href="{{ friend.get_absolute_url }}">
-                        {% if friend.photo %}
-                            <img src="{{ friend.photo.url }}">
-                        {% else %}
-                            <img src="/media/users/slen/slen.png/">
-                        {% endif %}
-                    </a>
-                    <p id="margin">
-                        <a href="{{ friend.get_absolute_url }}"><i>{{ friend.get_full_name|capfirst|default:'None' }}</i></a>
-                    </p>
-                    <a class="us-mes" href="#">Отправить сообщение</a>
-                    <a id="mag" class="us-mes" href="{% url 'friend_del' friend.pk %}">Удалить из друзей</a>
-                </div>
-            {% elif friend.username == request.user.username and object_list.count == 1 %}
-                <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>
-            {% endif %}
-        {% empty %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty }}</p>
-        {% endfor %}
+        {% if object_list %}
+            {% for friend in object_list %}
+                {% include 'main/include/friends.html' %}
+            {% endfor %}
+        {% endif %}
+        {% if global %}
+            <p class="global_search">Глобальный поиск</p>
+            {% for friend in global %}
+                {% include 'main/include/friends.html' %}
+            {% endfor %}
+        {% elif not global and not object_list %}
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"У вас нет друзей!" }}</p>
+        {% endif %}
     </div>
 {% endblock content %}
 

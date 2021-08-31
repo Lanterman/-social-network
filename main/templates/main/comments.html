@@ -3,32 +3,30 @@
 {% block title %}{{ title }}{% endblock title %}
 
 {% block content %}
-<div class="p3">
-    <p id="p1"><a href="{{ published.get_absolute_url }}">{{ published.name }}</a></p>
-    <pre><big>Обновленно </big>{{ published.date }}</pre>
-</div>
-<div id="comments">
-    <h1 id="h1">Комментарии</h1>
-    {% if page_obj %}
+    <div class="p3">
+        <p id="p1"><a href="{{ published.get_absolute_url }}">{{ published.name }}</a></p>
+        <pre><big>Обновленно </big>{{ published.date }}</pre>
+    </div>
+    <div id="comments">
+        <h1 id="h1">Комментарии</h1>
         {% for c in page_obj %}
-        <div>
-            <p class="p4"><a href="{{ c.users.get_absolute_url }}">{{ c.users.username }}</a> {{ c.date }}</p>
-            <p id="p2"><i>{{ c.biography }}</i></p>
-            <p id="p3">
-                <a href="{% url 'like_view' c.id %}"  title="Лайки">
-                    {% if user1 in c.like.all %}
-                        <span id="like"><i class="fas fa-heart"></i> {{ c.like.count }}</span>
-                    {% else %}
-                        <span><i class="fas fa-heart" title="Лайки"></i> {{ c.like.count }}</span>
-                    {% endif %}
-                </a>
-            </p>
-        </div>
+            <div>
+                <p class="p4"><a href="{{ c.users.get_absolute_url }}">{{ c.users.username }}</a> {{ c.date }}</p>
+                <p id="p2"><i>{{ c.biography }}</i></p>
+                <p id="p3">
+                    <a href="{% url 'like_view' c.id %}"  title="Лайки">
+                        {% if user1 in c.like.all %}
+                            <span id="like"><i class="fas fa-heart"></i> {{ c.like.count }}</span>
+                        {% else %}
+                            <span><i class="fas fa-heart" title="Лайки"></i> {{ c.like.count }}</span>
+                        {% endif %}
+                    </a>
+                </p>
+            </div>
+        {% empty %}
+            <p id="p5"><i>Комментарии отсутствуют, но вы можете быть первым!</i></p>
         {% endfor %}
-    {% else %}
-        <p id="p5"><i>Комментарии отсутствуют, но вы можете быть первым!</i></p>
-    {% endif %}
-    <p><a id="com" href="{% url 'add_comment' published.slug %}">Оставить комментарий</a></p><br>
-</div>
-{{ block.super }}
+        <p><a id="com" href="{% url 'add_comment' published.slug %}">Оставить комментарий</a></p><br>
+    </div>
+    {{ block.super }}
 {% endblock content %}

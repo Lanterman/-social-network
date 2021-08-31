@@ -7,9 +7,9 @@ from users.models import Users
 
 
 class Abstract(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Название', unique=True)
+    name = models.CharField(max_length=40, verbose_name='Название', unique=True)
     slug = models.SlugField(error_messages={'unique': 'Такой URL уже существует!!!'},
-                            help_text='<i>Заполняется автоматически!</i>', max_length=150, unique=True,
+                            help_text='<i>Заполняется автоматически!</i>', max_length=40, unique=True,
                             verbose_name='URL')
     biography = models.TextField(blank=True, verbose_name='Биография')
 

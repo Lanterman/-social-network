@@ -1,7 +1,5 @@
 {% extends 'main/base.html' %}
 
-{% block title%}{{ title }}{% endblock title %}
-
 {% block content %}
     <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }} |</h6>
     <p id="aps" class="pa">
@@ -16,26 +14,18 @@
         </div>
     </div>
     <div class="mar">
-        {% if groups or global %}
+        {% if groups %}
             {% for p in groups %}
-                <div id="div1">
-                    <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a>
-                    <p id="margin"><a href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a></p>
-                    <a id="del" href="{% url 'group_quit_primary' p.slug %}"><i class="fas fa-backspace"></i></a>
-                    <p id="p">Подписчиков: {{ p.users.count }}</p>
-                </div>
+                {% include 'main/include/group_include.html' %}
             {% endfor %}
-            <p>Глобальный поиск</p>
+        {% endif %}
+        {% if global %}
+            <p class="global_search">Глобальный поиск</p>
             {% for p in global %}
-                <div id="div1">
-                    <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a>
-                    <p id="margin"><a href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a></p>
-                    <a id="del" href="{% url 'group_quit_primary' p.slug %}"><i class="fas fa-backspace"></i></a>
-                    <p id="p">Подписчиков: {{ p.users.count }}</p>
-                </div>
+                {% include 'main/include/group_include.html' %}
             {% endfor %}
-        {% else %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> Нет таких групп!</p>
+        {% elif not global and not groups %}
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Вы не вступали в группы!" }}</p>
         {% endif %}
     </div>
 {% endblock content %}

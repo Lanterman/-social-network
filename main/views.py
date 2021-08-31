@@ -103,9 +103,7 @@ class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['title'] = 'Мои друзья'
-        context['empty'] = 'У вас нет друзей!'
         context['act'] = 'search_friends'
-        context['object'] = self.object
         context['name'] = 'Поиск друзей'
         context['recommendation'] = 'друзья'
         return context
@@ -253,7 +251,7 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         if request.user.is_authenticated:
             self.user = Users.objects.get(username=request.user.username)
         self.object = self.get_object(queryset=Published.objects.all())
-        self.comments = Comments.objects.filter(published=self.object).select_related('users').prefetch_related('like')  # Жадный запрос
+        self.comments = Comments.objects.filter(published=self.object).select_related('users').prefetch_related('like')
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -327,7 +325,7 @@ class UpdateGroup(LoginRequiredMixin, UpdateView):
         self.group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddGroupForm(request.POST, request.FILES)
         if form.is_valid():
-            self.group.update(request.FILES, request.POST)
+            self.group.update(**form.cleaned_data)
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -353,7 +351,7 @@ class UpdatePublished(LoginRequiredMixin, UpdateView):
         self.published = Published.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
-            self.published.update(request.FILES, request.POST)
+            self.published.update(**form.cleaned_data)
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -378,6 +376,13 @@ def friend_del(request, friend_pk):
     q = Users.objects.get(pk=friend_pk)
     user = Users.objects.get(pk=request.user.pk)
     user.friends.remove(q)
+    return redirect(reverse('friends', kwargs={'user_pk': user.pk}))
+
+
+def friend_add(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    user.friends.add(q)
     return redirect(reverse('friends', kwargs={'user_pk': user.pk}))
 
 
@@ -433,7 +438,7 @@ class SearchPublished(NewsView):  # Оптимизировать дубли и �
         self.public = Published.objects.filter(
             Q(name__icontains=self.request.GET.get('search')) |
             Q(owner__username__icontains=self.request.GET.get('search'))
-        ).select_related('owner')  # Только из вступивших групп
+        ).select_related('owner')
         for p in self.public:
             self.published += [[p, p.average(p.name)]]
         return super().get(request, *args, **kwargs)
@@ -443,26 +448,26 @@ class SearchPublished(NewsView):  # Оптимизировать дубли и �
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет записей соответствующих запросу'
+        context['empty'] = 'Нет записей соответствующих запросу!'
         context['search'] = f'search={self.request.GET.get("search")}&'
         context['count'] = len(self.published)
         return context
 
 
-class SearchGroups(GroupsView):
+class SearchGroups(GroupsView):  # разобраться с prefetch_related
     def get_queryset(self):
         return self.group1.filter(name__icontains=self.request.GET.get('search')).prefetch_related('users')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет групп соответствующих запросу'
+        context['empty'] = 'Нет групп соответствующих запросу!'
         context['global'] = Groups.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related('users')
         return context
 
 
 class SearchFriends(FriendsView):
     def get_queryset(self):
-        queryset = Users.objects.filter(
+        queryset = self.users.filter(
             Q(username__icontains=self.request.GET.get('search')) |
             Q(first_name__icontains=self.request.GET.get('search')) |
             Q(last_name__icontains=self.request.GET.get('search'))
@@ -471,5 +476,10 @@ class SearchFriends(FriendsView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет друзей соответствующих запросу'
+        context['empty'] = 'Нет пользователей соответствующих запросу!'
+        context['global'] = Users.objects.filter(
+            Q(username__icontains=self.request.GET.get('search')) |
+            Q(first_name__icontains=self.request.GET.get('search')) |
+            Q(last_name__icontains=self.request.GET.get('search'))
+        ).exclude(pk=self.request.user.pk)
         return context

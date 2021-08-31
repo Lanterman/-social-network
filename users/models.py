@@ -7,7 +7,7 @@ User._meta.get_field('email')._unique = True
 
 class Users(User):
     num_tel = models.CharField(max_length=20, verbose_name='Номер телефона')
-    slug = models.SlugField(max_length=100, verbose_name='URL', blank=True)
+    slug = models.SlugField(max_length=40, verbose_name='URL', blank=True)
     photo = models.ImageField(verbose_name='Фото', blank=True, upload_to='users/')
     friends = models.ManyToManyField('self', verbose_name='Друзья', related_name='friends_set', blank=True)
 

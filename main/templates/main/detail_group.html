@@ -3,30 +3,29 @@
 {% block title %}{{ group.name }}{% endblock title %}
 
 {% block content %}
-<div id="div">
-    {% if group.photo %}
-        <img src="{{ group.photo.url }}" alt="{{ group.photo }}">
-    {% endif %}
-    <p id="title">{{ group.name|capfirst }}
-        {% if user.pk == request.user.pk and primary %}
-            <a class="pub_menu" href="{% url 'update_group' group.slug %}"><i class="fas fa-pen"></i></a>
-            <a class="pub_menu" id="del" href="#conf"><i class="fas fa-backspace"></i></a>
-
+    <div id="div">
+        {% if group.photo %}
+            <img src="{{ group.photo.url }}" alt="{{ group.photo }}">
         {% endif %}
-    </p><br>
-    <p class="p1"><a href="#openModalSub">Подписчики: {{ users.count }}</a></p>
-    <p class="p1" id="p1">Всего записей: {{ page_obj.paginator.count }}</p>
-    <div id="div2">
-        {% if subscriber %}
-            <p class="p1"><a href="{% url 'group_quit' group.slug %}">Отписаться</a></p>
-            <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
-        {% else %}
-            <p class="p1"><a href="{% url 'group_enter' group.slug %}">Подписаться</a></p>
-        {% endif %}
+        <p id="title_group">{{ group.name|capfirst }}
+            {% if user.pk == request.user.pk and primary %}
+                <a class="pub_menu" href="{% url 'update_group' group.slug %}"><i class="fas fa-pen"></i></a>
+                <a class="pub_menu" id="del" href="#conf"><i class="fas fa-backspace"></i></a>
+            {% endif %}
+        </p><br>
+        <p class="p1"><a href="#openModalSub">Подписчики: {{ users.count }}</a></p>
+        <p class="p1" id="p1">Всего записей: {{ page_obj.paginator.count }}</p>
+        <div id="div2">
+            {% if subscriber %}
+                <p class="p1"><a href="{% url 'group_quit' group.slug %}">Отписаться</a></p>
+                <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
+            {% else %}
+                <p class="p1"><a href="{% url 'group_enter' group.slug %}">Подписаться</a></p>
+            {% endif %}
+        </div>
     </div>
-</div>
-{% include 'main/include/average_value.html' %}
-{% include 'main/include/modal_user.html' %}
-{% include 'main/include/modal-del.html' %}
-{{ block.super }}
+    {% include 'main/include/average_value.html' %}
+    {% include 'main/include/modal_user.html' %}
+    {% include 'main/include/modal-del.html' %}
+    {{ block.super }}
 {% endblock %}

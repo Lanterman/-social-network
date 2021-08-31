@@ -1,32 +1,29 @@
 {% extends 'main/base.html' %}
 
-{% block title%}{{ title }}{% endblock title %}
-
 {% block content %}
-<h6 class="title"><i class="fas fa-user-friends"></i> {{ title }}</h6>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% if form.errors %}
-    <p class="errors" id="errors">{{ add }}</p>
-    {% endif %}
-
-    {% for f in form %}
-        {% if form.photo == f and form.photo.value %}
-            <p class="form">
-                <label>{{ f.label }}</label>
-                <i id="form_photo">{{ f.value|truncatechars_html:25 }}</i><br><br>
-                {% if  not delete %}
-                    <label for="photo-clear_id">Удалить фото</label>
-                    <input type="checkbox" name="photo-clear" id="photo-clear_id"><br><br>
-                {% endif %}
-                <label for="id_photo">Изменить фото </label>
-                <input type="file" name="photo" accept="image/*" id="id_photo">
-            </p>
-        {% else %}
-            <p class="form"><label>{{ f.label }}</label><i>{{ f }}</i></p>
-            <div class="errors">{{ f.errors }}</div>
+    <h6 class="title"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.errors %}
+            <p class="errors" id="errors">{{ add }}</p>
         {% endif %}
-    {% endfor %}
-    <button class="button" type="submit">Создать</button>
-</form>
+        {% for f in form %}
+            {% if form.photo == f and form.photo.value %}
+                <p class="form">
+                    <label>{{ f.label }}</label>
+                    <i id="form_photo">{{ f.value|truncatechars_html:25 }}</i><br><br>
+                    {% if  not delete %}
+                        <label for="photo-clear_id">Удалить фото</label>
+                        <input type="checkbox" name="photo-clear" id="photo-clear_id"><br><br>
+                    {% endif %}
+                    <label for="id_photo">Изменить фото </label>
+                    <input type="file" name="photo" accept="image/*" id="id_photo">
+                </p>
+            {% else %}
+                <p class="form"><label>{{ f.label }}</label><i>{{ f }}</i></p>
+                <div class="errors">{{ f.errors }}</div>
+            {% endif %}
+        {% endfor %}
+        <button class="button" type="submit">Создать</button>
+    </form>
 {% endblock content %}

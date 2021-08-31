@@ -23,6 +23,7 @@ urlpatterns = [
     path('groups/<int:user_pk>/add_friend_primary/', friend_del_primary, name='friend_del_primary'),  # del friend primary
     path('groups/<int:user_pk>/del_friend_primary/', friend_add_primary, name='friend_add_primary'),  # add friend primary
     path('groups/<int:friend_pk>/del_friend/', friend_del, name='friend_del'),  # del friend
+    path('groups/<int:user_pk>/friend_add/', friend_add, name='friend_add'),  # add friend
     path('groups/<slug:group_slug>/quit/', group_quit, name='group_quit'),  # quit
     path('groups/<slug:group_slug>/enter/', group_enter, name='group_enter'),  # entry
     path('groups/<slug:group_slug>/quit_primary/', group_quit_primary, name='group_quit_primary'),  # quit_primary
