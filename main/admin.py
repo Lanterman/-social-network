@@ -6,7 +6,6 @@ from main.models import *
 class AbstractAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'name')
     search_fields = ('id', 'name')
-    # list_editable = ['name']  # Можно редактировать на странице изменений
     list_filter = ('name',)  # Фильтер справа
     list_max_show_all = 5  # Если больше этого значения экземпляров - появляется кнопка
     list_per_page = 10  # Разбиение на страницы
@@ -28,16 +27,6 @@ class PublishedAdmin(AbstractAdmin):
     fields = ('name', 'slug', 'biography', 'group', 'photo', 'date', 'owner')
     date_hierarchy = 'date'
     readonly_fields = ('date',)  # делает нередактиремым
-    # actions = ['not_dislike']
-
-    # @admin.action(description='Анилировать лайки и дизлайки')
-    # def not_dislike(self, request, queryset):
-    #     rows = queryset.update(dislike=0, like=0)
-    #     if rows == 1:
-    #         messages = 'Лайки и дизлайки 1 публикации были анулированы'
-    #     else:
-    #         messages = 'Лайки и дизлайки %s публикации были анулированы' % rows
-    #     self.message_user(request, messages)
 
 
 @admin.register(Comments)

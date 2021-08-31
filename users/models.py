@@ -21,3 +21,17 @@ class Users(User):
 
     def get_absolute_url(self):
         return reverse('home', kwargs={'user_pk': self.pk})
+
+
+class PostSubscribers(models.Model):
+    owner = models.CharField(max_length=50, verbose_name='IP')
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь', max_length=50)
+    date = models.DateTimeField(auto_now_add=True, verbose_name='Время заявки')
+
+    class Meta:
+        ordering = ['owner']
+        verbose_name = 'Подтверждение'
+        verbose_name_plural = 'Подтверждения'
+
+    def __str__(self):
+        return f'{self.owner} - {self.user}: {self.date}'

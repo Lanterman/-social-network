@@ -14,3 +14,15 @@ class UsersAdmin(admin.ModelAdmin):
     list_per_page = 10
     prepopulated_fields = {'slug': ('username',)}
     raw_id_fields = ('friends',)
+
+
+@admin.register(PostSubscribers)
+class PostSubscribersAdmin(admin.ModelAdmin):
+    list_display = ('owner', 'user', 'date')
+    list_display_links = ('owner',)
+    fields = ('owner', 'user')
+    search_fields = ('owner', 'date')
+    list_filter = ('owner', 'date')
+    list_max_show_all = 5
+    list_per_page = 10
+
