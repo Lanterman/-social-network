@@ -3,12 +3,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
 
 from main.form import *
 from main.models import *
+from users.models import PostSubscribers
 
 menu = [
     {'name': 'Главная страница', 'url': 'home'},
@@ -67,6 +69,15 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в дру�
         self.user = ''
         if self.object.pk != request.user.pk:
             self.user = Users.objects.get(pk=request.user.pk)
+            try:
+                self.subs = PostSubscribers.objects.select_related('user').get(
+                    Q(owner=self.user.username, user_id=self.object) |
+                    Q(owner=self.object.username, user_id=self.user)
+                )
+            except Exception:
+                self.subs = ''
+        else:
+            self.subs = PostSubscribers.objects.filter(owner=self.object.username).select_related('user')
         published = Published.objects.filter(owner=self.object).select_related('owner')
         self.public = []
         for p in published:
@@ -84,8 +95,9 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в дру�
         context['page_obj'] = self.public
         context['primary'] = 'home'
         context['my_groups'] = self.my_groups
-        if self.user in self.users:
-            context['yes'] = 'Yes'
+        if self.user:
+            context['owner'] = self.user
+        context['subs'] = self.subs
         return context
 
 
@@ -306,6 +318,27 @@ def del_published(request, pub_slug):
     return redirect(user)
 
 
+# class AbstractUpdate(LoginRequiredMixin, UpdateView):
+#     login_url = '/users/login/'
+#     template_name = 'main/add_pub_group.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['title'] = 'Редактирование!'
+#         context['menu'] = menu
+#         context['add'] = 'Ошибка изменения!'
+#         return context
+#
+#     def post(self, request, *args, **kwargs):
+#         if form.is_valid():
+#             self.group.update(**form.cleaned_data)
+#         return super().post(request, *args, **kwargs)
+#
+#     def form_valid(self, form):
+#         form.save()
+#         return redirect(self.group)
+
+
 class UpdateGroup(LoginRequiredMixin, UpdateView):
     model = Groups
     login_url = '/users/login/'
@@ -359,27 +392,60 @@ class UpdatePublished(LoginRequiredMixin, UpdateView):
         return redirect(self.published)
 
 
-def friend_del_primary(request, user_pk):
+def friend_del(request, user_pk):
     q = Users.objects.get(pk=user_pk)
+    user = Users.objects.get(pk=request.user.pk)
     q.friends.remove(request.user)
+    PostSubscribers.objects.create(owner=user.username, user_id=q.id)
     return redirect(q)
-
-
-def friend_add_primary(request, user_pk):
-    q = Users.objects.get(pk=user_pk)
-    user = Users.objects.get(pk=request.user.pk)
-    user.friends.add(q)
-    return redirect(q)
-
-
-def friend_del(request, friend_pk):
-    q = Users.objects.get(pk=friend_pk)
-    user = Users.objects.get(pk=request.user.pk)
-    user.friends.remove(q)
-    return redirect(reverse('friends', kwargs={'user_pk': user.pk}))
 
 
 def friend_add(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    PostSubscribers.objects.create(owner=q.username, user_id=user.id)
+    return redirect(q)
+
+
+def friend_answer(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    user.friends.add(q)
+    PostSubscribers.objects.filter(Q(owner=q.username, user_id=user.id) | Q(owner=user.username, user_id=q.id)).delete()
+    return redirect(q)
+
+
+def friend_not_add(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    PostSubscribers.objects.filter(Q(owner=q.username, user_id=user.id) | Q(owner=user.username, user_id=q.id)).delete()
+    return redirect(q)
+
+
+def friend_hide(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    PostSubscribers.objects.filter(Q(owner=q.username, user_id=user.id) | Q(owner=user.username, user_id=q.id)).delete()
+    return redirect(user)
+
+
+def friend_accept(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    user.friends.add(q)
+    PostSubscribers.objects.filter(Q(owner=q.username, user_id=user.id) | Q(owner=user.username, user_id=q.id)).delete()
+    return redirect(user)
+
+
+def friend_del_primary(request, friend_pk):
+    q = Users.objects.get(pk=friend_pk)
+    user = Users.objects.get(pk=request.user.pk)
+    user.friends.remove(q)
+    PostSubscribers.objects.create(owner=user.username, user_id=q.id)
+    return redirect(reverse('friends', kwargs={'user_pk': user.pk}))
+
+
+def friend_add_primary(request, user_pk):
     q = Users.objects.get(pk=user_pk)
     user = Users.objects.get(pk=request.user.pk)
     user.friends.add(q)

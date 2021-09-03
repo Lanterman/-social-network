@@ -98,7 +98,7 @@
     margin: 30px 0 -15px 0;
 }
 
-#users_home {
+#users_home, .users_subs {
     width: 350px;
     height: 102px;
     padding: 10px;
@@ -106,7 +106,7 @@
     margin: 0px 0 10px 30px;
 }
 
-#users_home img {
+#users_home img, .users_subs img {
     float: left;
     width: 100px;
     height: 100px;
@@ -115,9 +115,52 @@
     margin: 0px 30px -5px 10px;
 }
 
-#users_home img:hover, .group_name:hover {
+#users_home img:hover, .group_name:hover, .users_subs img:hover{
     transform: scale(1.05);
     color: red;
+}
+
+#subs_user i {
+    font-size: 17px;
+    border: solid 2px gray;
+    border-radius: 20px;
+    padding: 0 4px;
+    background-color: gray;
+}
+
+#del_us {
+    float: right;
+    text-decoration: None;
+    font-size: 17px;
+    height: 15px;
+    color: gray;
+}
+
+#del_us:hover {
+    color: red;
+}
+
+.users_subs .group_name {
+    text-decoration: None;
+    margin-top: 20px;
+}
+
+.users_subs .button_home {
+    font-size: 18px;
+    padding: 4px;
+}
+
+.users_subs .primary {
+    color: blue;
+    font-size: 17px;
+}
+
+.users_subs .primary:hover {
+    color: red;
+}
+
+.users_subs #primary {
+    margin-left: 15px;
 }
 
 .group_name {

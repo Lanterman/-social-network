@@ -7,10 +7,40 @@
             </div>
             <div class="modal-body">
                 <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
+                {% if user.pk == request.user.pk and subs %}
+                    <p class="groups_home">Заявки на добавления в друзья</p>
+                    {% for us in subs %}
+                        <p class="users_subs" >
+                            {% if us.user.photo %}
+                                <img src="{{ us.user.photo.url }}">
+                            {% else %}
+                                <img src="/media/users/slen/slen.png/">
+                            {% endif %}
+                            <a class="group_name" href="{{ us.user.get_absolute_url }}">
+                                {{ us.user.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
+                            </a><br><br><br>
+                            <a class="primary" href="{% url 'friend_accept' us.user.pk %}"><i class="fas fa-user-check"> Принять</i></a>
+                            <a id="primary" class="primary" href="{% url 'friend_hide' us.user.pk %}"><i class="fas fa-user-times"> Скрыть</i></a>
+                        </p><br>
+                    {% endfor %}
+                    <hr>
+                    <p class="groups_home">Друзья</p>
+                {% endif %}
                 {% for us in users %}
-                    <p id="users">
-                        <a href="{{ us.get_absolute_url }}">{{ us.get_full_name|default:'Аноним'|truncatechars_html:23|title }}</a>
-                        <a id="a" href="{{ us.get_absolute_url }}">{{ us.email|truncatechars_html:23 }}</a>
+                    <p class="users_subs">
+                        {% if us.photo %}
+                            <img src="{{ us.photo.url }}">
+                        {% else %}
+                            <img src="/media/users/slen/slen.png/">
+                        {% endif %}
+                        <a class="group_name" href="{{ us.get_absolute_url }}">
+                            {{ us.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
+                        </a><br><br><br>
+                        {% if us.pk != request.user.pk %}
+                            <a class="button_home" href="#">Отправить сообщение</a>
+                        {% else %}
+                            <i>Моя страница</i>
+                        {% endif %}
                     </p><br>
                 {% empty %}
                     <h4>Нет {{ users_init|default:"подписчиков" }}</h4>
