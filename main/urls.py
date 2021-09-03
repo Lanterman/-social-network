@@ -30,10 +30,8 @@ urlpatterns = [
     path('groups/<int:friend_pk>/del_friend_primary/', friend_del_primary, name='friend_del_primary'),  # del friend primary
     path('groups/<int:user_pk>/friend_add_primary/', friend_add_primary, name='friend_add_primary'),  # add friend primary
 
-    path('groups/<slug:group_slug>/quit/', group_quit, name='group_quit'),  # quit
-    path('groups/<slug:group_slug>/enter/', group_enter, name='group_enter'),  # entry
+    path('groups/<slug:group_slug>/group_activity/', group_activity, name='group_activity'),  # group activity
     path('groups/<slug:group_slug>/quit_primary/', group_quit_primary, name='group_quit_primary'),  # quit_primary
-
     path("add-rating/", AddStarRating.as_view(), name='add_rating'),  # star_rating
     path('like_view/<int:com_id>/', like_view, name='like_view'),  # like_comment
     path('p/', SearchPublished.as_view(), name='search_published'),  # news_search

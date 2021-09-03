@@ -5,7 +5,7 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% if form.errors %}
-            <p class="errors" id="errors">{{ add }}</p>
+            <p class="errors" id="errors">Ошибка создания!</p>
         {% endif %}
         {% for f in form %}
             {% if form.photo == f and form.photo.value %}

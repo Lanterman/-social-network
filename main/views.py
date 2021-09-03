@@ -3,7 +3,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
@@ -164,7 +163,6 @@ class AddGroup(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Создать группу'
         context['menu'] = menu
-        context['add'] = 'Ошибка создания группы!'
         return context
 
     def post(self, request, *args, **kwargs):
@@ -182,8 +180,8 @@ class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
     slug_url_kwarg = 'group_slug'
 
     def get(self, request, *args, **kwargs):
-        self.user1 = Users.objects.get(pk=request.user.pk)
-        self.object = self.get_object(queryset=Groups.objects.all())
+        self.user = Users.objects.get(pk=request.user.pk)
+        self.object = self.get_object(queryset=Groups.objects.all().prefetch_related('users'))
         self.users = self.object.users.all()
         self.published = []
         for p in self.object.published_set.all().select_related('owner'):
@@ -194,11 +192,10 @@ class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['group'] = self.object
-        context['users'] = self.users
         context['user'] = self.object.owner
+        context['users'] = self.users
         context['primary'] = 'home'
-        if self.user1 in self.users:
-            context['subscriber'] = 'Yes'
+        context['user1'] = self.user
         return context
 
     def get_queryset(self):
@@ -215,7 +212,6 @@ class AddPublished(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Создать запись'
         context['menu'] = menu
-        context['add'] = 'Ошибка создания записи!'
         return context
 
     def post(self, request, *args, **kwargs):
@@ -318,78 +314,33 @@ def del_published(request, pub_slug):
     return redirect(user)
 
 
-# class AbstractUpdate(LoginRequiredMixin, UpdateView):
-#     login_url = '/users/login/'
-#     template_name = 'main/add_pub_group.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['title'] = 'Редактирование!'
-#         context['menu'] = menu
-#         context['add'] = 'Ошибка изменения!'
-#         return context
-#
-#     def post(self, request, *args, **kwargs):
-#         if form.is_valid():
-#             self.group.update(**form.cleaned_data)
-#         return super().post(request, *args, **kwargs)
-#
-#     def form_valid(self, form):
-#         form.save()
-#         return redirect(self.group)
-
-
-class UpdateGroup(LoginRequiredMixin, UpdateView):
-    model = Groups
+class AbstractUpdate(LoginRequiredMixin, UpdateView):
     login_url = '/users/login/'
-    form_class = AddGroupForm
     template_name = 'main/add_pub_group.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Редактирование'
+        context['menu'] = menu
+        context['add'] = 'Ошибка изменения!'
+        return context
+
+
+class UpdateGroup(AbstractUpdate):
+    model = Groups
+    form_class = AddGroupForm
     slug_url_kwarg = 'group_slug'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Редактировать группу'
-        context['menu'] = menu
-        context['add'] = 'Ошибка изменения группы!'
         context['delete'] = 'No'
         return context
 
-    def post(self, request, *args, **kwargs):
-        self.group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
-        form = AddGroupForm(request.POST, request.FILES)
-        if form.is_valid():
-            self.group.update(**form.cleaned_data)
-        return super().post(request, *args, **kwargs)
 
-    def form_valid(self, form):
-        form.save()
-        return redirect(self.group)
-
-
-class UpdatePublished(LoginRequiredMixin, UpdateView):
+class UpdatePublished(AbstractUpdate):
     model = Published
-    login_url = '/users/login/'
     form_class = AddPublishedForm
-    template_name = 'main/add_pub_group.html'
     slug_url_kwarg = 'pub_slug'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Редактировать запись'
-        context['menu'] = menu
-        context['add'] = 'Ошибка изменения записи!'
-        return context
-
-    def post(self, request, *args, **kwargs):
-        self.published = Published.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
-        form = AddPublishedForm(request.POST, request.FILES)
-        if form.is_valid():
-            self.published.update(**form.cleaned_data)
-        return super().post(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        form.save()
-        return redirect(self.published)
 
 
 def friend_del(request, user_pk):
@@ -452,24 +403,20 @@ def friend_add_primary(request, user_pk):
     return redirect(reverse('friends', kwargs={'user_pk': user.pk}))
 
 
-def group_quit(request, group_slug):
+def group_activity(request, group_slug):
     q = Groups.objects.get(slug=group_slug)
-    q.users.remove(request.user)
+    user = Users.objects.get(pk=request.user.pk)
+    if user in q.users.all():
+        q.users.remove(request.user)
+    else:
+        q.users.add(user)
     return redirect(q)
 
 
 def group_quit_primary(request, group_slug):
     q = Groups.objects.get(slug=group_slug)
-    user = Users.objects.get(pk=request.user.pk)
     q.users.remove(request.user)
-    return redirect(reverse('groups', kwargs={'user_pk': user.pk}))
-
-
-def group_enter(request, group_slug):
-    q = Groups.objects.get(slug=group_slug)
-    user = Users.objects.get(pk=request.user.pk)
-    q.users.add(user)
-    return redirect(q)
+    return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
 
 
 class AddStarRating(View):
@@ -522,7 +469,7 @@ class SearchPublished(NewsView):  # Оптимизировать дубли и �
 
 class SearchGroups(GroupsView):  # разобраться с prefetch_related
     def get_queryset(self):
-        return self.group1.filter(name__icontains=self.request.GET.get('search')).prefetch_related('users')
+        return self.group1.filter(name__icontains=self.request.GET.get('search'))
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
