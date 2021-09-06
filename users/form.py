@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, AuthenticationForm
 from django.core.exceptions import ValidationError
+from django.forms import ModelForm
 
-from users.models import Users
+from users.models import Users, Message
 
 
 class AbstractForm(forms.Form):
@@ -86,3 +87,10 @@ class UpdateUserForm(AbstractForm, forms.ModelForm):
     class Meta:
         model = Users
         fields = ('first_name', 'last_name', 'num_tel', 'email')
+
+
+class MessageForm(ModelForm):
+    class Meta:
+        model = Message
+        fields = ['message']
+        labels = {'message': ""}

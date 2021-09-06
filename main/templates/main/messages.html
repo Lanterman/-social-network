@@ -1,0 +1,49 @@
+{% extends 'main/base.html' %}
+{% block content %}
+    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+    <div class="block">
+        <div class="search">
+            {% include 'main/include/search.html' %}
+        </div>
+    </div>
+    <div class="mar">
+        {% for p in chats %}
+            {% if p.message_set.count != 0 %}
+            {% with last_message=p.message_set.last %}
+            <div class="div1">
+                    <pre>{{ last_message.pub_date }}</pre>
+                    <a href="{{ p.get_absolute_url }}">
+                        {% for us in p.members.all %}
+                            {% if us.pk != user.pk %}
+                                <a href="{{ us.get_absolute_url }}">
+                                    <img src="{%if us.photo %}{{ us.photo.url }}{% else %}/media/users/slen/slen.png/{% endif %}">
+                                </a>
+                                <p class="group_margin">
+                                    <a href="{{ us.get_absolute_url }}">
+                                        <i>{{ us.get_full_name|default:"None" }}</i>
+                                    </a>
+                                </p>
+                           {% endif %}
+                        {% endfor %}
+                        <p class="group_margin">
+                            <a href="{{ p.get_absolute_url }}">
+                                {% if last_message.author.pk == user.pk %}
+                                <i> Вы: {{ last_message|default:"Нет сообщений" }}</i>
+                                {% else %}
+                                <i>{{ last_message|default:"Нет сообщений" }}</i>
+                                {% endif %}
+                            </a>
+                        </p>
+                    </a>
+                </div>
+            {% endwith %}
+            {% endif %}
+        {% empty %}
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> У вас нет начатых диалогов!"</p>
+        {% endfor %}
+    </div>
+{% endblock content %}
+
+{% block groups %}
+    {% include 'main/include/aside.html' %}
+{% endblock groups %}

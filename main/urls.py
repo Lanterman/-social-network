@@ -5,7 +5,7 @@ from main.views import *
 urlpatterns = [
     path('', NewsView.as_view(), name='news'),
     path('home/<int:user_pk>/', HomeView.as_view(), name='home'),
-    path('messages/<int:user_pk>/', messages, name='messages'),
+    path('messages/<int:user_pk>/', MessagesView.as_view(), name='messages'),
     path('friends/<int:user_pk>/', FriendsView.as_view(), name='friends'),
     path('groups/<int:user_pk>/', GroupsView.as_view(), name='groups'),
     path('groups/add_group/', AddGroup.as_view(), name='add_group'),
@@ -36,5 +36,6 @@ urlpatterns = [
     path('like_view/<int:com_id>/', like_view, name='like_view'),  # like_comment
     path('p/', SearchPublished.as_view(), name='search_published'),  # news_search
     path('g/', SearchGroups.as_view(), name='search_group'),  # group_search
+    path('m/', SearchMessages.as_view(), name='search_messages'),  # search_messages
     path('f-<int:user_pk>/', SearchFriends.as_view(), name='search_friends'),  # friend_search
 ]

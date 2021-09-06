@@ -27,13 +27,6 @@ class RegisterUser(CreateView):
         return redirect('news')
 
 
-# @login_required(login_url='/users/login/')
-# def profile(request, username):  # Переделать через SingleObjectMixin
-#     user1 = Users.objects.get(username=username)
-#     context = {'title': 'Мой профиль', 'menu': menu, 'user1': user1}
-#     return render(request, 'users/profile.html', context)
-
-
 class ProfileUser(LoginRequiredMixin, DetailView):
     login_url = '/users/login/'
     model = Users
@@ -88,20 +81,3 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
         context['menu'] = menu
         context['button'] = 'Применить'
         return context
-
-
-# @login_required
-# def update(request, slug):
-#     us = Users.objects.get(slug=slug)
-#     form = UpdateUserForm()
-#     if request.method == 'POST':
-#         form = UpdateUserForm(request.POST)
-#         if form.is_valid():
-#             us.first_name = request.POST['first_name']
-#             us.last_name = request.POST['last_name']
-#             us.email = request.POST['email']
-#             us.num_tel = request.POST['num_tel']
-#             us.save()
-#             return redirect('home')
-#     context = {'title': 'Изменить профиль', 'form': form, 'menu': menu}
-#     return render(request, 'users/edit_profile.html', context)

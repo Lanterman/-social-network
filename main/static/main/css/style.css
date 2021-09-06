@@ -660,3 +660,11 @@ color: blue;
 .owner:hover {
     color: red;
 }
+
+.block {
+    margin-top: -30px;
+}
+
+#search {
+    margin-top: -20px;
+}

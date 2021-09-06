@@ -26,3 +26,15 @@ class PostSubscribersAdmin(admin.ModelAdmin):
     list_max_show_all = 5
     list_per_page = 10
 
+
+@admin.register(Chat)
+class ChatAdmin(admin.ModelAdmin):
+    raw_id_fields = ('members',)
+    fields = ('members',)
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'author', 'is_readed', 'pub_date')
+    list_display_links = ('id', 'author')
+    fields = ('chat', 'author', 'message', 'is_readed')

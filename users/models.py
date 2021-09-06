@@ -35,3 +35,40 @@ class PostSubscribers(models.Model):
 
     def __str__(self):
         return f'{self.owner} - {self.user}: {self.date}'
+
+
+class Chat(models.Model):
+    DIALOG = 'D'
+    CHAT = 'C'
+    CHAT_TYPE_CHOICES = (
+        (DIALOG, 'Dialog'),
+        (CHAT, 'Chat')
+    )
+
+    type = models.CharField(
+        'Тип',
+        max_length=1,
+        choices=CHAT_TYPE_CHOICES,
+        default=DIALOG
+    )
+    members = models.ManyToManyField(Users, verbose_name="Участник")
+
+    def __str__(self):
+        return f'{self.pk}'
+
+    # def get_absolute_url(self):
+    #     return reverse('messages', kwargs={'chat_id': self.pk})
+
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE)
+    author = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.CASCADE)
+    message = models.TextField("Сообщение")
+    pub_date = models.DateTimeField('Дата сообщения', auto_now_add=True)
+    is_readed = models.BooleanField('Прочитано', default=False)
+
+    class Meta:
+        ordering = ['pub_date']
+
+    def __str__(self):
+        return self.message

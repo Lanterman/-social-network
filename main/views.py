@@ -9,7 +9,7 @@ from django.views.generic.detail import SingleObjectMixin
 
 from main.form import *
 from main.models import *
-from users.models import PostSubscribers
+from users.models import *
 
 menu = [
     {'name': 'Главная страница', 'url': 'home'},
@@ -100,12 +100,28 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в дру�
         return context
 
 
-def messages(request, user_pk):
-    return HttpResponse('Мои сообщения')
+class MessagesView(LoginRequiredMixin, ListView):
+    model = Chat
+    login_url = 'users/login'
+    template_name = 'main/messages.html'
+
+    def get(self, request, *args, **kwargs):
+        self.chats = Chat.objects.filter(members__in=[request.user.id]).prefetch_related('members')
+        self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['chats'] = self.chats
+        context['object'] = self.object
+        context['menu'] = menu
+        context['title'] = 'Мои сообщения'
+        context['act'] = 'search_messages'
+        context['name'] = 'Поиск сообщений'
+        return context
 
 
 class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
-    Model = Users
     login_url = 'users/login'
     template_name = 'main/friends.html'
     pk_url_kwarg = 'user_pk'
@@ -496,3 +512,7 @@ class SearchFriends(FriendsView):
             Q(last_name__icontains=self.request.GET.get('search'))
         ).exclude(pk=self.request.user.pk)
         return context
+
+
+class SearchMessages(MessagesView):
+    pass
