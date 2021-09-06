@@ -101,7 +101,7 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в дру�
 
 
 class MessagesView(LoginRequiredMixin, ListView):
-    model = Chat
+    context_object_name = 'chats'
     login_url = 'users/login'
     template_name = 'main/messages.html'
 
@@ -112,13 +112,16 @@ class MessagesView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['chats'] = self.chats
+        # context['chats'] = self.chats
         context['object'] = self.object
         context['menu'] = menu
         context['title'] = 'Мои сообщения'
         context['act'] = 'search_messages'
         context['name'] = 'Поиск сообщений'
         return context
+
+    def get_queryset(self):
+        return self.chats
 
 
 class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
@@ -515,4 +518,14 @@ class SearchFriends(FriendsView):
 
 
 class SearchMessages(MessagesView):
-    pass
+
+    def get_queryset(self):
+        return self.chats.filter(
+            Q(members__first_name__icontains=self.request.GET.get('search')) |
+            Q(members__last_name__icontains=self.request.GET.get('search'))
+        )   
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['empty'] = 'Нет диалогов соответствующих запросу!'
+        return context

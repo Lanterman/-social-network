@@ -30,6 +30,30 @@
     box-shadow: 0 0 10px #666;
 }
 
+.div1 #us_mar {
+    margin-top: -200px;
+}
+
+.div1 #pub_date {
+    float:right;
+    font-size: 16px;
+    color: gray;
+    width: 200px;
+    margin: 5px 0 0 0;
+}
+
+.div1 #us_name {
+    font-size: 25px;
+    margin: 2px 400px -10px 180px;
+}
+
+.div1 #messages {
+    background-color: #2E8B57;
+    font-size: 21px;
+    padding: 5px;
+    margin: 40px 5px 0 170px;
+}
+
 .div1 img {
     margin-right: 70px;
     float: left;
