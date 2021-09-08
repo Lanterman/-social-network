@@ -38,3 +38,12 @@ class MessageAdmin(admin.ModelAdmin):
     list_display = ('id', 'author', 'is_readed', 'pub_date')
     list_display_links = ('id', 'author')
     fields = ('chat', 'author', 'message', 'is_readed')
+    actions = ['message_true', 'message_false']
+
+    @admin.action(description='Прочитать сообщения')
+    def message_true(self, request, queryset):
+        queryset.update(is_readed=True)
+
+    @admin.action(description='Отметить как непрочитанные')
+    def message_false(self, request, queryset):
+        queryset.update(is_readed=False)

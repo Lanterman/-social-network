@@ -129,8 +129,8 @@ class ChatDetailView(LoginRequiredMixin, View):
     login_url = 'users/login'
 
     def get(self, request, chat_id):
-        self.group = Groups.objects.exclude(users__username=request.user.username)[:3]
         self.user = Users.objects.get(pk=request.user.pk)
+        self.group = Groups.objects.exclude(users=self.user)[:3]
         self.chat = Chat.objects.prefetch_related('members').get(id=chat_id)
         messages = Message.objects.filter(chat_id=chat_id).select_related('author')
         if self.user in self.chat.members.all():

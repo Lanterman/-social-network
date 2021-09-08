@@ -6,28 +6,26 @@
             {% include 'main/include/search.html' %}
         </div>
     </div>
-    <div class="mar">
+    <div id="mar_can">
         {% for p in chats %}
             {% if p.message_set.count != 0 %}
                 {% with last_message=p.message_set.last %}
-                <div class="div1">
+                <a class="chat" href="{{ p.get_absolute_url }}">
                     <pre id="pub_date">{{ last_message.pub_date }}</pre>
                     {% for us in p.members.all %}
                         {% if us.pk != user.pk %}
-                            <a id="us_a" href="{{ p.get_absolute_url }}">
-                                <img src="{%if us.photo %}{{ us.photo.url }}{% else %}/media/users/slen/slen.png/{% endif %}">
-                                <p class="group_margin" id="us_name"><i>{{ us.get_full_name|default:"None" }}</i></p>
-                            </a>
+                        <img src="{%if us.photo %}{{ us.photo.url }}{% else %}/media/users/slen/slen.png/{% endif %}">
+                        <p id="us_name"><i>{{ us.get_full_name|title|truncatechars_html:40|default:"None" }}</i></p>
                         {% endif %}
                     {% endfor %}
-                    <p class="group_margin" id="messages">
+                    <p class="{% if not last_message.is_readed %}unreaded{% endif %}" id="last_messages">
                         {% if last_message.author.pk == user.pk %}
-                            <i>Вы: {{ last_message }}</i>
+                            <i class="last_messages">Вы: {{ last_message|linebreaksbr|safe|truncatechars_html:66 }}</i>
                         {% else %}
-                            <i>{{ last_message }}</i>
+                            <i class="last_messages">{{ last_message|linebreaksbr|safe|truncatechars_html:60 }}</i>
                         {% endif %}
                     </p>
-                </div>
+                </a>
                 {% endwith %}
             {% endif %}
         {% empty %}
