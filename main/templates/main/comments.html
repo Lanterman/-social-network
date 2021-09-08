@@ -12,7 +12,7 @@
         {% for c in page_obj %}
             <div>
                 <p class="p4"><a href="{{ c.users.get_absolute_url }}">{{ c.users.username }}</a> {{ c.date }}</p>
-                <p id="p2"><i>{{ c.biography }}</i></p>
+                <p id="p2"><i>{{ c.biography|linebreaksbr|safe }}</i></p>
                 <p id="p3">
                     <a href="{% url 'like_view' c.id %}"  title="Лайки">
                         {% if user1 in c.like.all %}

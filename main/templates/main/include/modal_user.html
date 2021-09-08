@@ -37,7 +37,7 @@
                             {{ us.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
                         </a><br><br><br>
                         {% if us.pk != request.user.pk %}
-                            <a class="button_home" href="#">Отправить сообщение</a>
+                            <a class="button_home" href="{% url 'check' us.pk %}">Отправить сообщение</a>
                         {% else %}
                             <i>Моя страница</i>
                         {% endif %}

@@ -20,7 +20,7 @@
             {% if user.pk == request.user.pk %}
                 <p id="edit"><a class="model_user" href="#editPhoto">Изменить фото</a></p>
             {% else %}
-                <a class="button_home" href="#">Отправить сообщение</a>
+                <a class="button_home" href="{% url 'check' user.pk %}">Отправить сообщение</a>
                 <div id="button_home">
                     {% if owner in users %}
                         <a class="model_user" href="{% url 'friend_del' user.pk %}"><i class="fas fa-user-check"></i> Удалить из друзей</a>

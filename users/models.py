@@ -56,14 +56,14 @@ class Chat(models.Model):
     def __str__(self):
         return f'{self.pk}'
 
-    # def get_absolute_url(self):
-    #     return reverse('messages', kwargs={'chat_id': self.pk})
+    def get_absolute_url(self):
+        return reverse('chat', kwargs={'chat_id': self.pk})
 
 
 class Message(models.Model):
     chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE)
     author = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.CASCADE)
-    message = models.TextField("Сообщение")
+    message = models.TextField("Сообщение", blank=True)
     pub_date = models.DateTimeField('Дата сообщения', auto_now_add=True)
     is_readed = models.BooleanField('Прочитано', default=False)
 

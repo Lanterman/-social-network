@@ -37,7 +37,7 @@
         {% if published.photo %}
             <img src="{{ published.photo.url }}" alt="photo">
         {% endif %}
-        <p id="ap1">{{ published.biography|linebreaksbr|capfirst }}</p>
+        <p id="ap1">{{ published.biography|linebreaksbr|safe|capfirst }}</p>
     </div>
     <p id="p123">Автор: <a class="owner" id="a1" href="{{ published.owner.get_absolute_url }}"><i>{{ published.owner }}</i></a></p>
     <p id="aps1" class="aps">

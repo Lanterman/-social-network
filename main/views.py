@@ -1,14 +1,15 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
 
 from main.form import *
 from main.models import *
+from users.form import MessageForm
 from users.models import *
 
 menu = [
@@ -122,6 +123,41 @@ class MessagesView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return self.chats
+
+
+class ChatDetailView(LoginRequiredMixin, View):
+    login_url = 'users/login'
+
+    def get(self, request, chat_id):
+        self.group = Groups.objects.exclude(users__username=request.user.username)[:3]
+        self.user = Users.objects.get(pk=request.user.pk)
+        self.chat = Chat.objects.prefetch_related('members').get(id=chat_id)
+        messages = Message.objects.filter(chat_id=chat_id).select_related('author')
+        if self.user in self.chat.members.all():
+            messages.filter(is_readed=False).exclude(author=self.user).update(is_readed=True)
+        else:
+            self.chat = None
+        context = {'chat': self.chat, 'form': MessageForm(), 'messages': messages, 'menu': menu,
+                   'title': 'Мои сообщения', 'object': self.group}
+        return render(request, 'main/chat.html', context)
+
+    def post(self, request, chat_id):
+        form = MessageForm(data=request.POST)
+        if form.is_valid():
+            Message.objects.create(**form.cleaned_data, chat_id=chat_id, author_id=request.user.pk)
+        return redirect(reverse('chat', kwargs={'chat_id': chat_id}))
+
+
+class CreateDialogView(View):
+    def get(self, request, user_id):
+        chats = Chat.objects.filter(members__in=[request.user.id, user_id]).annotate(c=Count('members')).filter(c=2)
+        if chats.count() == 0:
+            chat = Chat.objects.create()
+            chat.members.add(request.user.pk)
+            chat.members.add(user_id)
+        else:
+            chat = chats.first()
+        return redirect(chat)
 
 
 class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):

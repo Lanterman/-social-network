@@ -9,7 +9,7 @@
             <a class="pub_menu" href="{% url 'update_pub' p.slug %}"><i class="fas fa-pen"></i></a>
         {% endif %}
         <pre>{{ p.date }}</pre>
-        <p id="ap">{{ p.biography|linebreaksbr|truncatechars_html:200 }}</p>
+        <p id="ap">{{ p.biography|linebreaksbr|safe|truncatechars_html:200 }}</p>
         {% if p.photo %}
             <img src="{{ p.photo.url }}" alt="photo"><br><br>
         {% endif %}

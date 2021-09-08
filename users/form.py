@@ -90,6 +90,9 @@ class UpdateUserForm(AbstractForm, forms.ModelForm):
 
 
 class MessageForm(ModelForm):
+    message = forms.CharField(label='Сообщения', widget=forms.Textarea(
+                                    attrs={'placeholder': 'Написать сообщение', 'rows': 5, 'cols': 90}))
+
     class Meta:
         model = Message
         fields = ['message']

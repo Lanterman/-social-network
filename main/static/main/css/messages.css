@@ -1,0 +1,78 @@
+.chat_error {
+    text-align: center ;
+    margin-top: 300px;
+    font-size: 20px;
+}
+
+.messages, .panel {
+    border: solid 2px gray;
+    margin: 20px 300px 0 400px;
+    background-color: #FFFFF0;
+    box-shadow: 0 0 10px #666;
+}
+
+.messages_us {
+    margin: 15px 10px 20px 40px;
+    padding: 10px 0 10px 10px;
+}
+
+.avatar {
+    width: 60px;
+    height: 60px;
+    float: left;
+    border-radius: 50px;
+    border: solid 1px black;
+}
+
+.reply-body {
+    margin-left: 75px;
+}
+
+.reply-body .username {
+    text-decoration: None;
+    font-size: 25px;
+    color: blue;
+}
+
+.reply-body .username:hover {
+    color: red;
+}
+
+.reply-body .pub_date {
+    float: right;
+    font-size: 17px;
+    color: black;
+    margin: 7px 25px 0 0;
+}
+
+.reply-body .text {
+    font-size: 20px;
+    margin: 10px 10px 0 0;
+}
+
+.unreaded {
+    background-color: #DCDCDC;
+}
+
+.no_messages {
+    text-align: center;
+    font-size: 20px;
+    margin: 200px 0;
+}
+
+.panel {
+    margin-bottom: 100px;
+    padding: 5px;
+    background-color: #5F9EA0;
+}
+
+.panel p {
+    margin-left: 20px;
+}
+
+.panel button {
+    float: right;
+    margin: -62px 3px 0 0;
+    font-size: 18px;
+    padding: 6px;
+}
