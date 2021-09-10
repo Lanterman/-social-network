@@ -38,19 +38,6 @@ class PostSubscribers(models.Model):
 
 
 class Chat(models.Model):
-    DIALOG = 'D'
-    CHAT = 'C'
-    CHAT_TYPE_CHOICES = (
-        (DIALOG, 'Dialog'),
-        (CHAT, 'Chat')
-    )
-
-    type = models.CharField(
-        'Тип',
-        max_length=1,
-        choices=CHAT_TYPE_CHOICES,
-        default=DIALOG
-    )
     members = models.ManyToManyField(Users, verbose_name="Участник")
 
     def __str__(self):

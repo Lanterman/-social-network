@@ -12,7 +12,5 @@
     <a class="us-mes" href="{% url 'check' friend.pk %}">Отправить сообщение</a>
     {% if friend in object_list %}
         <a id="mag1" class="us-mes" href="{% url 'friend_del_primary' friend.pk %}">Удалить из друзей</a>
-    {% else %}
-        <a id="mag2" class="us-mes" href="{% url 'friend_add_primary' friend.pk %}">Добавить в друзья</a>
     {% endif %}
 </div>

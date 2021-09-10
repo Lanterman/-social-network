@@ -8,8 +8,8 @@
     </div>
     <div id="mar_can">
         {% for p in chats %}
-            {% if p.message_set.count != 0 %}
-                {% with last_message=p.message_set.last %}
+            {% if p.message_set.count %} <!-- Оптимизировать -->
+                {% with last_message=p.message_set.last %} <!-- Оптимизировать -->
                 <a class="chat" href="{{ p.get_absolute_url }}">
                     <pre id="pub_date">{{ last_message.pub_date }}</pre>
                     {% for us in p.members.all %}
@@ -19,7 +19,7 @@
                         {% endif %}
                     {% endfor %}
                     <p class="{% if not last_message.is_readed %}unreaded{% endif %}" id="last_messages">
-                        {% if last_message.author.pk == user.pk %}
+                        {% if last_message.author_id == user.pk %}
                             <i class="last_messages">Вы: {{ last_message|linebreaksbr|safe|truncatechars_html:66 }}</i>
                         {% else %}
                             <i class="last_messages">{{ last_message|linebreaksbr|safe|truncatechars_html:60 }}</i>

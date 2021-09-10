@@ -19,8 +19,11 @@
                             <a class="group_name" href="{{ us.user.get_absolute_url }}">
                                 {{ us.user.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
                             </a><br><br><br>
-                            <a class="primary" href="{% url 'friend_accept' us.user.pk %}"><i class="fas fa-user-check"> Принять</i></a>
-                            <a id="primary" class="primary" href="{% url 'friend_hide' us.user.pk %}"><i class="fas fa-user-times"> Скрыть</i></a>
+                            <a class="primary" href="{% url 'friend_accept' us.user.pk %}">
+                                <i class="fas fa-user-check"> Принять</i></a>
+                            <a id="primary" class="primary" href="{% url 'friend_hide' us.user.pk %}">
+                                <i class="fas fa-user-times"> Скрыть</i>
+                            </a>
                         </p><br>
                     {% endfor %}
                     <hr>

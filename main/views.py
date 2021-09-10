@@ -20,7 +20,7 @@ menu = [
 ]
 
 
-class NewsView(ListView):
+class NewsView(ListView):  # Оптимизировать
     template_name = 'main/index.html'
     model = Published
     paginate_by = 5
@@ -53,7 +53,7 @@ class NewsView(ListView):
         return self.public
 
 
-class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в друзья только с согласием юзера и вывод групп
+class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
     login_url = '/users/login/'
     model = Users
     form_class = AddPhotoForm
@@ -70,7 +70,7 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в дру�
         if self.object.pk != request.user.pk:
             self.user = Users.objects.get(pk=request.user.pk)
             try:
-                self.subs = PostSubscribers.objects.select_related('user').get(
+                self.subs = PostSubscribers.objects.get(
                     Q(owner=self.user.username, user_id=self.object) |
                     Q(owner=self.object.username, user_id=self.user)
                 )
@@ -101,7 +101,7 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Добавлять в дру�
         return context
 
 
-class MessagesView(LoginRequiredMixin, ListView):
+class MessagesView(LoginRequiredMixin, ListView):  # Оптимизировать
     context_object_name = 'chats'
     login_url = 'users/login'
     template_name = 'main/messages.html'
@@ -113,7 +113,6 @@ class MessagesView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['chats'] = self.chats
         context['object'] = self.object
         context['menu'] = menu
         context['title'] = 'Мои сообщения'
@@ -228,7 +227,7 @@ class AddGroup(LoginRequiredMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
 
-class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
+class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):  # Оптимизировать
     login_url = '/users/login/'
     template_name = 'main/detail_group.html'
     paginate_by = 3
@@ -236,7 +235,7 @@ class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         self.user = Users.objects.get(pk=request.user.pk)
-        self.object = self.get_object(queryset=Groups.objects.all().prefetch_related('users'))
+        self.object = self.get_object(queryset=Groups.objects.all().prefetch_related('users').select_related('owner'))
         self.users = self.object.users.all()
         self.published = []
         for p in self.object.published_set.all().select_related('owner'):
@@ -398,40 +397,33 @@ class UpdatePublished(AbstractUpdate):
     slug_url_kwarg = 'pub_slug'
 
 
-def friend_del(request, user_pk):
+def friend_activity(request, user_pk):
     q = Users.objects.get(pk=user_pk)
     user = Users.objects.get(pk=request.user.pk)
-    q.friends.remove(request.user)
-    PostSubscribers.objects.create(owner=user.username, user_id=q.id)
-    return redirect(q)
-
-
-def friend_add(request, user_pk):
-    q = Users.objects.get(pk=user_pk)
-    user = Users.objects.get(pk=request.user.pk)
-    PostSubscribers.objects.create(owner=q.username, user_id=user.id)
-    return redirect(q)
-
-
-def friend_answer(request, user_pk):
-    q = Users.objects.get(pk=user_pk)
-    user = Users.objects.get(pk=request.user.pk)
-    user.friends.add(q)
-    PostSubscribers.objects.filter(Q(owner=q.username, user_id=user.id) | Q(owner=user.username, user_id=q.id)).delete()
-    return redirect(q)
-
-
-def friend_not_add(request, user_pk):
-    q = Users.objects.get(pk=user_pk)
-    user = Users.objects.get(pk=request.user.pk)
-    PostSubscribers.objects.filter(Q(owner=q.username, user_id=user.id) | Q(owner=user.username, user_id=q.id)).delete()
+    try:
+        subs = PostSubscribers.objects.select_related('user').get(
+            Q(owner=user.username, user_id=q.pk) |
+            Q(owner=q.username, user_id=user.pk)
+        )
+    except Exception:
+        subs = ''
+    if q in user.friends.all():
+        q.friends.remove(request.user)
+        PostSubscribers.objects.create(owner=user.username, user_id=q.id)
+    elif not subs:
+        PostSubscribers.objects.create(owner=q.username, user_id=user.id)
+    elif subs.owner != q.username:
+        user.friends.add(q)
+        PostSubscribers.objects.filter(owner=user.username, user_id=q.id).delete()
+    elif subs.owner == q.username:
+        PostSubscribers.objects.filter(owner=q.username, user_id=user.id).delete()
     return redirect(q)
 
 
 def friend_hide(request, user_pk):
     q = Users.objects.get(pk=user_pk)
     user = Users.objects.get(pk=request.user.pk)
-    PostSubscribers.objects.filter(Q(owner=q.username, user_id=user.id) | Q(owner=user.username, user_id=q.id)).delete()
+    PostSubscribers.objects.filter(owner=user.username, user_id=q.id).delete()
     return redirect(user)
 
 
@@ -439,22 +431,15 @@ def friend_accept(request, user_pk):
     q = Users.objects.get(pk=user_pk)
     user = Users.objects.get(pk=request.user.pk)
     user.friends.add(q)
-    PostSubscribers.objects.filter(Q(owner=q.username, user_id=user.id) | Q(owner=user.username, user_id=q.id)).delete()
+    PostSubscribers.objects.filter(owner=user.username, user_id=q.id).delete()
     return redirect(user)
 
 
-def friend_del_primary(request, friend_pk):
-    q = Users.objects.get(pk=friend_pk)
+def friend_del_primary(request, user_pk):
+    q = Users.objects.get(pk=user_pk)
     user = Users.objects.get(pk=request.user.pk)
     user.friends.remove(q)
     PostSubscribers.objects.create(owner=user.username, user_id=q.id)
-    return redirect(reverse('friends', kwargs={'user_pk': user.pk}))
-
-
-def friend_add_primary(request, user_pk):
-    q = Users.objects.get(pk=user_pk)
-    user = Users.objects.get(pk=request.user.pk)
-    user.friends.add(q)
     return redirect(reverse('friends', kwargs={'user_pk': user.pk}))
 
 
@@ -522,7 +507,7 @@ class SearchPublished(NewsView):  # Оптимизировать дубли и �
         return context
 
 
-class SearchGroups(GroupsView):  # разобраться с prefetch_related
+class SearchGroups(GroupsView):
     def get_queryset(self):
         return self.group1.filter(name__icontains=self.request.GET.get('search'))
 
@@ -554,12 +539,11 @@ class SearchFriends(FriendsView):
 
 
 class SearchMessages(MessagesView):
-
     def get_queryset(self):
         return self.chats.filter(
             Q(members__first_name__icontains=self.request.GET.get('search')) |
             Q(members__last_name__icontains=self.request.GET.get('search'))
-        )   
+        ).distinct()
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)

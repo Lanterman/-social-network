@@ -11,7 +11,7 @@
         <strong>
             <a class="username" href="{{ message_item.author.get_absolute_url }}">{{ message_item.author.get_full_name|title|truncatechars_html:50 }}</a>
         </strong>
-        <span class="pub_date">{{ message_item.pub_date|utc }}</span>
+        <span class="pub_date">{{ message_item.pub_date }}</span>
         <p class="text">{{ message_item.message|linebreaksbr|safe}}</p>
     </div>
 </div>

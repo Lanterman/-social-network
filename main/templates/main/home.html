@@ -23,13 +23,15 @@
                 <a class="button_home" href="{% url 'check' user.pk %}">Отправить сообщение</a>
                 <div id="button_home">
                     {% if owner in users %}
-                        <a class="model_user" href="{% url 'friend_del' user.pk %}"><i class="fas fa-user-check"></i> Удалить из друзей</a>
+                        <a class="model_user" href="{% url 'friend_activity' user.pk %}">
+                            <i class="fas fa-user-check"></i> Удалить из друзей
+                        </a>
                     {% elif not subs %}
-                        <a class="button_home" href="{% url 'friend_add' user.pk %}">Добавить в друзья</a>
+                        <a class="button_home" href="{% url 'friend_activity' user.pk %}">Добавить в друзья</a>
                     {% elif subs.owner != user.username %}
-                        <a class="button_home" href="{% url 'friend_answer' user.pk %}">Ответить на заявку</a>
+                        <a class="button_home" href="{% url 'friend_activity' user.pk %}">Ответить на заявку</a>
                     {% elif subs.owner == user.username %}
-                        <a class="button_home" href="{% url 'friend_not_add' user.pk %}">Отменить заявку</a>
+                        <a class="button_home" href="{% url 'friend_activity' user.pk %}">Отменить заявку</a>
                     {% endif %}
                 </div>
             {% endif %}
