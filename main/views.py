@@ -59,7 +59,7 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
     context_object_name = 'user'
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Users.objects.all())
+        self.object = self.get_object(queryset=Users.objects.all().prefetch_related('friends'))
         self.users = self.object.friends.all()
         self.group = Groups.objects.filter(users=self.object).prefetch_related('users')
         self.my_groups = Groups.objects.filter(owner=self.object).prefetch_related('users')
@@ -90,8 +90,7 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
         context['page_obj'] = self.published
         context['primary'] = 'home'
         context['my_groups'] = self.my_groups
-        if self.user:
-            context['owner'] = self.user
+        context['owner'] = self.user
         context['subs'] = self.subs
         return context
 
