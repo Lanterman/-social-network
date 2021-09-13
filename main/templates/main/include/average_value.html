@@ -1,4 +1,4 @@
-{% for p, average in page_obj %}
+{% for p in page_obj %}
     <div class="p">
         <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:30|capfirst  }}</a>
         {% if  user.pk == request.user.pk and primary %}
@@ -16,8 +16,8 @@
         <p id="aps">
             <span class="span1">
                 <b class="b1">Оценка пользователей:</b>
-                {% if average.avg %}
-                    <span class="editContent">{{ average.avg }} / 5,0</span>
+                {% if p.rat %}
+                    <span class="editContent">{{ p.rat }} / 5,0</span>
                 {% else%}
                     <span class="editContent">Нет</span>
                 {% endif %}

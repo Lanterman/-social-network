@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, Count
+from django.db.models import Q, Avg, Count
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
@@ -20,9 +20,8 @@ menu = [
 ]
 
 
-class NewsView(ListView):  # Оптимизировать
+class NewsView(ListView):
     template_name = 'main/index.html'
-    model = Published
     paginate_by = 5
 
     def get_context_data(self, **kwargs):
@@ -35,22 +34,20 @@ class NewsView(ListView):  # Оптимизировать
         return context
 
     def get(self, request, *args, **kwargs):
-        self.public = []
-        published = Published.objects.all().select_related('owner', 'group')
         if request.user.is_authenticated:
             self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
-            self.group1 = Groups.objects.filter(users__username=request.user.username)
-            for p in published:
-                if p.group in self.group1:
-                    self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
+            self.group = Groups.objects.filter(users__username=request.user.username)
+            self.published = Published.objects.filter(
+                group_id__in=[gr.id for gr in self.group]).select_related('owner').annotate(
+                rat=Avg('rating__star_id')).order_by('-date')
         else:
             self.object = Groups.objects.all()[:3]
-            for p in published:
-                self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
+            self.published = Published.objects.all().select_related('owner').annotate(
+                rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.public
+        return self.published
 
 
 class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
@@ -78,10 +75,8 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
                 self.subs = ''
         else:
             self.subs = PostSubscribers.objects.filter(owner=self.object.username).select_related('user')
-        published = Published.objects.filter(owner=self.object).select_related('owner')
-        self.public = []
-        for p in published:
-            self.public += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
+        self.published = Published.objects.filter(owner=self.object).select_related('owner').annotate(
+            rat=Avg('rating__star_id'))
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -92,7 +87,7 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
         context['groups'] = self.group
         context['users_init'] = 'друзей'
         context['center_friends'] = 'Друзья'
-        context['page_obj'] = self.public
+        context['page_obj'] = self.published
         context['primary'] = 'home'
         context['my_groups'] = self.my_groups
         if self.user:
@@ -171,6 +166,7 @@ class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
         context['act'] = 'search_friends'
         context['name'] = 'Поиск друзей'
         context['recommendation'] = 'друзья'
+        context['object'] = self.object
         return context
 
     def get(self, request, *args, **kwargs):
@@ -185,12 +181,10 @@ class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
 class GroupsView(LoginRequiredMixin, ListView):
     login_url = '/users/login/'
     template_name = 'main/groups.html'
-    model = Groups
     context_object_name = 'groups'
 
     def get(self, request, *args, **kwargs):
-        self.main_group = Groups.objects.filter(owner_id__id=request.user.pk)
-        self.group1 = Groups.objects.filter(users__pk=request.user.pk).prefetch_related('users')
+        self.group = Groups.objects.filter(users__pk=request.user.pk).prefetch_related('users')
         self.object = Groups.objects.exclude(users__pk=request.user.pk)[:3]
         return super().get(request, *args, **kwargs)
 
@@ -198,14 +192,13 @@ class GroupsView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['title'] = 'Мои группы'
-        context['main_group'] = self.main_group
         context['object'] = self.object
         context['name'] = 'Поиск группы'
         context['act'] = 'search_group'
         return context
 
     def get_queryset(self):
-        return self.group1
+        return self.group
 
 
 class AddGroup(LoginRequiredMixin, CreateView):
@@ -227,7 +220,7 @@ class AddGroup(LoginRequiredMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
 
-class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):  # Оптимизировать
+class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
     login_url = '/users/login/'
     template_name = 'main/detail_group.html'
     paginate_by = 3
@@ -237,9 +230,8 @@ class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):  # Оп�
         self.user = Users.objects.get(pk=request.user.pk)
         self.object = self.get_object(queryset=Groups.objects.all().prefetch_related('users').select_related('owner'))
         self.users = self.object.users.all()
-        self.published = []
-        for p in self.object.published_set.all().select_related('owner'):
-            self.published += [[p, p.average(p.name)]]  # Оптимизировать вывод среднего значения рейтинга
+        self.published = Published.objects.filter(group_id=self.object).select_related('owner').annotate(
+            rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -277,30 +269,23 @@ class AddPublished(LoginRequiredMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
 
-class DetailPublish(DetailView):  # Оптимизировать рейтинг
+class DetailPublish(DetailView):
     model = Published
     slug_url_kwarg = 'publish_slug'
     template_name = 'main/detail_publish.html'
-    queryset = Published.objects.all().select_related('group', 'owner')
+    queryset = Published.objects.all().select_related('group', 'owner').annotate(rat=Avg('rating__star_id'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
         context['star_form'] = RatingForm()
-        if self.user1:
+        if self.request.user.is_authenticated:
             try:
-                context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related().get(ip=self.user1)
+                context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related('star').get(
+                    ip=self.request.user)
             except Exception:
                 pass
-        context['average'] = self.object.average(self.object)
         return context
-
-    def get(self, request, *args, **kwargs):
-        self.user1 = ''
-        self.object = self.get_object(queryset=Published.objects.all())
-        if request.user.is_authenticated:
-            self.user1 = request.user
-        return super().get(request, *args, **kwargs)
 
 
 class PublishedCommentsView(SingleObjectMixin, ListView):
@@ -309,19 +294,17 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
     slug_url_kwarg = 'publish_slug'
 
     def get(self, request, *args, **kwargs):
-        self.user = ''
-        if request.user.is_authenticated:
-            self.user = Users.objects.get(username=request.user.username)
         self.object = self.get_object(queryset=Published.objects.all())
         self.comments = Comments.objects.filter(published=self.object).select_related('users').prefetch_related('like')
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Комментарии'
         context['menu'] = menu
         context['published'] = self.object
-        context['title'] = 'Комментарии'
-        context['user1'] = self.user
+        if self.request.user.is_authenticated:
+            context['user1'] = Users.objects.get(username=self.request.user.username)
         return context
 
     def get_queryset(self):
@@ -444,7 +427,7 @@ def friend_del_primary(request, user_pk):
 
 
 def group_activity(request, group_slug):
-    q = Groups.objects.get(slug=group_slug)
+    q = Groups.objects.prefetch_related('users').get(slug=group_slug)
     user = Users.objects.get(pk=request.user.pk)
     if user in q.users.all():
         q.users.remove(request.user)
@@ -476,7 +459,7 @@ class AddStarRating(View):
 
 @login_required(login_url='/users/login/')
 def like_view(request, com_id):
-    comment = Comments.objects.get(id=com_id)
+    comment = Comments.objects.prefetch_related('like').get(id=com_id)
     user = Users.objects.get(username=request.user.username)
     if user in comment.like.all():
         comment.like.remove(user)
@@ -485,31 +468,23 @@ def like_view(request, com_id):
     return redirect(comment)
 
 
-class SearchPublished(NewsView):  # Оптимизировать дубли и рейтинг
-    def get(self, request, *args, **kwargs):
-        self.published = []
-        self.public = Published.objects.filter(
+class SearchPublished(NewsView):
+    def get_queryset(self):
+        return Published.objects.filter(
             Q(name__icontains=self.request.GET.get('search')) |
             Q(owner__username__icontains=self.request.GET.get('search'))
-        ).select_related('owner')
-        for p in self.public:
-            self.published += [[p, p.average(p.name)]]
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(self):
-        return self.published
+        ).select_related('owner').annotate(rat=Avg('rating__star_id')).order_by('-date')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['empty'] = 'Нет записей соответствующих запросу!'
         context['search'] = f'search={self.request.GET.get("search")}&'
-        context['count'] = len(self.published)
         return context
 
 
 class SearchGroups(GroupsView):
     def get_queryset(self):
-        return self.group1.filter(name__icontains=self.request.GET.get('search'))
+        return self.group.filter(name__icontains=self.request.GET.get('search'))
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
