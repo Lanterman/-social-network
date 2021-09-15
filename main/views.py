@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Avg, Count, Prefetch
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -9,15 +8,9 @@ from django.views.generic.detail import SingleObjectMixin
 
 from main.form import *
 from main.models import *
+from main.utils import *
 from users.form import MessageForm
 from users.models import *
-
-menu = [
-    {'name': 'Главная страница', 'url': 'home'},
-    {'name': 'Сообщения', 'url': 'messages'},
-    {'name': 'Друзья', 'url': 'friends'},
-    {'name': 'Группы', 'url': 'groups'}
-]
 
 
 class NewsView(ListView):
@@ -50,8 +43,7 @@ class NewsView(ListView):
         return self.published
 
 
-class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
-    login_url = '/users/login/'
+class HomeView(DataMixin, UpdateView):  # Оптимизировать
     model = Users
     form_class = AddPhotoForm
     template_name = 'main/home.html'
@@ -82,7 +74,6 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Главная страница'
-        context['menu'] = menu
         context['users'] = self.users
         context['groups'] = self.group
         context['users_init'] = 'друзей'
@@ -92,16 +83,15 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
         context['my_groups'] = self.my_groups
         context['owner'] = self.user
         context['subs'] = self.subs
-        return context
+        return context | self.get_context()
 
 
-class MessagesView(LoginRequiredMixin, ListView):
+class MessagesView(DataMixin, ListView):
     context_object_name = 'chats'
-    login_url = 'users/login'
     template_name = 'main/messages.html'
 
     def get(self, request, *args, **kwargs):
-        self.chats = Chat.objects.filter(members__in=[request.user.id]).prefetch_related(
+        self.chats = Chat.objects.filter(members=request.user.id).prefetch_related(
             'members',
             Prefetch(
                 'message_set',
@@ -115,19 +105,16 @@ class MessagesView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['object'] = self.object
-        context['menu'] = menu
         context['title'] = 'Мои сообщения'
         context['act'] = 'search_messages'
         context['name'] = 'Поиск сообщений'
-        return context
+        return context | self.get_context()
 
     def get_queryset(self):
         return self.chats
 
 
-class ChatDetailView(LoginRequiredMixin, View):
-    login_url = 'users/login'
-
+class ChatDetailView(DataMixin, View):
     def get(self, request, chat_id):
         self.user = Users.objects.get(pk=request.user.pk)
         self.group = Groups.objects.exclude(users=self.user)[:3]
@@ -160,20 +147,18 @@ class CreateDialogView(View):
         return redirect(chat)
 
 
-class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
-    login_url = 'users/login'
+class FriendsView(DataMixin, SingleObjectMixin, ListView):
     template_name = 'main/friends.html'
     pk_url_kwarg = 'user_pk'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
         context['title'] = 'Мои друзья'
         context['act'] = 'search_friends'
         context['name'] = 'Поиск друзей'
         context['recommendation'] = 'друзья'
         context['object'] = self.object
-        return context
+        return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
         self.users = Users.objects.filter(friends__pk=request.user.pk)
@@ -184,8 +169,7 @@ class FriendsView(LoginRequiredMixin, SingleObjectMixin, ListView):
         return self.users
 
 
-class GroupsView(LoginRequiredMixin, ListView):
-    login_url = '/users/login/'
+class GroupsView(DataMixin, ListView):
     template_name = 'main/groups.html'
     context_object_name = 'groups'
 
@@ -196,27 +180,24 @@ class GroupsView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
         context['title'] = 'Мои группы'
         context['object'] = self.object
         context['name'] = 'Поиск группы'
         context['act'] = 'search_group'
-        return context
+        return context | self.get_context()
 
     def get_queryset(self):
         return self.group
 
 
-class AddGroup(LoginRequiredMixin, CreateView):
-    login_url = '/users/login/'
+class AddGroup(DataMixin, CreateView):
     form_class = AddGroupForm
     template_name = 'main/add_pub_group.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Создать группу'
-        context['menu'] = menu
-        return context
+        return context | self.get_context()
 
     def post(self, request, *args, **kwargs):
         form = AddGroupForm(request.POST, request.FILES)
@@ -226,8 +207,7 @@ class AddGroup(LoginRequiredMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
 
-class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
-    login_url = '/users/login/'
+class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
     template_name = 'main/detail_group.html'
     paginate_by = 3
     slug_url_kwarg = 'group_slug'
@@ -242,29 +222,25 @@ class DetailGroupView(LoginRequiredMixin, SingleObjectMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
         context['group'] = self.object
         context['user'] = self.object.owner
         context['users'] = self.users
         context['primary'] = 'home'
         context['user1'] = self.user
-        return context
+        return context | self.get_context()
 
     def get_queryset(self):
         return self.published
 
 
-class AddPublished(LoginRequiredMixin, CreateView):
-    login_url = '/users/login/'
+class AddPublished(DataMixin, CreateView):
     form_class = AddPublishedForm
     template_name = 'main/add_pub_group.html'
     slug_url_kwarg = 'group_slug'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Создать запись'
-        context['menu'] = menu
-        return context
+        return context | self.get_context(title='Создать запись')
 
     def post(self, request, *args, **kwargs):
         group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
@@ -317,8 +293,7 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
         return self.comments
 
 
-class AddCommentView(LoginRequiredMixin, CreateView):
-    login_url = '/users/login/'
+class AddCommentView(DataMixin, CreateView):
     template_name = 'main/add_comment.html'
     slug_url_kwarg = 'publish_slug'
     form_class = AddCommentForm
@@ -333,9 +308,7 @@ class AddCommentView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
-        context['title'] = 'Добавить комментарий'
-        return context
+        return context | self.get_context(title='Добавить комментарий')
 
 
 # Logic
@@ -357,16 +330,12 @@ def del_published(request, pub_slug):
     return redirect(user)
 
 
-class AbstractUpdate(LoginRequiredMixin, UpdateView):
-    login_url = '/users/login/'
+class AbstractUpdate(DataMixin, UpdateView):
     template_name = 'main/add_pub_group.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Редактирование'
-        context['menu'] = menu
-        context['add'] = 'Ошибка изменения!'
-        return context
+        return context | self.get_context(title='Редактирование', add='Ошибка изменения!')
 
 
 class UpdateGroup(AbstractUpdate):
@@ -376,8 +345,7 @@ class UpdateGroup(AbstractUpdate):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['delete'] = 'No'
-        return context
+        return context | self.get_context(delete='No')
 
 
 class UpdatePublished(AbstractUpdate):

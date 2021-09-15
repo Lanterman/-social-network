@@ -1,11 +1,10 @@
 from django.contrib.auth import login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DetailView
 
-from main.views import menu
+from main.utils import *
 from users.form import *
 from users.models import Users
 
@@ -27,17 +26,14 @@ class RegisterUser(CreateView):
         return redirect('news')
 
 
-class ProfileUser(LoginRequiredMixin, DetailView):
-    login_url = '/users/login/'
+class ProfileUser(DataMixin, DetailView):
     model = Users
     template_name = 'users/profile.html'
     pk_url_kwarg = 'user_pk'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
-        context['title'] = 'Мой профиль'
-        return context
+        return context | self.get_context(title='Мой профиль')
 
 
 def logout_view(request):
@@ -68,8 +64,7 @@ class PasswordChangeUser(PasswordChangeView):
         return context
 
 
-class UpdateUserView(LoginRequiredMixin, UpdateView):
-    login_url = '/users/login/'
+class UpdateUserView(DataMixin, UpdateView):
     model = Users
     form_class = UpdateUserForm
     template_name = 'users/edit_profile.html'
@@ -77,7 +72,4 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Изменить профиль'
-        context['menu'] = menu
-        context['button'] = 'Применить'
-        return context
+        return context | self.get_context(title='Изменить профиль', button='Применить')
