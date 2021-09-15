@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, Avg, Count
+from django.db.models import Q, Avg, Count, Prefetch
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
@@ -95,13 +95,20 @@ class HomeView(LoginRequiredMixin, UpdateView):  # Оптимизировать
         return context
 
 
-class MessagesView(LoginRequiredMixin, ListView):  # Оптимизировать
+class MessagesView(LoginRequiredMixin, ListView):
     context_object_name = 'chats'
     login_url = 'users/login'
     template_name = 'main/messages.html'
 
     def get(self, request, *args, **kwargs):
-        self.chats = Chat.objects.filter(members__in=[request.user.id]).prefetch_related('members')
+        self.chats = Chat.objects.filter(members__in=[request.user.id]).prefetch_related(
+            'members',
+            Prefetch(
+                'message_set',
+                queryset=Message.objects.filter(chat__members=request.user.id).order_by('-pub_date'),
+                to_attr='set_mes'
+            )
+        )
         self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
         return super().get(request, *args, **kwargs)
 
@@ -144,12 +151,12 @@ class ChatDetailView(LoginRequiredMixin, View):
 class CreateDialogView(View):
     def get(self, request, user_id):
         chats = Chat.objects.filter(members__in=[request.user.id, user_id]).annotate(c=Count('members')).filter(c=2)
-        if chats.count() == 0:
+        if chats.count():
+            chat = chats.first()
+        else:
             chat = Chat.objects.create()
             chat.members.add(request.user.pk)
             chat.members.add(user_id)
-        else:
-            chat = chats.first()
         return redirect(chat)
 
 
@@ -512,7 +519,7 @@ class SearchFriends(FriendsView):
         return context
 
 
-class SearchMessages(MessagesView):
+class SearchMessages(MessagesView):  # Убрать из members текущего пользователя(из запроса, а не базы данных)
     def get_queryset(self):
         return self.chats.filter(
             Q(members__first_name__icontains=self.request.GET.get('search')) |
