@@ -35,8 +35,6 @@ class AddPublishedForm(forms.ModelForm):
 
 
 class AddPhotoForm(forms.ModelForm):
-    # photo = forms.FileField(label='Фото', widget=forms.FileInput)
-
     class Meta:
         model = Users
         fields = ('photo',)
