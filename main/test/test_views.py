@@ -63,8 +63,8 @@ class HomeViewTest(TestCase):
 
     def test_view_url(self):
         user = Users.objects.get(first_name='user_0')
-        resp = self.client.get(reverse('home', kwargs={'user_pk': user.id}))
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.id}), follow=True)
+        self.assertEqual(resp.status_code, 200)
 
     def test_user_friends(self):
         user = Users.objects.get(first_name='user_0')
@@ -87,15 +87,15 @@ class MessagesViewTest(TestCase):
 
     def test_view_url(self):
         user = Users.objects.get(first_name='user_1')
-        resp = self.client.get(reverse('messages', kwargs={'user_pk': user.pk}))
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(reverse('messages', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
 
     def test_chat_members(self):
         users = Users.objects.all()
         chat = Chat.objects.create()
         chat.members.add(users[0], users[1])
-        resp = self.client.get(f'/messages/{users[0].pk}/')
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(f'/messages/{users[0].pk}/', follow=True)
+        self.assertEqual(resp.status_code, 200)
         self.assertEqual(chat.members.count(), 2)
         self.assertFalse(users[2] in chat.members.all())
         self.assertTrue(users[0] in chat.members.all())
@@ -117,8 +117,8 @@ class ChatDetailViewTest(TestCase):
 
     def test_view_url(self):
         chat = Chat.objects.get(id=1)
-        resp = self.client.get(f'/messages/chat/{chat.id}/')
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(f'/messages/chat/{chat.id}/', follow=True)
+        self.assertEqual(resp.status_code, 200)
 
     def test_chat_is_messages(self):
         chat = Chat.objects.all()
@@ -174,8 +174,8 @@ class DetailGroupViewTest(TestCase):
 
     def test_view_url(self):
         group = Groups.objects.get(name='group_1')
-        resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}))
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}), follow=True)
+        self.assertEqual(resp.status_code, 200)
 
     def test_group_and_user(self):
         group = Groups.objects.all()
@@ -199,6 +199,7 @@ class DetailPublishTest(TestCase):
         pub = Published.objects.get(name='pub_1')
         resp = self.client.get(reverse('detail_publish', kwargs={'publish_slug': pub.slug}))
         self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/detail_publish.html')
 
     def test_published_rating(self):
         published = Published.objects.annotate(rat=Avg('rating__star_id')).order_by('-date').get(name='pub_1')
@@ -215,8 +216,8 @@ class DelGroupTest(TestCase):
 
     def test_view_url(self):
         user = User.objects.get(username='user')
-        resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}))
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
 
     def test_del_group(self):
         group = Groups.objects.filter(name='group')
@@ -234,8 +235,8 @@ class DelPubGroupTest(TestCase):
 
     def test_view_url(self):
         group = Groups.objects.get(name='group')
-        resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}))
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}), follow=True)
+        self.assertEqual(resp.status_code, 200)
 
     def test_del_pub_group(self):
         pub = Published.objects.filter(name='pub_1')
@@ -255,8 +256,8 @@ class DelPublishedTest(TestCase):
 
     def test_view_url(self):
         user = User.objects.get(username='user')
-        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}))
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
 
     def test_del_pub_group(self):
         pub = Published.objects.filter(name='pub_1')
@@ -279,8 +280,8 @@ class FriendActivityTest(TestCase):
 
     def test_view_url(self):
         user = User.objects.get(username='user_1')
-        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}))
-        self.assertEqual(resp.status_code, 302)
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
 
     def test_del_friend(self):
         users = Users.objects.all()
@@ -299,33 +300,164 @@ class FriendActivityTest(TestCase):
 
     def test_add_friend(self):
         users = Users.objects.all()
-        post = PostSubscribers.objects.filter(owner=users[1].username, user_id=users[0].id)
+        post = PostSubscribers.objects.all()
         self.assertEqual(post.count() == 1, users[2].friends.count() == 0)
         users[2].friends.add(users[0])
         post.delete()
         self.assertEqual(post.count() == 0, users[2].friends.count() == 1)
 
     def test_del_post(self):
-        users = Users.objects.all()
-        post = PostSubscribers.objects.filter(owner=users[1].username, user_id=users[0].id)
+        post = PostSubscribers.objects.all()
         self.assertEqual(post.count(), 1)
         post.delete()
         self.assertEqual(post.count(), 0)
 
 
-# class FriendHideTest(TestCase):
-#
-#     @classmethod
-#     def setUpTestData(cls):
-#         for user_num in range(1, 4):
-#             Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-#                                  last_name='user_%s' % user_num, num_tel=12345678910,
-#                                  email='user_%s@mail.ru' % user_num)
-#         users = Users.objects.all()
-#         users[0].friends.add(users[1])
-#         PostSubscribers.objects.create(owner='user_2', user=users[0])
-#
-#     def test_view_url(self):
-#         user = User.objects.get(username='user_1')
-#         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}))
-#         self.assertEqual(resp.status_code, 302)
+class FriendHideTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user = Users.objects.create(username='user', first_name='user', last_name='user', num_tel=12345678910)
+        PostSubscribers.objects.create(owner='user_2', user=user)
+
+    def test_view_url(self):
+        user = User.objects.get(username='user')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_del_post(self):
+        post = PostSubscribers.objects.all()
+        self.assertEqual(post.count(), 1)
+        post.delete()
+        self.assertEqual(post.count(), 0)
+
+
+class FriendAcceptTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        for user_num in range(1, 3):
+            Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
+                                 last_name='user_%s' % user_num, num_tel=12345678910,
+                                 email='user_%s@mail.ru' % user_num)
+        users = Users.objects.all()
+        PostSubscribers.objects.create(owner=users[1].username, user=users[0])
+
+    def test_view_url(self):
+        user = User.objects.get(username='user_1')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_add_friend(self):
+        users = Users.objects.all()
+        post = PostSubscribers.objects.all()
+        self.assertEqual(post.count() == 1, users[1].friends.count() == 0)
+        users[1].friends.add(users[0])
+        post.delete()
+        self.assertEqual(post.count() == 0, users[1].friends.count() == 1)
+
+
+class FriendDelPrimaryTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        for user_num in range(1, 3):
+            Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
+                                 last_name='user_%s' % user_num, num_tel=12345678910,
+                                 email='user_%s@mail.ru' % user_num)
+        users = Users.objects.all()
+        users[0].friends.add(users[1])
+
+    def test_view_url(self):
+        user = User.objects.get(username='user_1')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_del_friend(self):
+        users = Users.objects.all()
+        post = PostSubscribers.objects.all()
+        self.assertEqual(users[0].friends.count() == 1, post.count() == 0)
+        users[0].friends.remove(users[1])
+        post.create(owner=users[0].username, user_id=users[1].id)
+        self.assertEqual(users[0].friends.count() == 0, post.count() == 1)
+
+
+class GroupActivityTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        Users.objects.create(username='user', first_name='user', last_name='user', num_tel=123456789, email='s@mail.ru')
+        user = Users.objects.create(username='user2', first_name='user2', last_name='user2', num_tel=12345678910)
+        group = Groups.objects.create(name='group', slug='group')
+        group.users.add(user)
+
+    def test_view_url(self):
+        group = Groups.objects.get(name='group')
+        resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_remove_user(self):
+        user = Users.objects.get(username='user2')
+        group = Groups.objects.get(name='group')
+        self.assertEqual(group.users.count(), 1)
+        group.users.remove(user)
+        self.assertEqual(group.users.count(), 0)
+
+    def test_add_user(self):
+        user = Users.objects.get(username='user')
+        group = Groups.objects.get(name='group')
+        self.assertEqual(group.users.count(), 1)
+        group.users.add(user)
+        self.assertEqual(group.users.count(), 2)
+
+
+class GroupQuitPrimaryTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user = Users.objects.create(username='user', first_name='user', last_name='user', num_tel=12345678910)
+        group = Groups.objects.create(name='group', slug='group')
+        group.users.add(user)
+
+    def test_view_url(self):
+        user = Users.objects.get(username='user')
+        resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_remove_user(self):
+        user = Users.objects.get(username='user')
+        group = Groups.objects.get(name='group')
+        self.assertEqual(group.users.count(), 1)
+        group.users.remove(user)
+        self.assertEqual(group.users.count(), 0)
+
+
+class LikeViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        Users.objects.create(username='user', first_name='user', last_name='user', num_tel=123456789, email='s@mail.ru')
+        user = Users.objects.create(username='user2', first_name='user2', last_name='user2', num_tel=12345678910)
+        group = Groups.objects.create(name='group', slug='group')
+        pub = Published.objects.create(name='pub', slug='pub', group=group)
+        comment = Comments.objects.create(published=pub, users=user, biography='why???')
+        comment.like.add(user)
+
+    def test_view_url(self):
+        publish = Published.objects.get(name='pub')
+        resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_remove_user(self):
+        user = Users.objects.get(username='user2')
+        comment = Comments.objects.get(biography='why???')
+        self.assertEqual(comment.like.count(), 1)
+        comment.like.remove(user)
+        self.assertEqual(comment.like.count(), 0)
+
+    def test_add_user(self):
+        user = Users.objects.get(username='user')
+        comment = Comments.objects.get(biography='why???')
+        self.assertEqual(comment.like.count(), 1)
+        comment.like.add(user)
+        self.assertEqual(comment.like.count(), 2)
