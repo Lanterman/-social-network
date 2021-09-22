@@ -203,3 +203,129 @@ class DetailPublishTest(TestCase):
     def test_published_rating(self):
         published = Published.objects.annotate(rat=Avg('rating__star_id')).order_by('-date').get(name='pub_1')
         self.assertEqual(published.rat, None)
+
+
+class DelGroupTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        Groups.objects.create(name='group', slug='group')
+        Users.objects.create(username='user', first_name='user', last_name='user', num_tel=12345678910,
+                             email='user@mail.ru')
+
+    def test_view_url(self):
+        user = User.objects.get(username='user')
+        resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}))
+        self.assertEqual(resp.status_code, 302)
+
+    def test_del_group(self):
+        group = Groups.objects.filter(name='group')
+        self.assertEqual(group.count(), 1)
+        Groups.objects.get(slug='group').delete()
+        self.assertEqual(group.count(), 0)
+
+
+class DelPubGroupTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        group = Groups.objects.create(name='group', slug='group')
+        Published.objects.create(name='pub_1', slug='pub_1', group=group)
+
+    def test_view_url(self):
+        group = Groups.objects.get(name='group')
+        resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}))
+        self.assertEqual(resp.status_code, 302)
+
+    def test_del_pub_group(self):
+        pub = Published.objects.filter(name='pub_1')
+        self.assertTrue(pub.count() == 1)
+        pub.delete()
+        self.assertTrue(pub.count() == 0)
+
+
+class DelPublishedTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        group = Groups.objects.create(name='group', slug='group')
+        Published.objects.create(name='pub_1', slug='pub_1', group=group)
+        Users.objects.create(username='user', first_name='user', last_name='user', num_tel=12345678910,
+                             email='user@mail.ru')
+
+    def test_view_url(self):
+        user = User.objects.get(username='user')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}))
+        self.assertEqual(resp.status_code, 302)
+
+    def test_del_pub_group(self):
+        pub = Published.objects.filter(name='pub_1')
+        self.assertTrue(pub.count() == 1)
+        pub.delete()
+        self.assertTrue(pub.count() == 0)
+
+
+class FriendActivityTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        for user_num in range(1, 4):
+            Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
+                                 last_name='user_%s' % user_num, num_tel=12345678910,
+                                 email='user_%s@mail.ru' % user_num)
+        users = Users.objects.all()
+        users[0].friends.add(users[1])
+        PostSubscribers.objects.create(owner='user_2', user=users[0])
+
+    def test_view_url(self):
+        user = User.objects.get(username='user_1')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}))
+        self.assertEqual(resp.status_code, 302)
+
+    def test_del_friend(self):
+        users = Users.objects.all()
+        post = PostSubscribers.objects.filter(owner=users[0].username)
+        self.assertEqual(users[0].friends.count() == 1, post.count() == 0)
+        users[0].friends.remove(users[1])
+        post.create(owner=users[0].username, user_id=users[1].id)
+        self.assertEqual(users[0].friends.count() == 0, post.count() == 1)
+
+    def test_create_subs(self):
+        users = Users.objects.all()
+        post = PostSubscribers.objects.filter(owner=users[0].username)
+        self.assertEqual(post.count(), 0)
+        post.create(owner=users[0].username, user_id=users[1].id)
+        self.assertEqual(post.count(), 1)
+
+    def test_add_friend(self):
+        users = Users.objects.all()
+        post = PostSubscribers.objects.filter(owner=users[1].username, user_id=users[0].id)
+        self.assertEqual(post.count() == 1, users[2].friends.count() == 0)
+        users[2].friends.add(users[0])
+        post.delete()
+        self.assertEqual(post.count() == 0, users[2].friends.count() == 1)
+
+    def test_del_post(self):
+        users = Users.objects.all()
+        post = PostSubscribers.objects.filter(owner=users[1].username, user_id=users[0].id)
+        self.assertEqual(post.count(), 1)
+        post.delete()
+        self.assertEqual(post.count(), 0)
+
+
+# class FriendHideTest(TestCase):
+#
+#     @classmethod
+#     def setUpTestData(cls):
+#         for user_num in range(1, 4):
+#             Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
+#                                  last_name='user_%s' % user_num, num_tel=12345678910,
+#                                  email='user_%s@mail.ru' % user_num)
+#         users = Users.objects.all()
+#         users[0].friends.add(users[1])
+#         PostSubscribers.objects.create(owner='user_2', user=users[0])
+#
+#     def test_view_url(self):
+#         user = User.objects.get(username='user_1')
+#         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}))
+#         self.assertEqual(resp.status_code, 302)
