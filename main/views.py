@@ -55,18 +55,16 @@ class HomeView(DataMixin, UpdateView):  # Оптимизировать
         self.users = self.object.friends.all()
         self.group = Groups.objects.filter(users=self.object).prefetch_related('users')
         self.my_groups = Groups.objects.filter(owner=self.object).prefetch_related('users')
+        self.stop = PostSubscribers.objects.filter(owner=self.object.username).select_related('user')
         self.user = ''
         if self.object.pk != request.user.pk:
             self.user = Users.objects.get(pk=request.user.pk)
-            try:
-                self.subs = PostSubscribers.objects.get(
-                    Q(owner=self.user.username, user_id=self.object) |
-                    Q(owner=self.object.username, user_id=self.user)
-                )
-            except Exception:
-                self.subs = ''
+            self.subs = PostSubscribers.objects.filter(
+                Q(owner=self.user.username, user_id=self.object) |
+                Q(owner=self.object.username, user_id=self.user)
+            )
         else:
-            self.subs = PostSubscribers.objects.filter(owner=self.object.username).select_related('user')
+            self.subs = PostSubscribers.objects.filter(owner=self.object.username, escape=False).select_related('user')
         self.published = Published.objects.filter(owner=self.object).select_related('owner').annotate(
             rat=Avg('rating__star_id'))
         return super().get(request, *args, **kwargs)
@@ -83,6 +81,7 @@ class HomeView(DataMixin, UpdateView):  # Оптимизировать
         context['my_groups'] = self.my_groups
         context['owner'] = self.user
         context['subs'] = self.subs
+        context['stop'] = self.stop
         return context | self.get_context()
 
 
@@ -380,7 +379,7 @@ def friend_activity(request, user_pk):
 def friend_hide(request, user_pk):
     q = Users.objects.get(pk=user_pk)
     user = Users.objects.get(pk=request.user.pk)
-    PostSubscribers.objects.filter(owner=user.username, user_id=q.id).delete()
+    PostSubscribers.objects.filter(owner=user.username, user_id=q.id).update(escape=True)
     return redirect(user)
 
 

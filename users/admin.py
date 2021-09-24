@@ -18,11 +18,11 @@ class UsersAdmin(admin.ModelAdmin):
 
 @admin.register(PostSubscribers)
 class PostSubscribersAdmin(admin.ModelAdmin):
-    list_display = ('owner', 'user', 'date')
+    list_display = ('owner', 'user', 'date', 'escape')
     list_display_links = ('owner',)
-    fields = ('owner', 'user')
-    search_fields = ('owner', 'date')
-    list_filter = ('owner', 'date')
+    fields = ('owner', 'user', 'escape')
+    search_fields = ('owner', 'date', 'escape')
+    list_filter = ('owner', 'date', 'escape')
     list_max_show_all = 5
     list_per_page = 10
 

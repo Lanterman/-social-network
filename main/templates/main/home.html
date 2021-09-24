@@ -28,20 +28,21 @@
                         </a>
                     {% elif not subs %}
                         <a class="button_home" href="{% url 'friend_activity' user.pk %}">Добавить в друзья</a>
-                    {% elif subs.owner != user.username %}
+                    {% elif subs.0.owner != user.username %}
                         <a class="button_home" href="{% url 'friend_activity' user.pk %}">Ответить на заявку</a>
-                    {% elif subs.owner == user.username %}
+                    {% elif subs.0.owner == user.username %}
                         <a class="button_home" href="{% url 'friend_activity' user.pk %}">Отменить заявку</a>
                     {% endif %}
                 </div>
             {% endif %}
         </div>
         <p id="subs_user">
-            <a id="mar" class="model" href="#openModalSub">Друзья ({{ users.count }})</a>
+            <a class="model" href="#openModalSub">Друзья ({{ users.count }})</a>
             {% if user.pk == request.user.pk and subs %}
                 <i>{{ subs.count }}</i>
             {% endif %}
         </p><br>
+        <p><a class="model" href="#openModalSub1">Подписчики: ({{ stop.count }})</a></p><br>
         <p><a class="model" href="#openModalGroup">Группы ({{ groups.count }})</a></p>
     </div>
     <p id="public">Записи пользователя</p>
@@ -96,5 +97,37 @@
             </div>
         </div>
     </div>
+
+    <div id="openModalSub1" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"> Подписчики</h3>
+                <a href="#close" title="Close" class="close">×</a>
+            </div>
+            <div class="modal-body">
+                    {% for us in stop %}
+                        <p class="users_subs" >
+                            {% if us.user.photo %}
+                                <img src="{{ us.user.photo.url }}">
+                            {% else %}
+                                <img src="/media/users/slen/slen.png/">
+                            {% endif %}
+                            <a class="group_name" href="{{ us.user.get_absolute_url }}">
+                                {{ us.user.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
+                            </a><br><br><br>
+                            {% if us.owner == request.user.username %}
+                                <a class="button_home" href="{% url 'check' us.user_id %}">Отправить сообщение</a>
+                            {% else %}
+                                <i>Моя страница</i>
+                            {% endif %}
+                        </p><br>
+                    {% empty %}
+                        <h4>Нет подписчиков</h4>
+                    {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
     {{ block.super }}
 {% endblock content %}

@@ -326,10 +326,10 @@ class FriendHideTest(TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_del_post(self):
-        post = PostSubscribers.objects.all()
-        self.assertEqual(post.count(), 1)
-        post.delete()
-        self.assertEqual(post.count(), 0)
+        post = PostSubscribers.objects.filter(owner='user_2')
+        self.assertFalse(post[0].escape)
+        post.update(escape=True)
+        self.assertTrue(post[0].escape)
 
 
 class FriendAcceptTest(TestCase):

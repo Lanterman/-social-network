@@ -27,6 +27,7 @@ class PostSubscribers(models.Model):
     owner = models.CharField(max_length=50, verbose_name='IP')
     user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь', max_length=50)
     date = models.DateTimeField(auto_now_add=True, verbose_name='Время заявки')
+    escape = models.BooleanField(default=False, verbose_name='Просмотрел(-а)')
 
     class Meta:
         ordering = ['owner']

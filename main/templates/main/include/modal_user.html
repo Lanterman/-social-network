@@ -6,7 +6,6 @@
                 <a href="#close" title="Close" class="close">×</a>
             </div>
             <div class="modal-body">
-                <p><i>Имя и фамилия</i><i id="i">Электронная почта</i></p><br>
                 {% if user.pk == request.user.pk and subs %}
                     <p class="groups_home">Заявки на добавления в друзья</p>
                     {% for us in subs %}
