@@ -35,7 +35,7 @@ class NewsViewTest(TestCase):
         self.assertTrue(resp.context['is_paginated'])
         self.assertTrue(len(resp.context['page_obj']) == 5)
 
-    def test_lists_all_authors(self):
+    def test_lists_all_pub(self):
         resp = self.client.get(reverse('news') + '?page=2')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('is_paginated' in resp.context)
@@ -55,19 +55,19 @@ class HomeViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         for user_num in range(3):
-            Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-                                 last_name='user_%s' % user_num, num_tel=12345678910, email='user_%s@mail.ru' % user_num)
+            Users.objects.create_user(username='user_%s' % user_num, password='12345', num_tel=12345678910,
+                                      email='user_%s@mail.ru' % user_num)
         Users.objects.get(username='user_0').friends.add(Users.objects.get(username='user_2'))
         group = Groups.objects.create(name='group', slug='group')
         Published.objects.create(name='pub', slug='pub', group=group)
 
     def test_view_url(self):
-        user = Users.objects.get(first_name='user_0')
+        user = Users.objects.get(username='user_0')
         resp = self.client.get(reverse('home', kwargs={'user_pk': user.id}), follow=True)
         self.assertEqual(resp.status_code, 200)
 
     def test_user_friends(self):
-        user = Users.objects.get(first_name='user_0')
+        user = Users.objects.get(username='user_0')
         self.assertTrue(user.friends)
         self.assertEqual(user.friends.count(), 1)
 
@@ -75,18 +75,43 @@ class HomeViewTest(TestCase):
         published = Published.objects.all().select_related('owner').annotate(rat=Avg('rating__star_id'))
         self.assertEqual(published[0].rat, None)
 
+    def test_view_template(self):
+        self.client.login(username='user_1', password='12345')
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.id}))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/home.html')
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='user_1', password='12345')
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.id}))
+        self.assertEqual(str(resp.context['user']), 'user_1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Главная страница')
+
+    def test_context_if_not_logged_in(self):
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.id}))
+        self.assertRedirects(resp, f'/users/login/?next=/home/{user.id}/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': user.id}))
+        self.assertRedirects(resp, f'/users/login/?next=/home/{user.id}/')
+
 
 class MessagesViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
         for user_num in range(3):
-            Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-                                 last_name='user_%s' % user_num, num_tel=12345678910,
-                                 email='user_%s@mail.ru' % user_num)
+            Users.objects.create_user(username='user_%s' % user_num, password='12345', num_tel=12345678910,
+                                      email='user_%s@mail.ru' % user_num)
 
     def test_view_url(self):
-        user = Users.objects.get(first_name='user_1')
+        user = Users.objects.get(username='user_1')
         resp = self.client.get(reverse('messages', kwargs={'user_pk': user.pk}), follow=True)
         self.assertEqual(resp.status_code, 200)
 
@@ -100,15 +125,40 @@ class MessagesViewTest(TestCase):
         self.assertFalse(users[2] in chat.members.all())
         self.assertTrue(users[0] in chat.members.all())
 
+    def test_view_template(self):
+        self.client.login(username='user_1', password='12345')
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(f'/messages/{user.pk}/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/messages.html')
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='user_1', password='12345')
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(f'/messages/{user.pk}/')
+        self.assertEqual(str(resp.context['user']), 'user_1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Мои сообщения')
+
+    def test_context_if_not_logged_in(self):
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(f'/messages/{user.pk}/')
+        self.assertRedirects(resp, f'/users/login/?next=/messages/{user.pk}/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(f'/messages/{user.pk}/')
+        self.assertRedirects(resp, f'/users/login/?next=/messages/{user.pk}/')
+
 
 class ChatDetailViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
         for user_num in range(3):
-            Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-                                 last_name='user_%s' % user_num, num_tel=12345678910,
-                                 email='user_%s@mail.ru' % user_num)
+            Users.objects.create_user(username='user_%s' % user_num, password='12345', num_tel=12345678910,
+                                      email='user_%s@mail.ru' % user_num)
         chat = [Chat.objects.create() for n in range(2)]
         users = Users.objects.all()
         Message.objects.create(chat=chat[0], author=users[0], message='test1', is_readed=True)
@@ -128,13 +178,39 @@ class ChatDetailViewTest(TestCase):
         self.assertEqual(messages.count(), 3)
 
     def test_chat_is_readed(self):
-        user = Users.objects.get(first_name='user_1')
+        user = Users.objects.get(username='user_1')
         chat = Chat.objects.all()
         messages = chat[0].message_set.all()
         self.assertEqual(messages[0].is_readed, True)
         self.assertEqual(messages[1].is_readed == False, messages[2].is_readed == False)
         messages.filter(is_readed=False).exclude(author=user).update(is_readed=True)
         self.assertEqual(messages[1].is_readed == False, messages[2].is_readed == True)
+
+    def test_view_template(self):
+        chat = Chat.objects.get(id=1)
+        self.client.login(username='user_1', password='12345')
+        resp = self.client.get(f'/messages/chat/{chat.id}/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/chat.html')
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='user_1', password='12345')
+        chat = Chat.objects.get(id=1)
+        resp = self.client.get(f'/messages/chat/{chat.id}/')
+        self.assertEqual(str(resp.context['user']), 'user_1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Мои сообщения')
+
+    def test_context_if_not_logged_in(self):
+        chat = Chat.objects.get(id=1)
+        resp = self.client.get(f'/messages/chat/{chat.id}/')
+        self.assertRedirects(resp, f'/users/login/?next=/messages/chat/{chat.id}/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        chat = Chat.objects.get(id=1)
+        resp = self.client.get(f'/messages/chat/{chat.id}/')
+        self.assertRedirects(resp, f'/users/login/?next=/messages/chat/{chat.id}/')
 
 
 class CreateDialogViewTest(TestCase):
@@ -158,6 +234,121 @@ class CreateDialogViewTest(TestCase):
         self.assertEqual(users[1] in chat[0].members.all(), users[0] in chat[0].members.all())
 
 
+class FriendsViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        for user_num in range(3):
+            Users.objects.create_user(username='user_%s' % user_num, password='12345', num_tel=12345678910,
+                                      email='user_%s@mail.ru' % user_num)
+
+    def test_view_url(self):
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(reverse('friends', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_template(self):
+        self.client.login(username='user_1', password='12345')
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(f'/friends/{user.pk}/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/friends.html')
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='user_1', password='12345')
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(f'/friends/{user.pk}/')
+        self.assertEqual(str(resp.context['user']), 'user_1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Мои друзья')
+
+    def test_context_if_not_logged_in(self):
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(f'/friends/{user.pk}/')
+        self.assertRedirects(resp, f'/users/login/?next=/friends/{user.pk}/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        user = Users.objects.get(username='user_1')
+        resp = self.client.get(f'/friends/{user.pk}/')
+        self.assertRedirects(resp, f'/users/login/?next=/friends/{user.pk}/')
+
+
+class GroupsViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        Groups.objects.create(name='group', slug='group')
+        Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
+                                  num_tel=12345678910, email='test1@mail.ru', slug='user1')
+
+    def test_view_url(self):
+        user = Users.objects.get(username='testuser1')
+        resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_template(self):
+        self.client.login(username='testuser1', password='12345')
+        user = Users.objects.get(username='testuser1')
+        resp = self.client.get(f'/groups/{user.pk}/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/groups.html')
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='testuser1', password='12345')
+        user = Users.objects.get(username='testuser1')
+        resp = self.client.get(f'/groups/{user.pk}/')
+        self.assertEqual(str(resp.context['user']), 'testuser1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Мои группы')
+
+    def test_context_if_not_logged_in(self):
+        user = Users.objects.get(username='testuser1')
+        resp = self.client.get(f'/groups/{user.pk}/')
+        self.assertRedirects(resp, f'/users/login/?next=/groups/{user.pk}/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        user = Users.objects.get(username='testuser1')
+        resp = self.client.get(f'/groups/{user.pk}/')
+        self.assertRedirects(resp, f'/users/login/?next=/groups/{user.pk}/')
+
+
+class AddGroupTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        Groups.objects.create(name='group', slug='group')
+        Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
+                                  num_tel=12345678910, email='test1@mail.ru', slug='user1')
+
+    def test_view_url(self):
+        resp = self.client.get(reverse('add_group'), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_template(self):
+        self.client.login(username='testuser1', password='12345')
+        resp = self.client.get('/groups/add_group/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/add_pub_group.html')
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='testuser1', password='12345')
+        resp = self.client.get('/groups/add_group/')
+        self.assertEqual(str(resp.context['user']), 'testuser1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Создать группу')
+
+    def test_context_if_not_logged_in(self):
+        resp = self.client.get('/groups/add_group/')
+        self.assertRedirects(resp, f'/users/login/?next=/groups/add_group/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        resp = self.client.get('/groups/add_group/')
+        self.assertRedirects(resp, f'/users/login/?next=/groups/add_group/')
+
+
 class DetailGroupViewTest(TestCase):
 
     @classmethod
@@ -165,9 +356,8 @@ class DetailGroupViewTest(TestCase):
         group = Groups.objects.create(name='group_1', slug='group_1')
         Groups.objects.create(name='group_2', slug='group_2')
         for user_num in range(2):
-            Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-                                 last_name='user_%s' % user_num, num_tel=12345678910,
-                                 email='user_%s@mail.ru' % user_num)
+            Users.objects.create_user(username='user_%s' % user_num, password='12345', num_tel=12345678910,
+                                      email='user_%s@mail.ru' % user_num)
         user = Users.objects.get(username='user_1')
         group.users.add(user)
         Published.objects.create(name='pub_1', slug='pub_1', group=group)
@@ -187,11 +377,72 @@ class DetailGroupViewTest(TestCase):
         published = Published.objects.annotate(rat=Avg('rating__star_id')).order_by('-date').get(name='pub_1')
         self.assertEqual(published.rat, None)
 
+    def test_view_template(self):
+        self.client.login(username='user_1', password='12345')
+        group = Groups.objects.get(name='group_1')
+        resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/detail_group.html')
+
+    def test_context_if_not_logged_in(self):
+        group = Groups.objects.get(name='group_1')
+        resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}))
+        self.assertRedirects(resp, f'/users/login/?next=/groups/{group.slug}/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        group = Groups.objects.get(name='group_1')
+        resp = self.client.get(f'/groups/{group.slug}/')
+        self.assertRedirects(resp, f'/users/login/?next=/groups/{group.slug}/')
+
+
+class AddPublishedTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        group = Groups.objects.create(name='group', slug='group')
+        Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
+                                  num_tel=12345678910, email='test1@mail.ru', slug='user1')
+        Published.objects.create(name='pub', slug='pub', group=group)
+
+    def test_view_url(self):
+        group = Groups.objects.get(name='group')
+        resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_template(self):
+        self.client.login(username='testuser1', password='12345')
+        group = Groups.objects.get(name='group')
+        resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/add_pub_group.html')
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='testuser1', password='12345')
+        group = Groups.objects.get(name='group')
+        resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}))
+        self.assertEqual(str(resp.context['user']), 'testuser1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Создать запись')
+
+    def test_context_if_not_logged_in(self):
+        group = Groups.objects.get(name='group')
+        resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}))
+        self.assertRedirects(resp, f'/users/login/?next=/groups/{group.slug}/add_published/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        group = Groups.objects.get(name='group')
+        resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}))
+        self.assertRedirects(resp, f'/users/login/?next=/groups/{group.slug}/add_published/')
+
 
 class DetailPublishTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
+                                  num_tel=12345678910, email='test1@mail.ru', slug='user1')
         group = Groups.objects.create(name='group_1', slug='group_1')
         Published.objects.create(name='pub_1', slug='pub_1', group=group)
 
@@ -199,11 +450,110 @@ class DetailPublishTest(TestCase):
         pub = Published.objects.get(name='pub_1')
         resp = self.client.get(reverse('detail_publish', kwargs={'publish_slug': pub.slug}))
         self.assertEqual(resp.status_code, 200)
-        self.assertTemplateUsed(resp, 'main/detail_publish.html')
 
     def test_published_rating(self):
         published = Published.objects.annotate(rat=Avg('rating__star_id')).order_by('-date').get(name='pub_1')
         self.assertEqual(published.rat, None)
+
+    def test_view_template(self):
+        pub = Published.objects.get(name='pub_1')
+        resp = self.client.get(f'/publish/{pub.slug}/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/detail_publish.html')
+
+    def test_if_logged_in(self):
+        self.client.login(username='testuser1', password='12345')
+        pub = Published.objects.get(name='pub_1')
+        resp = self.client.get(f'/publish/{pub.slug}/')
+        self.assertEqual(str(resp.context['user']), 'testuser1')
+
+
+class PublishedCommentsViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user = Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
+                                         num_tel=12345678910, email='test1@mail.ru', slug='user1')
+        group = Groups.objects.create(name='group_1', slug='group_1')
+        pub = Published.objects.create(name='pub_1', slug='pub_1', group=group)
+        for com_num in range(7):
+            Comments.objects.create(published=pub, users=user, biography='why_%s???' % com_num)
+
+    def test_view_url(self):
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_template(self):
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/comments.html')
+
+    def test_pagination(self):
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('is_paginated' in resp.context)
+        self.assertTrue(resp.context['is_paginated'])
+        self.assertTrue(len(resp.context['page_obj']) == 5)
+
+    def test_lists_all_comments(self):
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}) + '?page=2')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('is_paginated' in resp.context)
+        self.assertTrue(resp.context['is_paginated'])
+        self.assertEqual(len(resp.context['page_obj']), 2)
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='testuser1', password='12345')
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
+        self.assertEqual(str(resp.context['user']), 'testuser1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Комментарии')
+
+
+class AddCommentViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
+                                         num_tel=12345678910, email='test1@mail.ru', slug='user1')
+        group = Groups.objects.create(name='group_1', slug='group_1')
+        Published.objects.create(name='pub_1', slug='pub_1', group=group)
+
+    def test_view_url(self):
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_template(self):
+        self.client.login(username='testuser1', password='12345')
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main/add_comment.html')
+
+    def test_context_if_logged_in(self):
+        self.client.login(username='testuser1', password='12345')
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}))
+        self.assertEqual(str(resp.context['user']), 'testuser1')
+        self.assertTrue('title' in resp.context)
+        self.assertEqual(resp.context['title'], 'Добавить комментарий')
+
+    def test_context_if_not_logged_in(self):
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}))
+        self.assertRedirects(resp, f'/users/login/?next=/publish/{publish.slug}/add_comment/')
+        self.assertFalse(resp.context)
+
+    def test_redirect(self):
+        publish = Published.objects.get(name='pub_1')
+        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}))
+        self.assertRedirects(resp, f'/users/login/?next=/publish/{publish.slug}/add_comment/')
 
 
 class DelGroupTest(TestCase):

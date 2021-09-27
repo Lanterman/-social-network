@@ -94,10 +94,10 @@ class MessagesView(DataMixin, ListView):
             'members',
             Prefetch(
                 'message_set',
-                queryset=Message.objects.filter(chat__members=request.user.id).order_by('-pub_date'),
+                queryset=Message.objects.filter(chat__members=request.user.id),
                 to_attr='set_mes'
             )
-        )
+        )  # Отсортировать
         self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
         return super().get(request, *args, **kwargs)
 

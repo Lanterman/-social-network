@@ -36,6 +36,8 @@ class AbstractForm(forms.Form):
         ab = '1234567890'
         if len(num_tel) < 12 and num_tel:
             raise ValidationError('Минимальное число символов 12, у вас %s' % len(num_tel))
+        if len(num_tel) > 20 and num_tel:
+            raise ValidationError('Максимальное число символов 20, у вас %s' % len(num_tel))
         for n in num_tel:
             if n not in ab:
                 raise ValidationError('Номер должен содержать только цифры!')

@@ -51,10 +51,12 @@ class LoginUser(LoginView):
         return context
 
 
-class PasswordChangeUser(PasswordChangeView):
+class PasswordChangeUser(PasswordChangeView, DetailView):
+    model = Users
+    slug_url_kwarg = 'slug'
     template_name = 'users/edit_profile.html'
     form_class = PasswordChangeUserForm
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('news')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
