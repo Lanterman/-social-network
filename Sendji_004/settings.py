@@ -37,8 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'main.apps.MainConfig',
     'users.apps.UsersConfig',
+
     'debug_toolbar',
 ]
 
@@ -79,12 +81,12 @@ WSGI_APPLICATION = 'Sendji_004.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Sendji_004_02',
         'USER': 'postgres',
         'PASSWORD': 'karmavdele',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'HOST': 'postgres_db',
+        'PORT': 5432,
     }
 }
 
