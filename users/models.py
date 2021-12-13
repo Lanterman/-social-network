@@ -1,15 +1,16 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
 
-User._meta.get_field('email')._unique = True
+from Sendji_004 import settings
 
 
-class Users(User):
+class Users(AbstractUser):
     num_tel = models.CharField(max_length=20, verbose_name='Номер телефона')
     slug = models.SlugField(max_length=40, verbose_name='URL', blank=True)
     photo = models.ImageField(verbose_name='Фото', blank=True, upload_to='users/')
     friends = models.ManyToManyField('self', verbose_name='Друзья', related_name='friends_set', blank=True)
+    email = models.EmailField('email address', blank=False)
 
     class Meta:
         ordering = ['first_name', 'last_name', 'username']
@@ -25,7 +26,7 @@ class Users(User):
 
 class PostSubscribers(models.Model):
     owner = models.CharField(max_length=50, verbose_name='IP')
-    user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь', max_length=50)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Пользователь', max_length=50)
     date = models.DateTimeField(auto_now_add=True, verbose_name='Время заявки')
     escape = models.BooleanField(default=False, verbose_name='Просмотрел(-а)')
 
@@ -39,7 +40,7 @@ class PostSubscribers(models.Model):
 
 
 class Chat(models.Model):
-    members = models.ManyToManyField(Users, verbose_name="Участник")
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name="Участник")
 
     def __str__(self):
         return f'{self.pk}'
@@ -50,7 +51,7 @@ class Chat(models.Model):
 
 class Message(models.Model):
     chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE)
-    author = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name="Пользователь", on_delete=models.CASCADE)
     message = models.TextField("Сообщение", blank=True)
     pub_date = models.DateTimeField('Дата сообщения', auto_now_add=True)
     is_readed = models.BooleanField('Прочитано', default=False)

@@ -1,6 +1,7 @@
 from django import forms
 
 from main.models import *
+from users.models import Users
 
 
 class AddCommentForm(forms.ModelForm):

@@ -81,10 +81,10 @@ WSGI_APPLICATION = 'Sendji_004.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Sendji_004_02',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'karmavdele',
+        'PASSWORD': 'postgres',
         'HOST': 'postgres_db',
         'PORT': 5432,
     }
@@ -151,3 +151,5 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
 ]
+
+AUTH_USER_MODEL = 'users.Users'

@@ -1,15 +1,14 @@
-FROM python:3.9.0
+# syntax=docker/dockerfile:1
+FROM python:3
 
-# Просим Python не писать .pyc файлы
-ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONDONTWRITEBYTECODE=1
 
-# Просим Python не буферизовать stdin/stdout
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
-WORKDIR  /app
+WORKDIR /app
 
-COPY ./requirements.txt requirements.txt
+COPY requirements.txt /app/
 
 RUN pip install -r requirements.txt
 
-COPY . .
+COPY . /app/

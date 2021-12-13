@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 
-from users.models import Users
+from Sendji_004 import settings
 
 
 class Abstract(models.Model):
@@ -22,7 +22,7 @@ class Abstract(models.Model):
 class Published(Abstract):
     photo = models.ImageField(blank=True, upload_to='published/', verbose_name='Фото')
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
-    owner = models.ForeignKey(Users, verbose_name='Пользователь', on_delete=models.SET_NULL, null=True,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='Пользователь', on_delete=models.SET_NULL, null=True,
                               related_name='my_published')
     group = models.ForeignKey('Groups', on_delete=models.CASCADE, verbose_name='Группа')
 
@@ -38,8 +38,8 @@ class Published(Abstract):
 
 class Groups(Abstract):
     photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
-    users = models.ManyToManyField(Users, blank=True, related_name='groups_users', verbose_name='Пользователи')
-    owner = models.ForeignKey(Users, verbose_name='Создатель группы', on_delete=models.SET_NULL, null=True,
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='groups_users', verbose_name='Пользователи')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='Создатель группы', on_delete=models.SET_NULL, null=True,
                               related_name='my_group')
     biography = None
 
@@ -55,9 +55,9 @@ class Groups(Abstract):
 
 class Comments(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
-    like = models.ManyToManyField(Users, verbose_name='Лайки', related_name='likes')
+    like = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name='Лайки', related_name='likes')
     published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
-    users = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь')
+    users = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Пользователь')
     name, slug = None, None
 
     class Meta:

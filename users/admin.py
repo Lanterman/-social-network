@@ -5,8 +5,8 @@ from users.models import *
 
 @admin.register(Users)
 class UsersAdmin(admin.ModelAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'slug', 'email', 'num_tel')
-    list_display_links = ('username', 'first_name', 'last_name',)
+    list_display = ('id', 'username', 'first_name', 'last_name', 'slug', 'email', 'num_tel')
+    list_display_links = ('id', 'username', 'first_name', 'last_name',)
     fields = ('username', 'first_name', 'last_name', 'slug', 'email', 'num_tel', 'friends', 'photo',)
     search_fields = ('username', 'first_name', 'last_name', 'slug', 'email')
     list_filter = ('first_name', 'last_name', 'slug', 'email')

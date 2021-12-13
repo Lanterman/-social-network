@@ -54,7 +54,7 @@ class HomeView(DataMixin, UpdateView):  # Оптимизировать
         self.object = self.get_object(queryset=Users.objects.all().prefetch_related('friends'))
         self.users = self.object.friends.all()
         self.group = Groups.objects.filter(users=self.object).prefetch_related('users')
-        self.my_groups = Groups.objects.filter(owner=self.object).prefetch_related('users')
+        self.my_groups = Groups.objects.filter(owner_id=self.object.id).prefetch_related('users')
         self.stop = PostSubscribers.objects.filter(owner=self.object.username).select_related('user')
         self.user = ''
         if self.object.pk != request.user.pk:
@@ -65,7 +65,7 @@ class HomeView(DataMixin, UpdateView):  # Оптимизировать
             )
         else:
             self.subs = PostSubscribers.objects.filter(owner=self.object.username, escape=False).select_related('user')
-        self.published = Published.objects.filter(owner=self.object).select_related('owner').annotate(
+        self.published = Published.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id'))
         return super().get(request, *args, **kwargs)
 
@@ -120,7 +120,7 @@ class ChatDetailView(DataMixin, View):
         self.chat = Chat.objects.prefetch_related('members').get(id=chat_id)
         messages = Message.objects.filter(chat_id=chat_id).select_related('author')
         if self.user in self.chat.members.all():
-            messages.filter(is_readed=False).exclude(author=self.user).update(is_readed=True)
+            messages.filter(is_readed=False).exclude(author_id=self.user.id).update(is_readed=True)
         else:
             self.chat = None
         context = {'chat': self.chat, 'form': MessageForm(), 'messages': messages, 'menu': menu,
@@ -215,7 +215,7 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
         self.user = Users.objects.get(pk=request.user.pk)
         self.object = self.get_object(queryset=Groups.objects.all().prefetch_related('users').select_related('owner'))
         self.users = self.object.users.all()
-        self.published = Published.objects.filter(group_id=self.object).select_related('owner').annotate(
+        self.published = Published.objects.filter(group_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
 
@@ -262,7 +262,8 @@ class DetailPublish(DetailView):
         context['star_form'] = RatingForm()
         if self.request.user.is_authenticated:
             try:
-                context['user1'] = Rating.objects.filter(published_id__name=self.object).select_related('star').get(
+                context['user1'] = Rating.objects.filter(published_id__name=self.object.name).select_related(
+                    'star').get(
                     ip=self.request.user)
             except Exception:
                 pass
@@ -276,7 +277,8 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Published.objects.all())
-        self.comments = Comments.objects.filter(published=self.object).select_related('users').prefetch_related('like')
+        self.comments = Comments.objects.filter(published_id=self.object.id).select_related('users').prefetch_related(
+            'like')
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -462,7 +464,8 @@ class SearchGroups(GroupsView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['empty'] = 'Нет групп соответствующих запросу!'
-        context['global'] = Groups.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related('users')
+        context['global'] = Groups.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related(
+            'users')
         return context
 
 
