@@ -6,7 +6,6 @@
         <div class="ss">
             <a href="{% url 'add_group' %}"> <i class="fas fa-plus"></i></a>
         </div>
-    </p>
     <br><br>
     <div class="block" id="search">
         <div class="search">
@@ -33,3 +32,12 @@
 {% block groups %}
     {% include 'main/include/aside.html' %}
 {% endblock groups %}
+
+{% block script %}
+<script>
+    const info = document.querySelectorAll('.del');
+    for (let inf of info) {
+      inf.addEventListener("click", () => alert('Вы вышли из группы!'));
+    }
+</script>
+{% endblock script %}
