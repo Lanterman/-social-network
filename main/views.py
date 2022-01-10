@@ -6,6 +6,7 @@ from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
 
+from main import tasks
 from main.form import *
 from main.models import *
 from main.utils import *
@@ -130,7 +131,9 @@ class ChatDetailView(DataMixin, View):
     def post(self, request, chat_id):
         form = MessageForm(data=request.POST)
         if form.is_valid():
-            Message.objects.create(**form.cleaned_data, chat_id=chat_id, author_id=request.user.pk)
+            user = Users.objects.get(pk=request.user.pk)
+            Message.objects.create(**form.cleaned_data, chat_id=chat_id, author_id=user.pk)
+            tasks.send_message.delay(user, chat_id)
         return redirect(reverse('chat', kwargs={'chat_id': chat_id}))
 
 

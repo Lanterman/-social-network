@@ -9,7 +9,9 @@
     </a>
     <div class="reply-body">
         <strong>
-            <a class="username" href="{{ message_item.author.get_absolute_url }}">{{ message_item.author.get_full_name|title|truncatechars_html:50 }}</a>
+            <a class="username" href="{{ message_item.author.get_absolute_url }}">
+                {{ message_item.author.get_full_name|title|default:message_item.author.username|truncatechars_html:50 }}
+            </a>
         </strong>
         <span class="pub_date">{{ message_item.pub_date }}</span>
         <p class="text">{{ message_item.message|linebreaksbr|safe}}</p>
