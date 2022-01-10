@@ -131,9 +131,16 @@ class ChatDetailView(DataMixin, View):
     def post(self, request, chat_id):
         form = MessageForm(data=request.POST)
         if form.is_valid():
-            user = Users.objects.get(pk=request.user.pk)
-            Message.objects.create(**form.cleaned_data, chat_id=chat_id, author_id=user.pk)
-            tasks.send_message.delay(user, chat_id)
+            chat = Chat.objects.get(id=chat_id).members.all()
+            if chat[0].pk == request.user.pk:
+                user = chat[1]
+            else:
+                user = chat[0]
+            message = Message.objects.create(**form.cleaned_data, chat_id=chat_id, author_id=user.pk)
+            user_name = message.author.get_full_name()
+            if not user_name:
+                user_name = message.author
+            tasks.send_message.delay(user_name, message.author.email, chat_id)
         return redirect(reverse('chat', kwargs={'chat_id': chat_id}))
 
 
@@ -204,7 +211,9 @@ class AddGroup(DataMixin, CreateView):
     def post(self, request, *args, **kwargs):
         form = AddGroupForm(request.POST, request.FILES)
         if form.is_valid():
+            user = Users.objects.get(pk=request.user.pk)
             group = Groups.objects.create(**form.cleaned_data, owner_id=request.user.pk)
+            tasks.send_message_about_group.delay(group.name, group.slug, user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
 
@@ -248,7 +257,9 @@ class AddPublished(DataMixin, CreateView):
         group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
-            Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
+            user = Users.objects.get(pk=request.user.pk)
+            published = Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
+            tasks.send_message_about_published.delay(published.name, published.slug, user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
 

@@ -57,7 +57,7 @@ class Message(models.Model):
     is_readed = models.BooleanField('Прочитано', default=False)
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ['pub_date']
 
     def __str__(self):
         return self.message

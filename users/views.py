@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DetailView
 
 from main.utils import *
+from users import tasks
 from users.form import *
 from users.models import Users
 
@@ -23,6 +24,7 @@ class RegisterUser(CreateView):
         user.slug = user.username
         user.save()
         login(self.request, user)
+        tasks.send_registration_message.delay(user.email)
         return redirect('news')
 
 
