@@ -131,16 +131,16 @@ class ChatDetailView(DataMixin, View):
     def post(self, request, chat_id):
         form = MessageForm(data=request.POST)
         if form.is_valid():
+            Message.objects.create(**form.cleaned_data, chat_id=chat_id, author_id=request.user.pk)
             chat = Chat.objects.get(id=chat_id).members.all()
             if chat[0].pk == request.user.pk:
                 user = chat[1]
             else:
                 user = chat[0]
-            message = Message.objects.create(**form.cleaned_data, chat_id=chat_id, author_id=user.pk)
-            user_name = message.author.get_full_name()
+            user_name = user.get_full_name()
             if not user_name:
-                user_name = message.author
-            tasks.send_message.delay(user_name, message.author.email, chat_id)
+                user_name = user.username
+            tasks.send_message.delay(user_name, user.email, chat_id)
         return redirect(reverse('chat', kwargs={'chat_id': chat_id}))
 
 
