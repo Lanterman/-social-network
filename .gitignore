@@ -2,7 +2,11 @@
 media
 venv 
 __pycache__
-migrations/*.py
-!__init__.py
 
-dumb.rdb
+/main/migrations/*
+!/main/migrations/__init__.py
+
+/users/migrations/*
+!/users/migrations/__init__.py
+
+dump.rdb

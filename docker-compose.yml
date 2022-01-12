@@ -25,11 +25,9 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     depends_on:
-      - redis
       - postgres_db
-    container_name: main
-    links:
       - redis
+    container_name: main
 
   redis:
     image: redis:latest
@@ -43,8 +41,6 @@ services:
     command: "celery -A Sendji_004 worker -l INFO"
     volumes:
       - celery_data:/home/user
-    links:
-      - redis
     depends_on:
       - web
       - redis
