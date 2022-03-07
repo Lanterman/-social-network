@@ -212,7 +212,7 @@ class AddGroup(DataMixin, CreateView):
         form = AddGroupForm(request.POST, request.FILES)
         if form.is_valid():
             user = Users.objects.get(pk=request.user.pk)
-            group = Groups.objects.create(**form.cleaned_data, owner_id=request.user.pk)
+            group = Groups.objects.create(**form.cleaned_data, owner_id=user.pk)
             tasks.send_message_about_group.delay(group.name, group.slug, user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
@@ -258,7 +258,7 @@ class AddPublished(DataMixin, CreateView):
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
             user = Users.objects.get(pk=request.user.pk)
-            published = Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
+            published = Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=user.pk)
             tasks.send_message_about_published.delay(published.name, published.slug, user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
@@ -329,19 +329,19 @@ class AddCommentView(DataMixin, CreateView):
 # Logic
 
 def del_group(request, group_slug):
-    q = Groups.objects.get(slug=group_slug).delete()
+    Groups.objects.get(slug=group_slug).delete()
     return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
 
 
 def del_pub_group(request, pub_slug, group_slug):
     group = Groups.objects.get(slug=group_slug)
-    q = Published.objects.get(slug=pub_slug).delete()
+    Published.objects.get(slug=pub_slug).delete()
     return redirect(group)
 
 
 def del_published(request, pub_slug):
     user = Users.objects.get(pk=request.user.pk)
-    q = Published.objects.get(slug=pub_slug).delete()
+    Published.objects.get(slug=pub_slug).delete()
     return redirect(user)
 
 

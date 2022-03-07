@@ -1,3 +1,5 @@
+{% load naturaltime from humanize %}
+
 {% for p in page_obj %}
     <div class="p">
         <a class="a1" href="{{ p.get_absolute_url }}">{{ p.name|truncatechars_html:30|capfirst  }}</a>
@@ -8,7 +10,7 @@
             </a>
             <a class="pub_menu" href="{% url 'update_pub' p.slug %}"><i class="fas fa-pen"></i></a>
         {% endif %}
-        <pre>{{ p.date }}</pre>
+        <pre>{{ p.date|naturaltime }}</pre>
         <p id="ap">{{ p.biography|linebreaksbr|safe|truncatechars_html:200 }}</p>
         {% if p.photo %}
             <img src="{{ p.photo.url }}" alt="photo"><br><br>

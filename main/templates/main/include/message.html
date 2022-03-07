@@ -1,4 +1,5 @@
-{% load tz %}
+{% load naturaltime from humanize %}
+
 <div class="messages_us {% if not message_item.is_readed %}unreaded{% endif %}">
     <a href="{{ message_item.author.get_absolute_url }}">
         {% if message_item.author.photo %}
@@ -13,7 +14,7 @@
                 {{ message_item.author.get_full_name|title|default:message_item.author.username|truncatechars_html:50 }}
             </a>
         </strong>
-        <span class="pub_date">{{ message_item.pub_date }}</span>
+        <span class="pub_date">{{ message_item.pub_date|naturaltime }}</span>
         <p class="text">{{ message_item.message|linebreaksbr|safe}}</p>
     </div>
 </div>

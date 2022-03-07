@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, AuthenticationForm
 from django.core.exceptions import ValidationError
@@ -9,38 +11,50 @@ from users.models import Users, Message
 class AbstractForm(forms.Form):
     def clean_first_name(self):
         first_name = self.cleaned_data['first_name']
-        ab = '!@#$%^&*()_+"№:?-=*<>/\\|][{}1234567890 '
+        re_value = re.findall(r'\d|\W', first_name)
+        invalid_list = []
         if len(first_name) > 20:
-            raise ValidationError('Максимальное число символов 20, у вас %s' % len(first_name))
+            invalid_list.append(ValidationError('Максимальное число символов 20, у вас %(value)s',
+                                                params={'value': len(first_name)}))
         if len(first_name) < 3 and first_name:
-            raise ValidationError('Минимальное число символов 3, у вас %s' % len(first_name))
-        for n in first_name:
-            if n in ab:
-                raise ValidationError('Имя должно содержать только буквы')
+            invalid_list.append(ValidationError('Минимальное число символов 3, у вас %(value)s',
+                                                params={'value': len(first_name)}))
+        if re_value:
+            invalid_list.append(ValidationError('Имя должно содержать только буквы'))
+        if invalid_list:
+            raise ValidationError(invalid_list)
         return first_name
 
     def clean_last_name(self):
         last_name = self.cleaned_data['last_name']
-        ab = '!@#$%^&*()_+"№:?-=*<>/\\|][{}1234567890 '
+        re_value = re.findall(r'\d|\W', last_name)
+        invalid_list = []
         if len(last_name) > 25:
-            raise ValidationError('Максимальное число символов 25, у вас %s' % len(last_name))
+            invalid_list.append(ValidationError('Максимальное число символов 25, у вас %(value)s',
+                                                params={'value': len(last_name)}))
         if len(last_name) < 3 and last_name:
-            raise ValidationError('Минимальное число символов 3, у вас %s' % len(last_name))
-        for n in last_name:
-            if n in ab:
-                raise ValidationError('Имя должно содержать только буквы')
+            invalid_list.append(ValidationError('Минимальное число символов 3, у вас %(value)s',
+                                                params={'value': len(last_name)}))
+        if re_value:
+            invalid_list.append(ValidationError('Имя должно содержать только буквы'))
+        if invalid_list:
+            raise ValidationError(invalid_list)
         return last_name
 
     def clean_num_tel(self):
         num_tel = self.cleaned_data['num_tel']
-        ab = '1234567890'
+        re_value = re.findall(r'\D', num_tel)
+        invalid_list = []
         if len(num_tel) < 12 and num_tel:
-            raise ValidationError('Минимальное число символов 12, у вас %s' % len(num_tel))
+            invalid_list.append(ValidationError('Минимальное число символов 12, у вас %(value)s',
+                                                params={'value': len(num_tel)}))
         if len(num_tel) > 20 and num_tel:
-            raise ValidationError('Максимальное число символов 20, у вас %s' % len(num_tel))
-        for n in num_tel:
-            if n not in ab:
-                raise ValidationError('Номер должен содержать только цифры!')
+            invalid_list.append(ValidationError('Максимальное число символов 20, у вас %(value)s',
+                                                params={'value': len(num_tel)}))
+        if re_value:
+            invalid_list.append(ValidationError('Номер должен содержать только цифры!'))
+        if invalid_list:
+            raise ValidationError(invalid_list)
         return num_tel
 
     def clean_email(self):

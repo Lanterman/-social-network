@@ -2,7 +2,6 @@ from django.db.models import Avg
 from django.test import TestCase
 
 from main.models import *
-from django.urls import reverse
 
 from users.models import *
 
@@ -565,7 +564,7 @@ class DelGroupTest(TestCase):
                              email='user@mail.ru')
 
     def test_view_url(self):
-        user = User.objects.get(username='user')
+        user = Users.objects.get(username='user')
         resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}), follow=True)
         self.assertEqual(resp.status_code, 200)
 
@@ -605,7 +604,7 @@ class DelPublishedTest(TestCase):
                              email='user@mail.ru')
 
     def test_view_url(self):
-        user = User.objects.get(username='user')
+        user = Users.objects.get(username='user')
         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
         self.assertEqual(resp.status_code, 200)
 
@@ -629,7 +628,7 @@ class FriendActivityTest(TestCase):
         PostSubscribers.objects.create(owner='user_2', user=users[0])
 
     def test_view_url(self):
-        user = User.objects.get(username='user_1')
+        user = Users.objects.get(username='user_1')
         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
         self.assertEqual(resp.status_code, 200)
 
@@ -671,7 +670,7 @@ class FriendHideTest(TestCase):
         PostSubscribers.objects.create(owner='user_2', user=user)
 
     def test_view_url(self):
-        user = User.objects.get(username='user')
+        user = Users.objects.get(username='user')
         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
         self.assertEqual(resp.status_code, 200)
 
@@ -694,7 +693,7 @@ class FriendAcceptTest(TestCase):
         PostSubscribers.objects.create(owner=users[1].username, user=users[0])
 
     def test_view_url(self):
-        user = User.objects.get(username='user_1')
+        user = Users.objects.get(username='user_1')
         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
         self.assertEqual(resp.status_code, 200)
 
@@ -719,7 +718,7 @@ class FriendDelPrimaryTest(TestCase):
         users[0].friends.add(users[1])
 
     def test_view_url(self):
-        user = User.objects.get(username='user_1')
+        user = Users.objects.get(username='user_1')
         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
         self.assertEqual(resp.status_code, 200)
 

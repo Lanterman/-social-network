@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from main.models import *
+from users.models import Users
 
 
 class PublishedTest(TestCase):
