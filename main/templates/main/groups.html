@@ -35,9 +35,10 @@
 
 {% block script %}
 <script>
-    const info = document.querySelectorAll('.del');
-    for (let inf of info) {
-      inf.addEventListener("click", () => alert('Вы вышли из группы!'));
+    leave_the_group.onclick = function() {
+        if (!confirm('Выйти из группы?')) {
+            this.href = '';
+        }
     }
 </script>
 {% endblock script %}

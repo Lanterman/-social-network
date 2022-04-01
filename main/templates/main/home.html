@@ -23,15 +23,19 @@
                 <a class="button_home" href="{% url 'check' user.pk %}">Отправить сообщение</a>
                 <div id="button_home">
                     {% if owner in users %}
-                        <a class="model_user" href="{% url 'friend_activity' user.pk %}">
+                        <a class="model_user" href="{% url 'friend_activity' user.pk %}" onclick="remove()" id="rem_fr">
                             <i class="fas fa-user-check"></i> Удалить из друзей
                         </a>
                     {% elif not subs %}
                         <a class="button_home" href="{% url 'friend_activity' user.pk %}">Добавить в друзья</a>
                     {% elif subs.0.owner != user.username %}
-                        <a class="button_home" href="{% url 'friend_activity' user.pk %}">Ответить на заявку</a>
+                        <a class="button_home" href="{% url 'friend_activity' user.pk %}" id="agr_fr" onclick="agree()">
+                            Ответить на заявку
+                        </a>
                     {% elif subs.0.owner == user.username %}
-                        <a class="button_home" href="{% url 'friend_activity' user.pk %}">Отменить заявку</a>
+                        <a class="button_home" href="{% url 'friend_activity' user.pk %}" id="can_fr" onclick="cancel()">
+                            Отменить заявку
+                        </a>
                     {% endif %}
                 </div>
             {% endif %}
@@ -131,3 +135,25 @@
 </div>
     {{ block.super }}
 {% endblock content %}
+
+{% block script %}
+<script>
+    function remove() {
+        if (!confirm('Удалить из друзей?')) {
+            rem_fr.href = '';
+        }
+    }
+
+    function agree() {
+        if (!confirm('Добавить в друзья?')) {
+            agr_fr.href = '';
+        }
+    }
+
+    function cancel() {
+        if (!confirm('Отменить заявку?')) {
+            can_fr.href = '';
+        }
+    }
+</script>
+{% endblock script %}
