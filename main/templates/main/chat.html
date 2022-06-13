@@ -15,12 +15,15 @@
                 <p class="no_messages">У вас пока нет сообщений!</p>
             </div>
         {% endif %}
-        <form id="message-form" class="panel" method="post" >
-            {% csrf_token %}
-                <p>{{ form.message }}</p>
-            <button type="submit" >Отправить</button>
-        </form>
+        <div class="panel" id="message-form">
+            <input id="chat-message-input" type="text" size="100"><br>
+            <input id="chat-message-submit" type="button" value="Send">
+        </div>
     {% endif %}
+    {{ chat_id|json_script:"chat_id" }}
+    {{ user.pk|json_script:"user_pk" }}
+    <script src="/static/main/js/chat.js"></script>
+
 {% endblock content %}
 
 {% block groups %}

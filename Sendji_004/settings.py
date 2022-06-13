@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -75,8 +76,18 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Sendji_004.wsgi.application'
+# WSGI_APPLICATION = 'Sendji_004.wsgi.application'
 
+ASGI_APPLICATION = "Sendji_004.asgi.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -84,10 +95,10 @@ WSGI_APPLICATION = 'Sendji_004.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
+        'NAME': 'social_network',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'postgres_db',
+        'PASSWORD': 'karmavdele',
+        'HOST': 'localhost',
         'PORT': 5432,
     }
 }

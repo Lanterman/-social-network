@@ -24,7 +24,7 @@ class RegisterUser(CreateView):
         user.slug = user.username
         user.save()
         login(self.request, user)
-        tasks.send_registration_message.delay(user.email)
+        # tasks.send_registration_message.delay(user.email)
         return redirect('news')
 
 

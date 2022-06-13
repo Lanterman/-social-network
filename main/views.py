@@ -10,7 +10,6 @@ from main import tasks
 from main.form import *
 from main.models import *
 from main.utils import *
-from users.form import MessageForm
 from users.models import *
 
 
@@ -124,24 +123,9 @@ class ChatDetailView(DataMixin, View):
             messages.filter(is_readed=False).exclude(author_id=self.user.id).update(is_readed=True)
         else:
             self.chat = None
-        context = {'chat': self.chat, 'form': MessageForm(), 'messages': messages, 'menu': menu,
-                   'title': 'Мои сообщения', 'object': self.group}
+        context = {'chat': self.chat, 'messages': messages, 'menu': menu, 'title': 'Мои сообщения',
+                   'object': self.group, "chat_id": chat_id, "user": self.user}
         return render(request, 'main/chat.html', context)
-
-    def post(self, request, chat_id):
-        form = MessageForm(data=request.POST)
-        if form.is_valid():
-            Message.objects.create(**form.cleaned_data, chat_id=chat_id, author_id=request.user.pk)
-            chat = Chat.objects.get(id=chat_id).members.all()
-            if chat[0].pk == request.user.pk:
-                user = chat[1]
-            else:
-                user = chat[0]
-            user_name = user.get_full_name()
-            if not user_name:
-                user_name = user.username
-            tasks.send_message.delay(user_name, user.email, chat_id)
-        return redirect(reverse('chat', kwargs={'chat_id': chat_id}))
 
 
 class CreateDialogView(View):
@@ -213,7 +197,7 @@ class AddGroup(DataMixin, CreateView):
         if form.is_valid():
             user = Users.objects.get(pk=request.user.pk)
             group = Groups.objects.create(**form.cleaned_data, owner_id=user.pk)
-            tasks.send_message_about_group.delay(group.name, group.slug, user.email)
+            # tasks.send_message_about_group.delay(group.name, group.slug, user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
 
@@ -259,7 +243,7 @@ class AddPublished(DataMixin, CreateView):
         if form.is_valid():
             user = Users.objects.get(pk=request.user.pk)
             published = Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=user.pk)
-            tasks.send_message_about_published.delay(published.name, published.slug, user.email)
+            # tasks.send_message_about_published.delay(published.name, published.slug, user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
 

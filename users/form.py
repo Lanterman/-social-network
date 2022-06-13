@@ -103,13 +103,3 @@ class UpdateUserForm(AbstractForm, forms.ModelForm):
     class Meta:
         model = Users
         fields = ('first_name', 'last_name', 'num_tel', 'email')
-
-
-class MessageForm(ModelForm):
-    message = forms.CharField(label='Сообщения', widget=forms.Textarea(
-                                    attrs={'placeholder': 'Написать сообщение', 'rows': 5, 'cols': 90}))
-
-    class Meta:
-        model = Message
-        fields = ['message']
-        labels = {'message': ""}

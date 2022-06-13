@@ -6,7 +6,7 @@
 
 .messages {
     overflow: auto;
-    height: 500px;
+    height: 600px;
 }
 
 .messages, .panel {
@@ -16,7 +16,7 @@
     box-shadow: 0 0 10px #666;
 }
 
-.messages_us {
+.messages_us, .unreaded  {
     margin: 15px 10px 20px 40px;
     padding: 10px 0px 10px 10px;
 }
