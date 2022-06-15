@@ -72,19 +72,21 @@
 
 .panel {
     margin-bottom: 100px;
-    padding: 5px;
+    padding: 20px 0px 30px 10px;
     background-color: #5F9EA0;
+    display:  flex;
 }
 
-.panel p {
-    margin-left: 20px;
+#chat-message-submit {
+    margin: 26px 30px 0 20px;
+    font-size: 17px;
+    padding: 0px 10px;
 }
 
-.panel button {
-    float: right;
-    margin: -62px 3px 0 0;
+#chat-message-input {
     font-size: 18px;
-    padding: 6px;
+    padding: 7px;
+    resize: none;
 }
 
 #mar_can {

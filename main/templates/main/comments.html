@@ -29,4 +29,8 @@
         <p><a id="com" href="{% url 'add_comment' published.slug %}">Оставить комментарий</a></p><br>
     </div>
     {{ block.super }}
+
+    {{ published.slug|json_script:"publish_slug" }}
+    <script src="/static/main/js/comment.js"></script>
+
 {% endblock content %}

@@ -4,17 +4,6 @@ from celery import shared_task
 
 
 @shared_task
-def send_message(user_name, user_email, chat_id):
-    send_mail(
-        f'Вам пришло сообщение от {user_name}',
-        f'Для просмотра сообщения можно перейти по ссылке \n http://127.0.0.1:8000/messages/chat/{chat_id}/',
-        'klivchinskydmitry@gmail.com',
-        [user_email],
-        fail_silently=False,
-    )
-
-
-@shared_task
 def send_message_about_group(group_name, group_slug, user_email):
     send_mail(
         f'Вы создали группу {group_name}',

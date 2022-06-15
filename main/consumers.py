@@ -2,7 +2,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
-from users.models import Message, Chat, Users
+from users.models import Message, Users
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -37,16 +37,6 @@ class ChatConsumer(WebsocketConsumer):
             "author_url": user.get_absolute_url(),
             "author_photo": user.photo.url if user.photo else "/media/users/slen/slen.png/"
         }
-        # chat = Chat.objects.get(id=chat_id).members.all()
-        # if chat[0].pk == user_pk:
-        #     user = chat[1]
-        # else:
-         #     user = chat[0]
-        # user_name = user.get_full_name()
-        # if not user_name:
-        #     user_name = user.username
-        # tasks.send_message.delay(user_name, user.email, chat_id)
-
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
@@ -58,3 +48,20 @@ class ChatConsumer(WebsocketConsumer):
         message_info = event['message_info']
         # Send message to WebSocket
         self.send(text_data=json.dumps({'message_info': message_info}))
+
+
+class CommentConsumer(WebsocketConsumer):
+    """The consumer of the comment"""
+
+    def connect(self):
+        self.accept()
+
+    def disconnect(self, close_code):
+        pass
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json['message']
+        self.send(text_data=json.dumps({
+            'message': message
+        }))
