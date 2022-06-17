@@ -7,30 +7,38 @@
         <p id="p1"><a href="{{ published.get_absolute_url }}">{{ published.name }}</a></p>
         <pre><big>Обновленно </big>{{ published.date }}</pre>
     </div>
-    <div id="comments">
+    <div id="comment_block">
         <h1 id="h1">Комментарии</h1>
-        {% for c in page_obj %}
-            <div>
-                <p class="p4"><a href="{{ c.users.get_absolute_url }}">{{ c.users.username }}</a> {{ c.date }}</p>
-                <p id="p2"><i>{{ c.biography|linebreaksbr|safe }}</i></p>
-                <p id="p3">
-                    <a href="{% url 'like_view' c.id %}"  title="Лайки">
-                        {% if user1 in c.like.all %}
-                            <span id="like"><i class="fas fa-heart"></i> {{ c.like.count }}</span>
-                        {% else %}
-                            <span><i class="fas fa-heart" title="Лайки"></i> {{ c.like.count }}</span>
-                        {% endif %}
-                    </a>
-                </p>
-            </div>
-        {% empty %}
-            <p id="p5"><i>Комментарии отсутствуют, но вы можете быть первым!</i></p>
-        {% endfor %}
-        <p><a id="com" href="{% url 'add_comment' published.slug %}">Оставить комментарий</a></p><br>
+        <div id="create_comment">
+            <textarea id="comment_input" cols="85" rows="3" required></textarea>
+            <input id="comment_submit" type="button" value="Отправить" onclick="create_comment()">
+        </div>
     </div>
+    <div id="comments">
+        {% for c in object_list %}
+        <div id="{{ c.id }}">
+            <p class="p4"><a href="{{ c.users.get_absolute_url }}">{{ c.users.username }}</a> {{ c.date }}</p>
+            <p id="p2"><i>{{ c.biography|linebreaksbr|safe }}</i></p>
+            <p id="p3">
+                <a class="like_comment"  title="Лайки" onclick="action_with_like({{c.id}})">
+                    {% if user1 in c.like.all %}
+                    <span class="com_like_{{c.id}}" id="like"><i class="fas fa-heart"></i> {{ c.like.count }}</span>
+                    {% else %}
+                    <span class="com_like_{{c.id}}"><i class="fas fa-heart"></i> {{ c.like.count }}</span>
+                    {% endif %}
+                </a>
+            </p>
+        </div>
+        {% empty %}
+        <p id="p5"><i>Комментарии отсутствуют, но вы можете быть первым!</i></p>
+        {% endfor %}
+    </div>
+
     {{ block.super }}
 
+    {{ user.id|json_script:"user_id" }}
     {{ published.slug|json_script:"publish_slug" }}
+    {{ published.id|json_script:"publish_id" }}
     <script src="/static/main/js/comment.js"></script>
 
 {% endblock content %}

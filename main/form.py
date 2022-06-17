@@ -4,15 +4,6 @@ from main.models import *
 from users.models import Users
 
 
-class AddCommentForm(forms.ModelForm):
-    biography = forms.CharField(label='Комментарий',
-                                widget=forms.Textarea(attrs={'placeholder': 'Написать комментарий', 'rows': 5}))
-
-    class Meta:
-        model = Comments
-        fields = ('biography',)
-
-
 class AddGroupForm(forms.ModelForm):
     name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
     photo = forms.ImageField(label='Аватарка')

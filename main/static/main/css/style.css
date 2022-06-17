@@ -220,9 +220,27 @@ color: blue;
     text-align: center;
 }
 
-#comments #h1 {
+#comment_block #h1 {
     text-align: center;
-    margin: 50px 0   0 30px;
+    margin: 50px 0 0 30px;
+}
+
+#comment_block #create_comment {
+    margin: 70px 30px 20px 150px;
+    padding: 20px 10px;
+    display: flex;
+}
+
+#comment_submit {
+    margin: 40px 30px 0px 20px;
+    font-size: 17px;
+    padding: 6px 10px;
+}
+
+#comment_input {
+    font-size: 16px;
+    padding: 7px;
+    resize: none;
 }
 
 #comments div {

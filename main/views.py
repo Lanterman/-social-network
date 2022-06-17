@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Avg, Count, Prefetch
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -270,7 +269,6 @@ class DetailPublish(DetailView):
 
 class PublishedCommentsView(SingleObjectMixin, ListView):
     template_name = 'main/comments.html'
-    paginate_by = 5
     slug_url_kwarg = 'publish_slug'
 
     def get(self, request, *args, **kwargs):
@@ -290,24 +288,6 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 
     def get_queryset(self):
         return self.comments
-
-
-class AddCommentView(DataMixin, CreateView):
-    template_name = 'main/add_comment.html'
-    slug_url_kwarg = 'publish_slug'
-    form_class = AddCommentForm
-
-    def post(self, request, *args, **kwargs):
-        published = Published.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
-        form = AddCommentForm(request.POST)
-        if form.is_valid():
-            comment = Comments.objects.create(**form.cleaned_data, published_id=published.id, users_id=request.user.pk)
-            return redirect(comment)
-        return super().post(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context | self.get_context(title='Добавить комментарий')
 
 
 # Logic
@@ -428,17 +408,6 @@ class AddStarRating(View):
             return HttpResponse(status=201)
         else:
             return HttpResponse(status=400)
-
-
-@login_required(login_url='/users/login/')
-def like_view(request, com_id):
-    comment = Comments.objects.prefetch_related('like').get(id=com_id)
-    user = Users.objects.get(username=request.user.username)
-    if user in comment.like.all():
-        comment.like.remove(user)
-    else:
-        comment.like.add(user)
-    return redirect(comment)
 
 
 class SearchPublished(NewsView):

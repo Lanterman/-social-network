@@ -1,7 +1,7 @@
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
-
+from main.models import Comments
 from users.models import Message, Users
 
 
@@ -54,14 +54,55 @@ class CommentConsumer(WebsocketConsumer):
     """The consumer of the comment"""
 
     def connect(self):
+        self.publish_slug = self.scope['url_route']['kwargs']['publish_slug']
+        self.publication_comments_group = 'publication_comments_%s' % self.publish_slug
+        # Join room group
+        async_to_sync(self.channel_layer.group_add)(self.publication_comments_group, self.channel_name)
         self.accept()
 
     def disconnect(self, close_code):
-        pass
+        async_to_sync(self.channel_layer.group_discard)(self.publication_comments_group, self.channel_name)
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-        self.send(text_data=json.dumps({
-            'message': message
-        }))
+        user_id = text_data_json["user_id"]
+        if text_data_json["type"] == "like":
+            comment_id = text_data_json["comment_id"]
+            comment = Comments.objects.prefetch_related('like').get(id=comment_id)
+            data = {"like_from_me": 1}
+            user = Users.objects.get(id=user_id)
+            if user in comment.like.all():
+                comment.like.remove(user)
+                data["like_from_me"] = 0
+            else:
+                comment.like.add(user)
+            data |= {'comment_id': comment.id, 'likes_count': comment.like.count()}
+            async_to_sync(self.channel_layer.group_send)(
+                self.publication_comments_group,
+                {'type': 'comment_like', 'likes_info': data, 'action_type': "action_like"}
+            )
+        else:
+            publish_id = text_data_json["publish_id"]
+            message = text_data_json["message"]
+            comment = Comments.objects.create(biography=message, published_id=publish_id, users_id=user_id)
+            user = Users.objects.get(id=user_id)
+            comment_info = {
+                "author_username": user.username,
+                "author_url": user.get_absolute_url(),
+                "message": message,
+                "comment_id": comment.id,
+            }
+            async_to_sync(self.channel_layer.group_send)(
+                self.publication_comments_group,
+                {'type': 'show_comment', 'comment_info': comment_info, 'action_type': "create_comment"}
+            )
+
+    def comment_like(self, event):
+        likes_info = event["likes_info"]
+        action_like = event["action_type"]
+        self.send(text_data=json.dumps({"likes_info": likes_info, "action_type": action_like}))
+
+    def show_comment(self, event):
+        comment_info = event["comment_info"]
+        create_comment = event["action_type"]
+        self.send(text_data=json.dumps({"comment_info": comment_info, "action_type": create_comment}))

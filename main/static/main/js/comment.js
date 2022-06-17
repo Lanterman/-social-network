@@ -1,45 +1,74 @@
 // comments, use websocket
 
 const publish_slug = JSON.parse(document.getElementById('publish_slug').textContent);
+const publish_id = JSON.parse(document.getElementById('publish_id').textContent);
+const user_id = JSON.parse(document.getElementById('user_id').textContent);
 const commentsSocket = new WebSocket('ws://' + window.location.host + '/ws/publish/' + publish_slug + '/comments/');
 
 commentsSocket.onopen = function(e) {
-    alert("лайки, потом комменты с websocket js");
+    console.log("Ok");
+    alert("менять цвет лайка только у тех, кто его поставил");
 };
-//chatSocket.onmessage = function(e) {
-//    const data = JSON.parse(e.data);
-//    let all_messages = document.querySelector('.messages');
-//    let mes_html = `<div class="${data.message_info.is_readed}">
-//                        <a href="${data.message_info.author_url}">
-//                            <img class="avatar" src="${data.message_info.author_photo}">
-//                        </a>
-//                        <div class="reply-body">
-//                            <strong>
-//                                <a class="username" href="${data.message_info.author_url}">
-//                                    ${data.message_info.author_name}
-//                                </a>
-//                            </strong>
-//                             <span class="pub_date">${data.message_info.pub_date}</span>
-//                             <p class="text">${data.message_info.message}</p>
-//                        </div>
-//                    </div>`;
-//    all_messages.innerHTML += mes_html;
-//};
-//
-//chatSocket.onclose = function(e) {
-//    console.error('Chat socket closed unexpectedly');
-//};
-//
-//document.querySelector('#chat-message-submit').onclick = function(e) {
-//    const html_message = document.querySelector('#chat-message-input');
-//    const no_messages = document.querySelector('.no_messages');
-//    chatSocket.send(JSON.stringify({
-//        'message': html_message.value,
-//        'chat_id': chat_id,
-//        'user_pk': user_pk,
-//    }));
-//    if (no_messages) {
-//        no_messages.remove();
-//    };
-//    html_message.value = '';
-//};
+
+commentsSocket.onclose = function(e) {
+    console.error('Comments socket closed unexpectedly');
+};
+
+commentsSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    if (data.action_type == 'action_like') {
+        const html_comment = document.querySelector(`.com_like_${data.likes_info.comment_id}`);
+        html_comment.innerHTML = `<i class="fas fa-heart"></i> ${data.likes_info.likes_count}`;
+        if (data.likes_info.like_from_me) {
+            html_comment.style.color = "red";
+        }else{
+            html_comment.style.color = "blue";
+        };
+    }else{
+        const no_comment = document.querySelector('#p5');
+        if (no_comment) {
+            no_comment.remove();
+        };
+        const comments_html = document.querySelector('#comments');
+        const all = comments_html.innerHTML;
+        const comment_html = `<div>
+                                <p class="p4"><a href="${data.comment_info.author_url}">${data.comment_info.author_username}</a> Только что</p>
+                                <p id="p2"><i>${data.comment_info.message}</i></p>
+                                <p id="p3">
+                                    <a class="like_comment"  title="Лайки" onclick="action_with_like(${data.comment_info.comment_id})">
+                                        <span class="com_like_${data.comment_info.comment_id}"><i class="fas fa-heart"></i> 0</span>
+                                    </a>
+                                </p>
+                            </div>`;
+        comments_html.innerHTML = comment_html;
+        comments_html.innerHTML += all;
+    };
+};
+
+function action_with_like(comment_id) {
+    if (!user_id) {
+        window.location.pathname = '/users/login/';
+    }
+    commentsSocket.send(JSON.stringify({
+        'comment_id': comment_id,
+        'user_id': user_id,
+        'type': 'like',
+    }));
+};
+
+function create_comment() {
+    if (!user_id) {
+        window.location.pathname = '/users/login/';
+    }
+    const message = document.querySelector("#comment_input");
+    message.reportValidity()
+    if (message.value) {
+        commentsSocket.send(JSON.stringify({
+            'publish_id': publish_id,
+            'user_id': user_id,
+            'message': message.value,
+            'type': 'comment',
+        }));
+        message.value = '';
+    };
+};

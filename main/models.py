@@ -55,13 +55,13 @@ class Groups(Abstract):
 
 class Comments(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
-    like = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name='Лайки', related_name='likes')
+    like = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name='Лайки', related_name='likes', blank=True)
     published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
     users = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Пользователь')
     name, slug = None, None
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-id']
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         db_table = 'Комментарии'

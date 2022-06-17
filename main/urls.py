@@ -15,7 +15,6 @@ urlpatterns = [
     path('groups/<slug:group_slug>/add_published/', AddPublished.as_view(), name='add_published'),
     path('publish/<slug:publish_slug>/', DetailPublish.as_view(), name='detail_publish'),
     path('publish/<slug:publish_slug>/comments/', PublishedCommentsView.as_view(), name='comments'),
-    path('publish/<slug:publish_slug>/add_comment/', AddCommentView.as_view(), name='add_comment'),
     # logic
     path('groups/<slug:group_slug>/del_group/', del_group, name='del_group'),  # del group
     path('groups/<slug:pub_slug>/<slug:group_slug>/del_published/', del_pub_group, name='del_pub_group'),  # del pub_group
@@ -29,7 +28,6 @@ urlpatterns = [
     path('groups/<slug:group_slug>/group_activity/', group_activity, name='group_activity'),  # group activity
     path('groups/<slug:group_slug>/quit_primary/', group_quit_primary, name='group_quit_primary'),  # quit_primary
     path("add-rating/", AddStarRating.as_view(), name='add_rating'),  # star_rating
-    path('like_view/<int:com_id>/', like_view, name='like_view'),  # like_comment
     path('p/', SearchPublished.as_view(), name='search_published'),  # news_search
     path('g/', SearchGroups.as_view(), name='search_group'),  # group_search
     path('m/', SearchMessages.as_view(), name='search_messages'),  # search_messages
