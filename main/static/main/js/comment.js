@@ -7,7 +7,6 @@ const commentsSocket = new WebSocket('ws://' + window.location.host + '/ws/publi
 
 commentsSocket.onopen = function(e) {
     console.log("Ok");
-    alert("менять цвет лайка только у тех, кто его поставил");
 };
 
 commentsSocket.onclose = function(e) {

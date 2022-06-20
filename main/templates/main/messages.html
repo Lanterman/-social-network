@@ -1,4 +1,6 @@
 {% extends 'main/base.html' %}
+{% load filter_for_messages %}
+
 {% block content %}
     <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }}</h6>
     <div class="block">
@@ -19,11 +21,13 @@
                             {% endif %}
                         {% endfor %}
                         <p class="{% if not last_message.is_readed %}unreaded{% endif %}" id="last_messages">
-                            {% if last_message.author_id == user.pk %}
-                                <i class="last_messages">Вы: {{ last_message|linebreaksbr|safe|truncatechars_html:66 }}</i>
-                            {% else %}
-                                <i class="last_messages">{{ last_message|linebreaksbr|safe|truncatechars_html:60 }}</i>
-                            {% endif %}
+                            {% autoescape off %}
+                                {% if last_message.author_id == user.pk %}
+                                    <i class="last_messages">Вы: {{ last_message|linebreaksbr|safe|truncatechars_html:66|replace_html:"<br>" }}</i>
+                                {% else %}
+                                    <i class="last_messages">{{ last_message|linebreaksbr|safe|truncatechars_html:60|replace_html:"<br>" }}</i>
+                                {% endif %}
+                            {% endautoescape %}
                         </p>
                     </a>
                 {% endwith %}

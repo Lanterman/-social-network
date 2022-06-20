@@ -118,9 +118,7 @@ class ChatDetailView(DataMixin, View):
         self.group = Groups.objects.exclude(users=self.user)[:3]
         self.chat = Chat.objects.prefetch_related('members').get(id=chat_id)
         messages = Message.objects.filter(chat_id=chat_id).select_related('author')
-        if self.user in self.chat.members.all():
-            messages.filter(is_readed=False).exclude(author_id=self.user.id).update(is_readed=True)
-        else:
+        if self.user not in self.chat.members.all():
             self.chat = None
         context = {'chat': self.chat, 'messages': messages, 'menu': menu, 'title': 'Мои сообщения',
                    'object': self.group, "chat_id": chat_id, "user": self.user}
