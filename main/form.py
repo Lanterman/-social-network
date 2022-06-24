@@ -1,29 +1,39 @@
+import re
+
 from django import forms
+from django.core.exceptions import ValidationError
 
 from main.models import *
 from users.models import Users
 
 
-class AddGroupForm(forms.ModelForm):
+class AbstractForm(forms.ModelForm):
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        re_value = re.findall(r'[^\w ]', name)
+        if re_value:
+            raise ValidationError(f"Имя не может содержать данные символ(-ы): {', '.join(re_value)}")
+        return name
+
+
+class AddGroupForm(AbstractForm):
     name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
     photo = forms.ImageField(label='Аватарка')
-    slug = forms.SlugField(label='URL', widget=forms.TextInput(attrs={'placeholder': 'Slug'}))
 
     class Meta:
         model = Groups
-        fields = ('name', 'slug', 'photo')
+        fields = ('name', 'photo')
 
 
-class AddPublishedForm(forms.ModelForm):
+class AddPublishedForm(AbstractForm):
     name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
     photo = forms.ImageField(label='Аватарка', required=False)
-    slug = forms.SlugField(label='URL', widget=forms.TextInput(attrs={'placeholder': 'Slug'}))
     biography = forms.CharField(label='Биография',
                                 widget=forms.Textarea(attrs={'placeholder': 'Написать биографию', 'rows': 5, 'cols': 35}))
 
     class Meta:
         model = Published
-        fields = ('name', 'slug', 'biography', 'photo')
+        fields = ('name', 'biography', 'photo')
 
 
 class AddPhotoForm(forms.ModelForm):

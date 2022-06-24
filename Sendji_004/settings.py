@@ -95,10 +95,10 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
+        'NAME': 'social_network',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'postgres_db',
+        'PASSWORD': 'karmavdele',
+        'HOST': 'localhost',
         'PORT': 5432,
     }
 }
@@ -184,3 +184,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = '...'
 EMAIL_HOST_PASSWORD = '...'
 EMAIL_PORT = 587
+
+AUTH_TOKEN = ""

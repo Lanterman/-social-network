@@ -195,6 +195,8 @@ class AddGroup(DataMixin, CreateView):
             user = Users.objects.get(pk=request.user.pk)
             group = Groups.objects.create(**form.cleaned_data, owner_id=user.pk)
             # tasks.send_message_about_group.delay(group.name, group.slug, user.email)
+            group.slug = group.name.replace(" ", "_")
+            group.save()
             return redirect(group)
         return super().post(request, *args, **kwargs)
 
@@ -240,6 +242,8 @@ class AddPublished(DataMixin, CreateView):
         if form.is_valid():
             user = Users.objects.get(pk=request.user.pk)
             published = Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=user.pk)
+            published.slug = published.name.replace(" ", "_")
+            published.save()
             # tasks.send_message_about_published.delay(published.name, published.slug, user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
@@ -320,6 +324,12 @@ class UpdateGroup(AbstractUpdate):
     form_class = AddGroupForm
     slug_url_kwarg = 'group_slug'
 
+    def form_valid(self, form):
+        group = form.save()
+        group.slug = group.name.replace(" ", "")
+        group.save()
+        return redirect(group)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context | self.get_context(delete='No')
@@ -329,6 +339,12 @@ class UpdatePublished(AbstractUpdate):
     model = Published
     form_class = AddPublishedForm
     slug_url_kwarg = 'pub_slug'
+
+    def form_valid(self, form):
+        publish = form.save()
+        publish.slug = publish.name.replace(" ", "")
+        publish.save()
+        return redirect(publish)
 
 
 def friend_activity(request, user_pk):

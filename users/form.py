@@ -3,9 +3,8 @@ import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, AuthenticationForm
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm
 
-from users.models import Users, Message
+from users.models import Users
 
 
 class AbstractForm(forms.Form):

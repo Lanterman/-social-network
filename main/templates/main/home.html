@@ -6,7 +6,7 @@
             {% if user.photo %}
                 <img src="{{ user.photo.url }}">
             {% else %}
-                <img src="/media/users/slen/slen.png/">
+                <img src="/main/static/main/images/slen.png/">
             {% endif %}
             <br><br><br>
             <p class="users"><label>Имя: </label><i id="i1">{{ user.first_name|default:'None' }}</i></p>
