@@ -27,6 +27,7 @@
             <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Вы не вступали в группы!" }}</p>
         {% endif %}
     </div>
+    {{ groups.count|json_script:"groups" }}
 {% endblock content %}
 
 {% block groups %}
@@ -35,10 +36,12 @@
 
 {% block script %}
 <script>
-    leave_the_group.onclick = function() {
-        if (!confirm('Выйти из группы?')) {
-            this.href = '';
-        }
-    }
+    if (groups.value) {
+        leave_the_group.onclick = function() {
+            if (!confirm('Выйти из группы?')) {
+                this.href = '';
+            };
+        };
+    };
 </script>
 {% endblock script %}

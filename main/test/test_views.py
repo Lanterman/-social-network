@@ -176,15 +176,6 @@ class ChatDetailViewTest(TestCase):
         self.assertFalse(chat[1].message_set.all())
         self.assertEqual(messages.count(), 3)
 
-    def test_chat_is_readed(self):
-        user = Users.objects.get(username='user_1')
-        chat = Chat.objects.all()
-        messages = chat[0].message_set.all()
-        self.assertEqual(messages[0].is_readed, True)
-        self.assertEqual(messages[1].is_readed == False, messages[2].is_readed == False)
-        messages.filter(is_readed=False).exclude(author=user).update(is_readed=True)
-        self.assertEqual(messages[1].is_readed == False, messages[2].is_readed == True)
-
     def test_view_template(self):
         chat = Chat.objects.get(id=1)
         self.client.login(username='user_1', password='12345')
@@ -489,22 +480,6 @@ class PublishedCommentsViewTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'main/comments.html')
 
-    def test_pagination(self):
-        publish = Published.objects.get(name='pub_1')
-        resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue('is_paginated' in resp.context)
-        self.assertTrue(resp.context['is_paginated'])
-        self.assertTrue(len(resp.context['page_obj']) == 5)
-
-    def test_lists_all_comments(self):
-        publish = Published.objects.get(name='pub_1')
-        resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}) + '?page=2')
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue('is_paginated' in resp.context)
-        self.assertTrue(resp.context['is_paginated'])
-        self.assertEqual(len(resp.context['page_obj']), 2)
-
     def test_context_if_logged_in(self):
         self.client.login(username='testuser1', password='12345')
         publish = Published.objects.get(name='pub_1')
@@ -512,47 +487,6 @@ class PublishedCommentsViewTest(TestCase):
         self.assertEqual(str(resp.context['user']), 'testuser1')
         self.assertTrue('title' in resp.context)
         self.assertEqual(resp.context['title'], 'Комментарии')
-
-
-class AddCommentViewTest(TestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
-                                         num_tel=12345678910, email='test1@mail.ru', slug='user1')
-        group = Groups.objects.create(name='group_1', slug='group_1')
-        Published.objects.create(name='pub_1', slug='pub_1', group=group)
-
-    def test_view_url(self):
-        publish = Published.objects.get(name='pub_1')
-        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}), follow=True)
-        self.assertEqual(resp.status_code, 200)
-
-    def test_view_template(self):
-        self.client.login(username='testuser1', password='12345')
-        publish = Published.objects.get(name='pub_1')
-        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}))
-        self.assertEqual(resp.status_code, 200)
-        self.assertTemplateUsed(resp, 'main/add_comment.html')
-
-    def test_context_if_logged_in(self):
-        self.client.login(username='testuser1', password='12345')
-        publish = Published.objects.get(name='pub_1')
-        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}))
-        self.assertEqual(str(resp.context['user']), 'testuser1')
-        self.assertTrue('title' in resp.context)
-        self.assertEqual(resp.context['title'], 'Добавить комментарий')
-
-    def test_context_if_not_logged_in(self):
-        publish = Published.objects.get(name='pub_1')
-        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}))
-        self.assertRedirects(resp, f'/users/login/?next=/publish/{publish.slug}/add_comment/')
-        self.assertFalse(resp.context)
-
-    def test_redirect(self):
-        publish = Published.objects.get(name='pub_1')
-        resp = self.client.get(reverse('add_comment', kwargs={'publish_slug': publish.slug}))
-        self.assertRedirects(resp, f'/users/login/?next=/publish/{publish.slug}/add_comment/')
 
 
 class DelGroupTest(TestCase):

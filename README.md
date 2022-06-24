@@ -22,3 +22,7 @@ docker-compose up --build
 ```
 http://127.0.0.1:8000/
 ```
+
+P.S.
+
+Celery is currently down due to security issues with Gmail.

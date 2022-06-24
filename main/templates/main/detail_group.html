@@ -18,9 +18,11 @@
         <div id="div2">
             {% if user1 in users %}
                 <p class="p1"><a href="{% url 'group_activity' group.slug %}">Отписаться</a></p>
-                <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
             {% else %}
                 <p class="p1"><a href="{% url 'group_activity' group.slug %}">Подписаться</a></p>
+            {% endif %}
+            {% if user1 in users or user1.id == group.owner_id %}
+                <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
             {% endif %}
         </div>
     </div>
