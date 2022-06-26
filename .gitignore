@@ -1,7 +1,10 @@
 .idea
-media
 venv 
 __pycache__
+/media/groups
+/media/users/*.png
+
+!/media/users/slen/slen.png
 
 /main/migrations/*
 !/main/migrations/__init__.py

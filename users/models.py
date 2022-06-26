@@ -42,6 +42,10 @@ class PostSubscribers(models.Model):
 class Chat(models.Model):
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name="Участник")
 
+    class Meta:
+        verbose_name = "Диалог"
+        verbose_name_plural = "Диалоги"
+
     def __str__(self):
         return f'{self.pk}'
 
@@ -58,6 +62,8 @@ class Message(models.Model):
 
     class Meta:
         ordering = ['pub_date']
+        verbose_name = "Сообщение"
+        verbose_name_plural = "Сообщения"
 
     def __str__(self):
         return self.message
