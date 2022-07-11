@@ -8,7 +8,6 @@ class AddGroupFormTest(TestCase):
         form = AddGroupForm()
         self.assertTrue(form.fields['name'].label == 'Название')
         self.assertTrue(form.fields['photo'].label == 'Аватарка')
-        self.assertTrue(form.fields['slug'].label == 'URL')
 
 
 class AddPublishedFormTest(TestCase):
@@ -16,7 +15,6 @@ class AddPublishedFormTest(TestCase):
         form = AddPublishedForm()
         self.assertTrue(form.fields['name'].label == 'Название')
         self.assertTrue(form.fields['photo'].label == 'Аватарка')
-        self.assertTrue(form.fields['slug'].label == 'URL')
         self.assertTrue(form.fields['biography'].label == 'Биография')
 
 

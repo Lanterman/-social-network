@@ -10,6 +10,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def connect(self):
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
+        self.user = self.scope['user']
         self.room_group_name = 'chat_%s' % self.chat_id
         async_to_sync(self.channel_layer.group_add)(self.room_group_name, self.channel_name)
         self.accept()
@@ -30,22 +31,21 @@ class ChatConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         chat_id = text_data_json["chat_id"]
         user_pk = text_data_json["user_pk"]
-        if len(text_data_json) != 2:
+        action_type = text_data_json['type']
+        if action_type == "add_message":
             message = text_data_json['message']
-            self.message_obj = Message.objects.create(message=message, chat_id=chat_id, author_id=user_pk)
-            user = Users.objects.get(pk=user_pk)
-            full_name = user.get_full_name()
-            author_name = full_name if full_name else user.username
+            full_name = self.user.get_full_name()
+            author_name = full_name if full_name else self.user.username
             message_info = {
                 "message": message.replace("\n", "<br>"),
                 "author_name": author_name if len(author_name) < 50 else author_name[:50] + "...",
-                "author_url": user.get_absolute_url(),
-                "author_photo": user.photo.url if user.photo else "/media/users/slen/slen.png/"
+                "author_url": self.user.get_absolute_url(),
+                "author_photo": self.user.photo.url if self.user.photo else "/media/users/slen/slen.png/"
             }
 
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
-                {'type': 'chat_message', 'message_info': message_info, "user_id": user.id}
+                {'type': 'chat_message', 'message_info': message_info, "user_id": self.user.id}
             )
         self.is_readed(chat_id=chat_id, user_id=user_pk)
 

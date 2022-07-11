@@ -12,7 +12,7 @@ The project is a social network and has standard functionality:
 
 #### 1) clone the repository
 ```
-https://github.com/Lanterman/-social-network.git
+git clone https://github.com/Lanterman/-social-network.git
 ```
 #### 2) Create and run docker-compose
 ```

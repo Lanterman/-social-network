@@ -124,6 +124,12 @@ class ChatDetailView(DataMixin, View):
                    'object': self.group, "chat_id": chat_id, "user": self.user}
         return render(request, 'main/chat.html', context)
 
+    def post(self, request, chat_id):
+        message = request.POST.get("message")
+        # Message.objects.create(message=message, chat_id_id=chat_id, author_id_id=request.user.pk)
+        print(message)
+        return HttpResponse(status=200)
+
 
 class CreateDialogView(View):
     def get(self, request, user_id):

@@ -9,6 +9,7 @@ document.querySelector('#chat-message-input').focus();
 chatSocket.onopen = function(e) {
     console.log("Ok");
     chatSocket.send(JSON.stringify({
+        'type': 'connect_to_chat',
         'chat_id': chat_id,
         'user_pk': user_pk,
     }));
@@ -43,7 +44,7 @@ chatSocket.onmessage = function(e) {
         if (message.firstChild.value != data.user_id) {
             message.style.backgroundColor = "#FFFFF0";
         };
-    }
+    };
 };
 
 chatSocket.onclose = function(e) {
@@ -55,10 +56,19 @@ document.querySelector('#chat-message-submit').onclick = function(e) {
     html_message.reportValidity()
     if (html_message.value) {
         chatSocket.send(JSON.stringify({
+            'type': 'add_message',
             'message': html_message.value,
             'chat_id': chat_id,
             'user_pk': user_pk,
         }));
+        const request = new Request(
+            `/messages/chat/${chat_id}/`,
+            {headers: {'X-CSRFToken': csrftoken}}
+        );
+        let data = new FormData();
+        data.append("message", html_message.value)
+        fetch(request, {method: 'POST', body: data})
+
+        html_message.value = '';
     };
-    html_message.value = '';
 };
