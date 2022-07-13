@@ -1,27 +1,24 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-    {% if not chat %}
-        <div class="chat_error">Вы не имеете доступа к данной беседе!</div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                {% include 'main/include/message.html' with message_item=message %}
+            {% endfor %}
+        </div>
     {% else %}
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    {% include 'main/include/message.html' with message_item=message %}
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="messages">
-                <p class="no_messages">У вас пока нет сообщений!</p>
-            </div>
-        {% endif %}
-        <div class="panel">
-            <textarea name="" id="chat-message-input" cols="85" rows="3" required></textarea>
-            <input id="chat-message-submit" type="button" value="Отправить">
+        <div class="messages">
+            <p class="no_messages">У вас пока нет сообщений!</p>
         </div>
     {% endif %}
+    <div class="panel">
+        {% csrf_token %}
+        <textarea name="" id="chat-message-input" cols="85" rows="3" required placeholder="Введите сообщение"></textarea>
+        <input id="chat-message-submit" type="button" value="Отправить">
+    </div>
     {{ chat_id|json_script:"chat_id" }}
-    {{ user.pk|json_script:"user_pk" }}
     <script src="/static/main/js/chat.js"></script>
 
 {% endblock content %}

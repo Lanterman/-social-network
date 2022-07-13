@@ -1,6 +1,6 @@
 {% load naturaltime from humanize %}
 
-<div class="messages_us {% if not message_item.is_readed %}unreaded{% endif %}"><input type="hidden" value="{{ message_item.author.id }}">
+<div class="{% if message_item.is_readed %}messages_us{% else %}unreaded{% endif %}"><input type="hidden" value="{{ message_item.author_id }}">
     <a href="{{ message_item.author.get_absolute_url }}">
         {% if message_item.author.photo %}
             <img class="avatar" src="{{ message_item.author.photo.url }}">

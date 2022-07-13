@@ -50,7 +50,6 @@ function action_with_like(comment_id) {
     }
     commentsSocket.send(JSON.stringify({
         'comment_id': comment_id,
-        'user_id': user_id,
         'type': 'like',
     }));
 };

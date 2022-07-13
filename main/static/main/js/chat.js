@@ -1,25 +1,19 @@
 // chat, use websocket
 
 const chat_id = JSON.parse(document.getElementById('chat_id').textContent);
-const user_pk = JSON.parse(document.getElementById('user_pk').textContent);
 const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/messages/chat/' + chat_id + '/');
 
 document.querySelector('#chat-message-input').focus();
 
 chatSocket.onopen = function(e) {
     console.log("Ok");
-    chatSocket.send(JSON.stringify({
-        'type': 'connect_to_chat',
-        'chat_id': chat_id,
-        'user_pk': user_pk,
-    }));
 };
 
 chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     let all_messages = document.querySelector('.messages');
-    const no_messages = document.querySelector('.no_messages');
     if (data.message_info != "connect") {
+        const no_messages = document.querySelector('.no_messages');
         if (no_messages) {
             no_messages.remove();
         };
@@ -38,11 +32,12 @@ chatSocket.onmessage = function(e) {
                             </div>
                         </div>`;
         all_messages.innerHTML += mes_html;
-    };
-    let messages = document.querySelectorAll(".unreaded")
-    for (let message of messages) {
-        if (message.firstChild.value != data.user_id) {
-            message.style.backgroundColor = "#FFFFF0";
+    }else {
+        let messages = document.querySelectorAll(".unreaded")
+        for (let message of messages) {
+            if (message.firstChild.value != data.user_id) {
+                message.style.backgroundColor = "#FFFFF0";
+            };
         };
     };
 };
@@ -56,15 +51,12 @@ document.querySelector('#chat-message-submit').onclick = function(e) {
     html_message.reportValidity()
     if (html_message.value) {
         chatSocket.send(JSON.stringify({
-            'type': 'add_message',
             'message': html_message.value,
             'chat_id': chat_id,
-            'user_pk': user_pk,
         }));
-        const request = new Request(
-            `/messages/chat/${chat_id}/`,
-            {headers: {'X-CSRFToken': csrftoken}}
-        );
+
+        const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const request = new Request(`/messages/chat/${chat_id}/`, {headers: {'X-CSRFToken': csrf_token}});
         let data = new FormData();
         data.append("message", html_message.value)
         fetch(request, {method: 'POST', body: data})
