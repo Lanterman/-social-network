@@ -84,8 +84,8 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379), ('0.0.0.0', 6379)],
-            # "hosts": [('Redis', 6379)],
+            # "hosts": [('127.0.0.1', 6379), ('0.0.0.0', 6379)],
+            "hosts": [('Redis', 6379)],
         },
     },
 }
@@ -96,12 +96,10 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'social_network',
-        # commit -m "fixed bug with channel layers, updated README.md, updated test_form.py"
-        # перенести логику работы с бд в во views.py, закончить messages
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'karmavdele',
-        'HOST': 'localhost',
+        'PASSWORD': 'postgres',
+        'HOST': 'postgres_db',
         'PORT': 5432,
     }
 }
