@@ -8,6 +8,9 @@ The project is a social network and has standard functionality:
 - changing profile information
 - etc.
 
+P.S.
+To draw rating stars, it is recommended to add a couple of instances of the RatingStar class through the admin panel.
+
 ### Launch of the project
 
 #### 1) clone the repository

@@ -1,0 +1,161 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+    <div id="home">
+        <div id="users1">
+            {% if user.photo %}
+                <img class="photo_frame" src="{{ user.photo.url }}">
+            {% else %}
+                <div class="photo_frame" id="no-photo">
+                    <p>No image</p>
+                </div>
+            {% endif %}
+            <br><br><br>
+            <p class="users"><label>Имя: </label><i id="i1">{{ user.first_name|default:'None' }}</i></p>
+            <p class="users"><label>Фамилия: </label><i id="i2">{{ user.last_name|default:'None' }}</i></p>
+            <p class="users"><label>Email: </label><i id="i3">{{ user.email }}</i></p>
+            <p class="users"><label>Номер телефона: </label><i id="i4">{{ user.num_tel }}</i></p>
+            <p class="users"><label>URL: </label><i id="i5">{{ user.slug }}</i></p>
+            <p class="users"><label>Статус админа: </label><i id="i6">{{ user.is_superuser }}</i></p>
+        </div>
+        <div class="user_pk">
+            {% if user.pk == request.user.pk %}
+                <p id="edit"><a class="model_user" href="#editPhoto">Изменить фото</a></p>
+            {% else %}
+                <a class="button_home" href="{% url 'check' user.pk %}">Отправить сообщение</a>
+                <div id="button_home">
+                    {% if owner in users %}
+                        <a class="model_user" href="{% url 'friend_activity' user.pk %}" onclick="remove()" id="rem_fr">
+                            <i class="fas fa-user-check"></i> Удалить из друзей
+                        </a>
+                    {% elif not subs %}
+                        <a class="button_home" href="{% url 'friend_activity' user.pk %}">Добавить в друзья</a>
+                    {% elif subs.0.owner != user.username %}
+                        <a class="button_home" href="{% url 'friend_activity' user.pk %}" id="agr_fr" onclick="agree()">
+                            Ответить на заявку
+                        </a>
+                    {% elif subs.0.owner == user.username %}
+                        <a class="button_home" href="{% url 'friend_activity' user.pk %}" id="can_fr" onclick="cancel()">
+                            Отменить заявку
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        <p id="subs_user">
+            <a class="model" href="#openModalSub">Друзья ({{ users.count }})</a>
+            {% if user.pk == request.user.pk and subs %}
+                <i>{{ subs.count }}</i>
+            {% endif %}
+        </p><br>
+        <p><a class="model" href="#openModalSub1">Подписчики: ({{ stop.count }})</a></p><br>
+        <p><a class="model" href="#openModalGroup">Группы ({{ groups.count }})</a></p>
+    </div>
+    <p id="public">Записи пользователя</p>
+
+    {% include 'main/include/average_value.html' %}
+    {% include 'main/include/modal_user.html' %}
+
+    <!-- modal_edit_photo -->
+    <div id="editPhoto" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Загрузить фото</h3>
+                    <a href="#close" title="Close" class="close">×</a>
+                </div>
+                <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <p id="photo">{{ form.photo }}</p>
+                        <button type="submit">Сохранить и продолжить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal_edit_group -->
+    <div id="openModalGroup" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Группы</h3>
+                    <a href="#close" title="Close" class="close">×</a>
+                </div>
+                <div class="modal-body">
+                    {% if user.pk == request.user.pk %}
+                        <p class="groups_home">Мои группы</p>
+                        {% for group in my_groups %}
+                            {% include 'main/include/home_include.html' %}
+                        {% empty %}
+                            <h4>Нет групп</h4>
+                        {% endfor %}
+                        <hr>
+                        <p class="groups_home">Группы на которые подписан</p>
+                    {% endif %}
+                    {% for group in groups %}
+                        {% include 'main/include/home_include.html' %}
+                    {% empty %}
+                        <h4>Нет групп</h4>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="openModalSub1" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"> Подписчики</h3>
+                <a href="#close" title="Close" class="close">×</a>
+            </div>
+            <div class="modal-body">
+                    {% for us in stop %}
+                        <p class="users_subs" >
+                            {% if us.user.photo %}
+                                <img src="{{ us.user.photo.url }}">
+                            {% else %}
+                                <img src="/media/users/slen/slen.png/">
+                            {% endif %}
+                            <a class="group_name" href="{{ us.user.get_absolute_url }}">
+                                {{ us.user.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
+                            </a><br><br><br>
+                            {% if us.owner == request.user.username %}
+                                <a class="button_home" href="{% url 'check' us.user_id %}">Отправить сообщение</a>
+                            {% else %}
+                                <i>Моя страница</i>
+                            {% endif %}
+                        </p><br>
+                    {% empty %}
+                        <h4>Нет подписчиков</h4>
+                    {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+    {{ block.super }}
+{% endblock content %}
+
+{% block script %}
+<script>
+    function remove() {
+        if (!confirm('Удалить из друзей?')) {
+            rem_fr.href = '';
+        }
+    }
+
+    function agree() {
+        if (!confirm('Добавить в друзья?')) {
+            agr_fr.href = '';
+        }
+    }
+
+    function cancel() {
+        if (!confirm('Отменить заявку?')) {
+            can_fr.href = '';
+        }
+    }
+</script>
+{% endblock script %}
