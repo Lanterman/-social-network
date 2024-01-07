@@ -2,15 +2,16 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Avg, Count, Prefetch
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
 
 from src.main import tasks
-from src.main.form import *
-from src.main.models import *
+from src.main.form import AddGroupForm, AddPhotoForm, AddPublishedForm, RatingForm
+from src.main.models import Comments, Publication, Groups, Rating
 from src.main.utils import *
-from src.users.models import *
+from src.users.models import User, Follower, Chat, Message
 
 
 class NewsView(ListView):
@@ -32,12 +33,12 @@ class NewsView(ListView):
         if request.user.is_authenticated:
             self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
             self.group = Groups.objects.filter(users__username=request.user.username)
-            self.published = Published.objects.filter(
+            self.published = Publication.objects.filter(
                 group_id__in=[gr.id for gr in self.group]).select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
         else:
             self.object = Groups.objects.all()[:3]
-            self.published = Published.objects.all().select_related('owner').annotate(
+            self.published = Publication.objects.all().select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
 
@@ -48,26 +49,26 @@ class NewsView(ListView):
 class HomeView(DataMixin, UpdateView):  # Оптимизировать
     """User page"""
 
-    model = Users
+    model = User
     form_class = AddPhotoForm
     template_name = 'main/home.html'
     pk_url_kwarg = 'user_pk'
     context_object_name = 'user'
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Users.objects.all().prefetch_related('friends'))
+        self.object = self.get_object(queryset=User.objects.all().prefetch_related('friends'))
         self.users = self.object.friends.all()
         self.group = Groups.objects.filter(users=self.object).prefetch_related('users')
         self.my_groups = Groups.objects.filter(owner_id=self.object.id).prefetch_related('users')
-        self.stop = PostSubscribers.objects.filter(owner=self.object.username).select_related('user')
+        self.stop = Follower.objects.filter(owner=self.object.username).select_related('user')
         if self.object.pk != request.user.pk:
-            self.subs = PostSubscribers.objects.filter(
+            self.subs = Follower.objects.filter(
                 Q(owner=request.user.username, user_id=self.object) |
                 Q(owner=self.object.username, user_id=request.user)
             )
         else:
-            self.subs = PostSubscribers.objects.filter(owner=self.object.username, escape=False).select_related('user')
-        self.published = Published.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
+            self.subs = Follower.objects.filter(owner=self.object.username, escape=False).select_related('user')
+        self.published = Publication.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id'))
         return super().get(request, *args, **kwargs)
     
@@ -175,8 +176,8 @@ class FriendsView(DataMixin, SingleObjectMixin, ListView):
         return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
-        self.users = Users.objects.filter(friends__pk=request.user.pk)
-        self.object = Users.objects.exclude(friends=request.user.pk).exclude(pk=request.user.pk)[:3]
+        self.users = User.objects.filter(friends__pk=request.user.pk)
+        self.object = User.objects.exclude(friends=request.user.pk).exclude(pk=request.user.pk)[:3]
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
@@ -238,7 +239,7 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Groups.objects.all().prefetch_related('users').select_related('owner'))
         self.users = self.object.users.all()
-        self.published = Published.objects.filter(group_id=self.object.id).select_related('owner').annotate(
+        self.published = Publication.objects.filter(group_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
 
@@ -270,7 +271,7 @@ class AddPublished(DataMixin, CreateView):
         group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
-            published = Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
+            published = Publication.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
             published.slug = published.name.replace(" ", "_")
             published.save()
             # tasks.send_message_about_published.delay(published.name, published.slug, user.email)
@@ -281,10 +282,10 @@ class AddPublished(DataMixin, CreateView):
 class DetailPublish(DetailView):
     """Detail publish page"""
 
-    model = Published
+    model = Publication
     slug_url_kwarg = 'publish_slug'
     template_name = 'main/detail_publish.html'
-    queryset = Published.objects.all().select_related('group', 'owner').annotate(rat=Avg('rating__star_id'))
+    queryset = Publication.objects.all().select_related('group', 'owner').annotate(rat=Avg('rating__star_id'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -307,7 +308,7 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
     slug_url_kwarg = 'publish_slug'
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Published.objects.all())
+        self.object = self.get_object(queryset=Publication.objects.all())
         self.comments = Comments.objects.filter(published_id=self.object.id).select_related('users').prefetch_related(
             'like')
         return super().get(request, *args, **kwargs)
@@ -338,14 +339,14 @@ def del_pub_group(request, pub_slug, group_slug):
     """Delete group for owner"""
 
     group = Groups.objects.get(slug=group_slug)
-    Published.objects.get(slug=pub_slug).delete()
+    Publication.objects.get(slug=pub_slug).delete()
     return redirect(group)
 
 
 def del_published(request, pub_slug):
     """Delete published for owner group or owner publication"""
 
-    Published.objects.get(slug=pub_slug).delete()
+    Publication.objects.get(slug=pub_slug).delete()
     return redirect(request.user)
 
 
@@ -374,7 +375,7 @@ class UpdateGroup(AbstractUpdate):
 
 
 class UpdatePublished(AbstractUpdate):
-    model = Published
+    model = Publication
     form_class = AddPublishedForm
     slug_url_kwarg = 'pub_slug'
 
@@ -388,9 +389,9 @@ class UpdatePublished(AbstractUpdate):
 def friend_activity(request, user_pk):
     """Logic for adding friends"""
 
-    q = Users.objects.get(pk=user_pk)
+    q = User.objects.get(pk=user_pk)
     try:
-        subs = PostSubscribers.objects.select_related('user').get(
+        subs = Follower.objects.select_related('user').get(
             Q(owner=request.user.username, user_id=q.pk) |
             Q(owner=q.username, user_id=request.user.pk)
         )
@@ -398,40 +399,40 @@ def friend_activity(request, user_pk):
         subs = ''
     if q in request.user.friends.all():
         q.friends.remove(request.user)
-        PostSubscribers.objects.create(owner=request.user.username, user_id=q.id)
+        Follower.objects.create(owner=request.user.username, user_id=q.id)
     elif not subs:
-        PostSubscribers.objects.create(owner=q.username, user_id=request.user.id)
+        Follower.objects.create(owner=q.username, user_id=request.user.id)
     elif subs.owner != q.username:
         request.user.friends.add(q)
-        PostSubscribers.objects.filter(owner=request.user.username, user_id=q.id).delete()
+        Follower.objects.filter(owner=request.user.username, user_id=q.id).delete()
     elif subs.owner == q.username:
-        PostSubscribers.objects.filter(owner=q.username, user_id=request.user.id).delete()
+        Follower.objects.filter(owner=q.username, user_id=request.user.id).delete()
     return redirect(q)
 
 
 def friend_hide(request, user_pk):
     """Leave in subscribers"""
 
-    q = Users.objects.get(pk=user_pk)
-    PostSubscribers.objects.filter(owner=request.user.username, user_id=q.id).update(escape=True)
+    q = User.objects.get(pk=user_pk)
+    Follower.objects.filter(owner=request.user.username, user_id=q.id).update(escape=True)
     return redirect(request.user)
 
 
 def friend_accept(request, user_pk):
     """Add in friends"""
 
-    q = Users.objects.get(pk=user_pk)
+    q = User.objects.get(pk=user_pk)
     request.user.friends.add(q)
-    PostSubscribers.objects.filter(owner=request.user.username, user_id=q.id).delete()
+    Follower.objects.filter(owner=request.user.username, user_id=q.id).delete()
     return redirect(request.user)
 
 
 def friend_del_primary(request, user_pk):
     """Delete from friends"""
 
-    q = Users.objects.get(pk=user_pk)
+    q = User.objects.get(pk=user_pk)
     request.user.friends.remove(q)
-    PostSubscribers.objects.create(owner=request.user.username, user_id=q.id)
+    Follower.objects.create(owner=request.user.username, user_id=q.id)
     return redirect(reverse('friends', kwargs={'user_pk': request.user.pk}))
 
 
@@ -475,7 +476,7 @@ class SearchPublished(NewsView):
     """Search for publications by name or owner username"""
 
     def get_queryset(self):
-        return Published.objects.filter(
+        return Publication.objects.filter(
             Q(name__icontains=self.request.GET.get('search')) |
             Q(owner__username__icontains=self.request.GET.get('search'))
         ).select_related('owner').annotate(rat=Avg('rating__star_id')).order_by('-date')
@@ -515,7 +516,7 @@ class SearchFriends(FriendsView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['empty'] = 'Нет пользователей соответствующих запросу!'
-        context['global'] = Users.objects.filter(
+        context['global'] = User.objects.filter(
             Q(username__icontains=self.request.GET.get('search')) |
             Q(first_name__icontains=self.request.GET.get('search')) |
             Q(last_name__icontains=self.request.GET.get('search'))

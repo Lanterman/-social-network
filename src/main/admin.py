@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.main.models import *
+from src.main.models import Publication, Groups, Comments, RatingStar, Rating
 
 
 class AbstractAdmin(admin.ModelAdmin):
@@ -21,8 +21,8 @@ class GroupsAdmin(AbstractAdmin):
     raw_id_fields = ('users',)  # удобная вещь при связях
 
 
-@admin.register(Published)
-class PublishedAdmin(AbstractAdmin):
+@admin.register(Publication)
+class PublicationAdmin(AbstractAdmin):
     list_display = ('id', 'name', 'slug', 'photo', 'date', 'owner')
     fields = ('name', 'slug', 'biography', 'group', 'photo', 'date', 'owner')
     date_hierarchy = 'date'
@@ -31,15 +31,15 @@ class PublishedAdmin(AbstractAdmin):
 
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'published', 'users', 'date')
-    list_display_links = ('id', 'published', 'users')
-    fields = ('biography', 'published', 'users', 'date', 'like')
-    search_fields = ('published', 'date', 'users')
+    list_display = ('id', 'publication', 'users', 'date')
+    list_display_links = ('id', 'publication', 'users')
+    fields = ('biography', 'publication', 'users', 'date', 'like')
+    search_fields = ('publication', 'date', 'users')
     list_filter = ('date', 'users')
     list_max_show_all = 5
     list_per_page = 10
     ordering = ('-date',)
-    raw_id_fields = ('published', 'users', 'like')
+    raw_id_fields = ('publication', 'users', 'like')
     date_hierarchy = 'date'
     readonly_fields = ('date',)
 

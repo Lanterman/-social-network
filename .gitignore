@@ -4,10 +4,10 @@ media
 
 __pycache__
 
-/main/migrations/*
-!/main/migrations/__init__.py
+/src/main/migrations/*
+!/src/main/migrations/__init__.py
 
-/users/migrations/*
-!/users/migrations/__init__.py
+/src/users/migrations/*
+!/src/users/migrations/__init__.py
 
 dump.rdb

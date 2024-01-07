@@ -6,11 +6,11 @@ from config import settings
 
 
 class Abstract(models.Model):
-    name = models.CharField(max_length=40, verbose_name='Название', unique=True)
-    slug = models.SlugField(error_messages={'unique': 'Такой URL уже существует!!!'},
-                            help_text='<i>Заполняется автоматически!</i>', max_length=40, unique=True,
+    name = models.CharField(max_length=40, verbose_name='name', unique=True)
+    slug = models.SlugField(error_messages={'unique': 'This URL already exists!!!!'},
+                            help_text='<i>Automatic filling!</i>', max_length=40, unique=True,
                             verbose_name='URL')
-    biography = models.TextField(verbose_name='Биография')
+    biography = models.TextField(verbose_name='biography')
 
     class Meta:
         abstract = True
@@ -19,18 +19,19 @@ class Abstract(models.Model):
         return self.name
 
 
-class Published(Abstract):
-    photo = models.ImageField(blank=True, upload_to='published/', verbose_name='Фото')
-    date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='Пользователь', on_delete=models.SET_NULL, null=True,
-                              related_name='my_published')
-    group = models.ForeignKey('Groups', on_delete=models.CASCADE, verbose_name='Группа')
+class Publication(Abstract):
+    photo = models.ImageField(blank=True, upload_to='publication/', verbose_name='Фото')
+    date = models.DateTimeField(default=timezone.now, verbose_name='pub_date')
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='my_publication'
+    )
+    group = models.ForeignKey('groups', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-date']
-        verbose_name = 'Публикация'
-        verbose_name_plural = 'Публикации'
-        db_table = 'Публикации'
+        verbose_name = 'Publication'
+        verbose_name_plural = 'Publications'
+        db_table = 'Publications'
 
     def get_absolute_url(self):
         return reverse('detail_publish', kwargs={'publish_slug': self.slug})
@@ -56,15 +57,15 @@ class Groups(Abstract):
 class Comments(Abstract):
     date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
     like = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name='Лайки', related_name='likes', blank=True)
-    published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
-    users = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Пользователь')
+    publication = models.ForeignKey(Publication, on_delete=models.CASCADE, verbose_name='Publication')
+    users = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='User')
     name, slug = None, None
 
     class Meta:
         ordering = ['-id']
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
-        db_table = 'Комментарии'
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
+        db_table = 'Comments'
 
     def __str__(self):
         return self.published.name
@@ -74,11 +75,11 @@ class Comments(Abstract):
 
 
 class RatingStar(models.Model):
-    value = models.SmallIntegerField(verbose_name='Рейтинг', default=0)
+    value = models.SmallIntegerField(verbose_name='rating', default=0)
 
     class Meta:
-        verbose_name = 'Звезда Рейтинг'
-        verbose_name_plural = 'Звезда Рейтинги'
+        verbose_name = 'Rating star'
+        verbose_name_plural = 'Rating stars'
         ordering = ['-value']
 
     def __str__(self):
@@ -86,13 +87,13 @@ class RatingStar(models.Model):
 
 
 class Rating(models.Model):
-    ip = models.CharField('Пользователь', max_length=150)
-    published = models.ForeignKey(Published, on_delete=models.CASCADE, verbose_name='Публикация')
-    star = models.ForeignKey(RatingStar, on_delete=models.CASCADE, verbose_name='Звезда')
+    ip = models.CharField('IP', max_length=150)
+    published = models.ForeignKey(Publication, on_delete=models.CASCADE, verbose_name='publication')
+    star = models.ForeignKey(RatingStar, on_delete=models.CASCADE, verbose_name='star')
 
     class Meta:
-        verbose_name = 'Рейтинг'
-        verbose_name_plural = 'Рейтинги'
+        verbose_name = 'Rating'
+        verbose_name_plural = 'Ratings'
 
     def __str__(self):
         return f'{self.star} - {self.published}: {self.ip}'

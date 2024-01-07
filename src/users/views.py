@@ -4,10 +4,10 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DetailView
 
-from src.main.utils import *
+from src.main.utils import DataMixin, menu
 from src.users import tasks
-from src.users.form import *
-from src.users.models import Users
+from src.users.form import LoginUserForm, PasswordChangeUserForm, RegisterUserForm, UpdateUserForm
+from src.users.models import User
 
 
 class RegisterUser(CreateView):
@@ -29,7 +29,7 @@ class RegisterUser(CreateView):
 
 
 class ProfileUser(DataMixin, DetailView):
-    model = Users
+    model = User
     template_name = 'users/profile.html'
     pk_url_kwarg = 'user_pk'
 
@@ -54,7 +54,7 @@ class LoginUser(LoginView):
 
 
 class PasswordChangeUser(PasswordChangeView, DetailView):
-    model = Users
+    model = User
     slug_url_kwarg = 'slug'
     template_name = 'users/edit_profile.html'
     form_class = PasswordChangeUserForm
@@ -69,7 +69,7 @@ class PasswordChangeUser(PasswordChangeView, DetailView):
 
 
 class UpdateUserView(DataMixin, UpdateView):
-    model = Users
+    model = User
     form_class = UpdateUserForm
     template_name = 'users/edit_profile.html'
     slug_url_kwarg = 'slug'

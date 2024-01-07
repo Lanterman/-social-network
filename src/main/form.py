@@ -3,8 +3,8 @@ import re
 from django import forms
 from django.core.exceptions import ValidationError
 
-from src.main.models import *
-from src.users.models import Users
+from src.main.models import Publication, Groups, Rating, RatingStar
+from src.users.models import User
 
 
 class AbstractForm(forms.ModelForm):
@@ -32,13 +32,13 @@ class AddPublishedForm(AbstractForm):
                                 widget=forms.Textarea(attrs={'placeholder': 'Написать биографию', 'rows': 5, 'cols': 35}))
 
     class Meta:
-        model = Published
+        model = Publication
         fields = ('name', 'biography', 'photo')
 
 
 class AddPhotoForm(forms.ModelForm):
     class Meta:
-        model = Users
+        model = User
         fields = ('photo',)
 
 

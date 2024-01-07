@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 
-from src.users.models import Users
+from src.users.models import User
 
 
 class AbstractForm(forms.Form):
@@ -74,7 +74,7 @@ class RegisterUserForm(AbstractForm, UserCreationForm):
     photo = forms.ImageField(label='Фото', required=False)
 
     class Meta:
-        model = Users
+        model = User
         fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'email', 'num_tel', 'photo')
 
 
@@ -100,5 +100,5 @@ class UpdateUserForm(AbstractForm, forms.ModelForm):
                               widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
 
     class Meta:
-        model = Users
+        model = User
         fields = ('first_name', 'last_name', 'num_tel', 'email')
