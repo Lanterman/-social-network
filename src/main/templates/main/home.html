@@ -11,20 +11,20 @@
                 </div>
             {% endif %}
             <br><br><br>
-            <p class="users"><label>Имя: </label><i id="i1">{{ user.first_name|default:'None' }}</i></p>
-            <p class="users"><label>Фамилия: </label><i id="i2">{{ user.last_name|default:'None' }}</i></p>
+            <p class="users"><label>First name: </label><i id="i1">{{ user.first_name|default:'None' }}</i></p>
+            <p class="users"><label>Last name: </label><i id="i2">{{ user.last_name|default:'None' }}</i></p>
             <p class="users"><label>Email: </label><i id="i3">{{ user.email }}</i></p>
-            <p class="users"><label>Номер телефона: </label><i id="i4">{{ user.num_tel }}</i></p>
+            <p class="users"><label>Mobile number: </label><i id="i4">{{ user.num_tel }}</i></p>
             <p class="users"><label>URL: </label><i id="i5">{{ user.slug }}</i></p>
-            <p class="users"><label>Статус админа: </label><i id="i6">{{ user.is_superuser }}</i></p>
+            <p class="users"><label>Is admin: </label><i id="i6">{{ user.is_superuser }}</i></p>
         </div>
         <div class="user_pk">
             {% if user.pk == request.user.pk %}
-                <p id="edit"><a class="model_user" href="#editPhoto">Изменить фото</a></p>
+                <p id="edit"><a class="model_user" href="#editPhoto">Change a photo</a></p>
             {% else %}
-                <a class="button_home" href="{% url 'check' user.pk %}">Отправить сообщение</a>
+                <a class="button_home" href="{% url 'check' user.pk %}">Send message</a>
                 <div id="button_home">
-                    {% if owner in users %}
+                    <!-- {% if owner in users %}
                         <a class="model_user" href="{% url 'friend_activity' user.pk %}" onclick="remove()" id="rem_fr">
                             <i class="fas fa-user-check"></i> Удалить из друзей
                         </a>
@@ -38,20 +38,17 @@
                         <a class="button_home" href="{% url 'friend_activity' user.pk %}" id="can_fr" onclick="cancel()">
                             Отменить заявку
                         </a>
-                    {% endif %}
+                    {% endif %} -->
                 </div>
             {% endif %}
         </div>
         <p id="subs_user">
-            <a class="model" href="#openModalSub">Друзья ({{ users.count }})</a>
-            {% if user.pk == request.user.pk and subs %}
-                <i>{{ subs.count }}</i>
-            {% endif %}
+            <a class="model" href="#openModalSub">Followers ({{ followers.count }})</a>
         </p><br>
-        <p><a class="model" href="#openModalSub1">Подписчики: ({{ stop.count }})</a></p><br>
-        <p><a class="model" href="#openModalGroup">Группы ({{ groups.count }})</a></p>
+        <p><a class="model" href="#openModalSub1">Subscriptions: ({{ subscriptions.count }})</a></p><br>
+        <p><a class="model" href="#openModalGroup">Groups ({{ groups.count}})</a></p>
     </div>
-    <p id="public">Записи пользователя</p>
+    <p id="public">User publicashions</p>
 
     {% include 'main/include/average_value.html' %}
     {% include 'main/include/modal_user.html' %}
@@ -61,14 +58,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Загрузить фото</h3>
+                    <h3 class="modal-title">Upload a photo</h3>
                     <a href="#close" title="Close" class="close">×</a>
                 </div>
                 <div class="modal-body">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <p id="photo">{{ form.photo }}</p>
-                        <button type="submit">Сохранить и продолжить</button>
+                        <button type="submit">Submit</button>
                     </form>
                 </div>
             </div>
@@ -80,24 +77,24 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Группы</h3>
+                    <h3 class="modal-title">Groups</h3>
                     <a href="#close" title="Close" class="close">×</a>
                 </div>
                 <div class="modal-body">
                     {% if user.pk == request.user.pk %}
-                        <p class="groups_home">Мои группы</p>
+                        <p class="groups_home">My groups</p>
                         {% for group in my_groups %}
                             {% include 'main/include/home_include.html' %}
                         {% empty %}
-                            <h4>Нет групп</h4>
+                            <h4>No groups</h4>
                         {% endfor %}
-                        <hr>
-                        <p class="groups_home">Группы на которые подписан</p>
+                        <br/><hr>
+                        <p class="groups_home">Groups</p>
                     {% endif %}
                     {% for group in groups %}
                         {% include 'main/include/home_include.html' %}
                     {% empty %}
-                        <h4>Нет групп</h4>
+                        <h4>No groups</h4>
                     {% endfor %}
                 </div>
             </div>
@@ -108,28 +105,30 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title"> Подписчики</h3>
+                <h3 class="modal-title"> Subscriptions</h3>
                 <a href="#close" title="Close" class="close">×</a>
             </div>
             <div class="modal-body">
-                    {% for us in stop %}
+                    {% for subscription in subscriptions %}
                         <p class="users_subs" >
-                            {% if us.user.photo %}
-                                <img src="{{ us.user.photo.url }}">
+                            {% if subscription.subscription_id.photo %}
+                                <img src="{{ subscription.subscription_id.photo.url }}">
                             {% else %}
-                                <img src="/media/users/slen/slen.png/">
+                                <span class="user_photo">
+                                    <span>No image</span>
+                                </span>
                             {% endif %}
-                            <a class="group_name" href="{{ us.user.get_absolute_url }}">
-                                {{ us.user.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
+                            <a class="group_name" href="{{ subscription.subscription_id.get_absolute_url }}">
+                                {{ subscription.subscription_id.get_full_name|default:'Anonymous'|truncatechars_html:23|title }}
                             </a><br><br><br>
-                            {% if us.owner == request.user.username %}
-                                <a class="button_home" href="{% url 'check' us.user_id %}">Отправить сообщение</a>
+                            {% if subscription.subscription_id.id != request.user.id %}
+                                <a class="button_home" href="{% url 'check' subscription.subscription_id.id %}">Send message</a>
                             {% else %}
-                                <i>Моя страница</i>
+                                <i>My profile</i>
                             {% endif %}
                         </p><br>
                     {% empty %}
-                        <h4>Нет подписчиков</h4>
+                        <h4>No subscriptions</h4>
                     {% endfor %}
             </div>
         </div>

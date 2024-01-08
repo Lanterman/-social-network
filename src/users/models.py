@@ -27,7 +27,7 @@ class User(AbstractUser):
         return reverse('home', kwargs={'user_pk': self.pk})
 
 
-class Follower(models.Model):
+class Follower(models.Model): #  Сделать в первую очередь. Переписать логику друзей на подписчиков и подписки.
     """User followers"""
 
     follower_id: int = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, max_length=255, related_name="subscriptions")
@@ -41,7 +41,7 @@ class Follower(models.Model):
         verbose_name_plural = 'Followers'
 
     def __str__(self):
-        return f'{self.owner} - {self.user}: {self.date}'
+        return f'{self.follower_id} - {self.subscription_id}: {self.date}'
 
 
 class Chat(models.Model):

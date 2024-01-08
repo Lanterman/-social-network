@@ -1,5 +1,8 @@
+from typing import Any
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Avg, Count, Prefetch
+from django.db.models.base import Model as Model
+from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -56,40 +59,38 @@ class HomeView(DataMixin, UpdateView):  # Оптимизировать
     context_object_name = 'user'
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=User.objects.all().prefetch_related('friends'))
-        self.users = self.object.friends.all()
-        self.group = Groups.objects.filter(users=self.object).prefetch_related('users')
-        self.my_groups = Groups.objects.filter(owner_id=self.object.id).prefetch_related('users')
-        self.stop = Follower.objects.filter(owner=self.object.username).select_related('user')
-        if self.object.pk != request.user.pk:
-            self.subs = Follower.objects.filter(
-                Q(owner=request.user.username, user_id=self.object) |
-                Q(owner=self.object.username, user_id=request.user)
-            )
-        else:
-            self.subs = Follower.objects.filter(owner=self.object.username, escape=False).select_related('user')
-        self.published = Publication.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
-            rat=Avg('rating__star_id'))
-        return super().get(request, *args, **kwargs)
-    
-    # def post(self, request, *args, **kwargs):
-    #     self.object = self.get_object()
-    #     print(self.object.photo)
-    #     return super().post(request, *args, **kwargs)
+        self.object = self.get_object(queryset=User.objects.all().prefetch_related('followers', 'subscriptions', 'groups_user', 'my_groups'))
+        self.followers = self.object.followers.all()
+        self.subscriptions = self.object.subscriptions.all()
+        self.groups = self.object.groups_user.all()
+        self.my_groups = self.object.my_groups.all()
+
+        self.new_followers = [follower for follower in self.followers if not follower.is_checked]
+
+        # self.users = self.object.followers.all()
+        # if self.object.pk != request.user.pk:
+        #     self.subs = Follower.objects.filter(
+        #         Q(owner=request.user.username, user_id=self.object) |
+        #         Q(owner=self.object.username, user_id=request.user)
+        #     )
+        # else:
+        #     self.subs = Follower.objects.filter(owner=self.object.username, escape=False).select_related('user')
+        # self.published = Publication.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
+        #     rat=Avg('rating__star_id'))
+        return self.render_to_response(self.get_context_data())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Главная страница'
-        context['users'] = self.users
-        context['groups'] = self.group
-        context['users_init'] = 'друзей'
-        context['center_friends'] = 'Друзья'
-        context['page_obj'] = self.published
-        context['primary'] = 'home'
+        context['title'] = 'Home'
+        # context['users'] = self.users
+        context['groups'] = self.groups
         context['my_groups'] = self.my_groups
-        context['owner'] = self.request.user
-        context['subs'] = self.subs
-        context['stop'] = self.stop
+        # context['page_obj'] = self.published
+        context['primary'] = 'home'
+        # context['owner'] = self.request.user
+        context['subscriptions'] = self.subscriptions
+        context['followers'] = self.followers
+        context["new_followers"] = self.new_followers
         return context | self.get_context()
 
 
@@ -418,12 +419,10 @@ def friend_hide(request, user_pk):
     return redirect(request.user)
 
 
-def friend_accept(request, user_pk):
-    """Add in friends"""
+def conf_followers(request, user_id: int):
+    """Confirm subscribers verification"""
 
-    q = User.objects.get(pk=user_pk)
-    request.user.friends.add(q)
-    Follower.objects.filter(owner=request.user.username, user_id=q.id).delete()
+    Follower.objects.filter(follower_id__id=user_id, subscription_id__id=request.user.id).update(is_checked=True)
     return redirect(request.user)
 
 

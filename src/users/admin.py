@@ -16,7 +16,7 @@ class UsersAdmin(admin.ModelAdmin):
 
 
 @admin.register(Follower)
-class PostSubscribersAdmin(admin.ModelAdmin):
+class FollowerAdmin(admin.ModelAdmin):
     list_display = ('follower_id', 'subscription_id', 'date', 'is_checked')
     list_display_links = ('follower_id',)
     fields = ('follower_id', 'subscription_id', 'is_checked')
@@ -24,6 +24,15 @@ class PostSubscribersAdmin(admin.ModelAdmin):
     list_filter = ('follower_id', 'date', 'is_checked')
     list_max_show_all = 5
     list_per_page = 10
+    actions = ["confirm_checking_followers, unconfirm_checking_followers"]
+
+    @admin.action(description='Confirm checking followers')
+    def confirm_checking_followers(self, request, queryset):
+        queryset.update(is_checked=True)
+
+    @admin.action(description='Unconfirm checking followers')
+    def unconfirm_checking_followers(self, request, queryset):
+        queryset.update(is_checked=False)
 
 
 @admin.register(Chat)

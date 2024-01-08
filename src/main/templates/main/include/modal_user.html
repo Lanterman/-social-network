@@ -2,50 +2,59 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">{{ center_friends|default:"Подписчики" }}</h3>
+                <h3 class="modal-title">Followers</h3>
                 <a href="#close" title="Close" class="close">×</a>
             </div>
             <div class="modal-body">
-                {% if user.pk == request.user.pk and subs %}
-                    <p class="groups_home">Заявки на добавления в друзья</p>
-                    {% for us in subs %}
-                        <p class="users_subs" >
-                            {% if us.user.photo %}
-                                <img src="{{ us.user.photo.url }}">
+                {% if user.pk == request.user.pk and new_followers %}
+                    <p class="groups_home">Announcements</p>
+                    {% for follower in new_followers %}
+                        <p class="users_subs">
+                            {% if follower.follower_id.photo %}
+                                <img src="{{ follower.follower_id.photo.url }}">
                             {% else %}
-                                <img src="/media/users/slen/slen.png/">
+                                <span class="user_photo">
+                                    <span>No image</span>
+                                </span>
                             {% endif %}
-                            <a class="group_name" href="{{ us.user.get_absolute_url }}">
-                                {{ us.user.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
+
+                            <a class="group_name" href="{{ follower.follower_id.get_absolute_url }}">
+                                {{ follower.follower_id.get_full_name|default:'Anonymous'|truncatechars_html:23|title }}
                             </a><br><br><br>
-                            <a class="primary" href="{% url 'friend_accept' us.user.pk %}">
-                                <i class="fas fa-user-check"> Принять</i></a>
-                            <a id="primary" class="primary" href="{% url 'friend_hide' us.user.pk %}">
-                                <i class="fas fa-user-times"> Скрыть</i>
-                            </a>
-                        </p><br>
+
+                            {% if follower.follower_id.pk == request.user.pk %}
+                                <i>My profile</i>
+                            {% endif %}
+
+                            <a class="primary" href="{% url 'conf_followers' follower.follower_id.pk %}">
+                                <i class="fas fa-user-check"> Ok</i></a>
+                        </p>
                     {% endfor %}
-                    <hr>
-                    <p class="groups_home">Друзья</p>
+                    <br/><hr><br/>
                 {% endif %}
-                {% for us in users %}
+                
+                <p class="groups_home">Followers</p>
+                {% for follower in followers %}
                     <p class="users_subs">
-                        {% if us.photo %}
-                            <img src="{{ us.photo.url }}">
+                        {% if follower.follower_id.photo %}
+                            <img src="{{ follower.follower_id.photo.url }}">
                         {% else %}
-                            <img src="/media/users/slen/slen.png/">
+                            <span class="user_photo">
+                                <span>No image</span>
+                            </span>
                         {% endif %}
-                        <a class="group_name" href="{{ us.get_absolute_url }}">
-                            {{ us.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
+
+                        <a class="group_name" href="{{ follower.follower_id.get_absolute_url }}">
+                            {{ follower.follower_id.get_full_name|default:'Anonymous'|truncatechars_html:23|title }}
                         </a><br><br><br>
-                        {% if us.pk != request.user.pk %}
-                            <a class="button_home" href="{% url 'check' us.pk %}">Отправить сообщение</a>
+                        {% if follower.follower_id.pk != request.user.pk %}
+                            <a class="button_home" href="{% url 'check' follower.follower_id.id %}">Send message</a>
                         {% else %}
-                            <i>Моя страница</i>
+                            <i>My profile</i>
                         {% endif %}
                     </p><br>
                 {% empty %}
-                    <h4>Нет {{ users_init|default:"подписчиков" }}</h4>
+                    <h4>No followers</h4>
                 {% endfor %}
             </div>
         </div>

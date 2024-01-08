@@ -39,15 +39,15 @@ class Publication(Abstract):
 
 class Groups(Abstract):
     photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='groups_users', verbose_name='Пользователи')
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='groups_user', verbose_name='users')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='Создатель группы', on_delete=models.SET_NULL, null=True,
-                              related_name='my_group')
+                              related_name='my_groups')
     biography = None
 
     class Meta:
         ordering = ['name']
-        verbose_name = 'Группа'
-        verbose_name_plural = 'Группы'
+        verbose_name = 'Group'
+        verbose_name_plural = 'Groups'
         db_table = 'Группы'
 
     def get_absolute_url(self):  # Вместо тега url и добавляет кнопку на страницу записи в админке
