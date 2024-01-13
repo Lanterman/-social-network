@@ -12,7 +12,7 @@ from django.views.generic.detail import SingleObjectMixin
 
 from src.main import tasks
 from src.main.form import AddGroupForm, AddPhotoForm, AddPublishedForm, RatingForm
-from src.main.models import Comments, Publication, Groups, Rating
+from src.main.models import Comment, Publication, Group, Rating
 from src.main.utils import *
 from src.users.models import User, Follower, Chat, Message
 
@@ -34,13 +34,13 @@ class NewsView(ListView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
-            self.group = Groups.objects.filter(users__username=request.user.username)
+            self.object = Group.objects.exclude(users__username=request.user.username)[:3]
+            self.group = Group.objects.filter(users__username=request.user.username)
             self.published = Publication.objects.filter(
                 group_id__in=[gr.id for gr in self.group]).select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
         else:
-            self.object = Groups.objects.all()[:3]
+            self.object = Group.objects.all()[:3]
             self.published = Publication.objects.all().select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
@@ -59,7 +59,10 @@ class HomeView(DataMixin, UpdateView):  # Оптимизировать
     context_object_name = 'user'
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=User.objects.all().prefetch_related('followers', 'subscriptions', 'groups_user', 'my_groups'))
+        self.object = self.get_object(queryset=User.objects.all().prefetch_related(
+            'followers__follower_id', 'subscriptions__subscription_id', 'groups_user', 'my_groups')
+        )
+
         self.followers = self.object.followers.all()
         self.subscriptions = self.object.subscriptions.all()
         self.groups = self.object.groups_user.all()
@@ -67,27 +70,16 @@ class HomeView(DataMixin, UpdateView):  # Оптимизировать
 
         self.new_followers = [follower for follower in self.followers if not follower.is_checked]
 
-        # self.users = self.object.followers.all()
-        # if self.object.pk != request.user.pk:
-        #     self.subs = Follower.objects.filter(
-        #         Q(owner=request.user.username, user_id=self.object) |
-        #         Q(owner=self.object.username, user_id=request.user)
-        #     )
-        # else:
-        #     self.subs = Follower.objects.filter(owner=self.object.username, escape=False).select_related('user')
-        # self.published = Publication.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
-        #     rat=Avg('rating__star_id'))
+        self.publications = Publication.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
+            rat=Avg('rating__star_id'))
+
         return self.render_to_response(self.get_context_data())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Home'
-        # context['users'] = self.users
         context['groups'] = self.groups
         context['my_groups'] = self.my_groups
-        # context['page_obj'] = self.published
-        context['primary'] = 'home'
-        # context['owner'] = self.request.user
+        context['page_obj'] = self.publications
         context['subscriptions'] = self.subscriptions
         context['followers'] = self.followers
         context["new_followers"] = self.new_followers
@@ -109,7 +101,7 @@ class MessagesView(DataMixin, ListView):
                 to_attr='set_mes'
             )
         )  # Отсортировать
-        self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
+        self.object = Group.objects.exclude(users__username=request.user.username)[:3]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -128,7 +120,7 @@ class ChatDetailView(DataMixin, View):
     """Chat page"""
 
     def get(self, request, chat_id):
-        self.group = Groups.objects.exclude(users=request.user)[:3]
+        self.group = Group.objects.exclude(users=request.user)[:3]
         self.chat = Chat.objects.prefetch_related('members').get(id=chat_id)
         if request.user not in self.chat.members.all():
             raise PermissionDenied()
@@ -192,8 +184,8 @@ class GroupsView(DataMixin, ListView):
     context_object_name = 'groups'
 
     def get(self, request, *args, **kwargs):
-        self.group = Groups.objects.filter(users__pk=request.user.pk).prefetch_related('users')
-        self.object = Groups.objects.exclude(users__pk=request.user.pk)[:3]
+        self.group = Group.objects.filter(users__pk=request.user.pk).prefetch_related('users')
+        self.object = Group.objects.exclude(users__pk=request.user.pk)[:3]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -222,7 +214,7 @@ class AddGroup(DataMixin, CreateView):
     def post(self, request, *args, **kwargs):
         form = AddGroupForm(request.POST, request.FILES)
         if form.is_valid():
-            group = Groups.objects.create(**form.cleaned_data, owner_id=request.user.pk)
+            group = Group.objects.create(**form.cleaned_data, owner_id=request.user.pk)
             # tasks.send_message_about_group.delay(group.name, group.slug, user.email)
             group.slug = group.name.replace(" ", "_")
             group.save()
@@ -238,7 +230,7 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
     slug_url_kwarg = 'group_slug'
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Groups.objects.all().prefetch_related('users').select_related('owner'))
+        self.object = self.get_object(queryset=Group.objects.all().prefetch_related('users').select_related('owner'))
         self.users = self.object.users.all()
         self.published = Publication.objects.filter(group_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id')).order_by('-date')
@@ -269,7 +261,7 @@ class AddPublished(DataMixin, CreateView):
         return context | self.get_context(title='Создать запись')
 
     def post(self, request, *args, **kwargs):
-        group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
+        group = Group.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
             published = Publication.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
@@ -310,7 +302,7 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Publication.objects.all())
-        self.comments = Comments.objects.filter(published_id=self.object.id).select_related('users').prefetch_related(
+        self.comments = Comment.objects.filter(published_id=self.object.id).select_related('users').prefetch_related(
             'like')
         return super().get(request, *args, **kwargs)
 
@@ -332,14 +324,14 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 def del_group(request, group_slug):
     """Delete group"""
 
-    Groups.objects.get(slug=group_slug).delete()
+    Group.objects.get(slug=group_slug).delete()
     return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
 
 
 def del_pub_group(request, pub_slug, group_slug):
     """Delete group for owner"""
 
-    group = Groups.objects.get(slug=group_slug)
+    group = Group.objects.get(slug=group_slug)
     Publication.objects.get(slug=pub_slug).delete()
     return redirect(group)
 
@@ -360,7 +352,7 @@ class AbstractUpdate(DataMixin, UpdateView):
 
 
 class UpdateGroup(AbstractUpdate):
-    model = Groups
+    model = Group
     form_class = AddGroupForm
     slug_url_kwarg = 'group_slug'
 
@@ -438,7 +430,7 @@ def friend_del_primary(request, user_pk):
 def group_activity(request, group_slug):
     """logic for group entry"""
 
-    q = Groups.objects.prefetch_related('users').get(slug=group_slug)
+    q = Group.objects.prefetch_related('users').get(slug=group_slug)
     if request.user in q.users.all():
         q.users.remove(request.user)
     else:
@@ -449,7 +441,7 @@ def group_activity(request, group_slug):
 def group_quit_primary(request, group_slug):
     """Leave group"""
 
-    q = Groups.objects.get(slug=group_slug)
+    q = Group.objects.get(slug=group_slug)
     q.users.remove(request.user)
     return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
 
@@ -496,7 +488,7 @@ class SearchGroups(GroupsView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['empty'] = 'Нет групп соответствующих запросу!'
-        context['global'] = Groups.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related(
+        context['global'] = Group.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related(
             'users')
         return context
 

@@ -8,16 +8,16 @@
     {% csrf_token %}
 
     {% if form.errors %}
-    <p class="errors">Ошибка регистрации! Попробуйте еще раз.</p>
+    <p class="errors">Registration error! Try again.</p>
     {% endif %}
 
     {% for f in form %}
     <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>
     <div class="errors">{{ f.errors }}</div>
     {% endfor %}
-    <button class="button" type="submit">Регистрация</button>
+    <button class="button" type="submit">Registration</button>
 </form>
 
-<a class="a" href="{% url 'login' %}"><i>Уже есть аккаунт ?</i></a>
+<a class="a" href="{% url 'login' %}"><i>Does the account already exist?</i></a>
 {% endblock content %}
 

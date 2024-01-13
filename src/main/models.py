@@ -25,7 +25,7 @@ class Publication(Abstract):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='my_publication'
     )
-    group = models.ForeignKey('groups', on_delete=models.CASCADE)
+    group = models.ForeignKey('group', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-date']
@@ -37,10 +37,10 @@ class Publication(Abstract):
         return reverse('detail_publish', kwargs={'publish_slug': self.slug})
 
 
-class Groups(Abstract):
+class Group(Abstract):
     photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='groups_user', verbose_name='users')
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='Создатель группы', on_delete=models.SET_NULL, null=True,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='owner', on_delete=models.SET_NULL, null=True,
                               related_name='my_groups')
     biography = None
 
@@ -48,17 +48,17 @@ class Groups(Abstract):
         ordering = ['name']
         verbose_name = 'Group'
         verbose_name_plural = 'Groups'
-        db_table = 'Группы'
+        db_table = 'Groups'
 
     def get_absolute_url(self):  # Вместо тега url и добавляет кнопку на страницу записи в админке
         return reverse('detail_group', kwargs={'group_slug': self.slug})
 
 
-class Comments(Abstract):
-    date = models.DateTimeField(default=timezone.now, verbose_name='Время публикации')
-    like = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name='Лайки', related_name='likes', blank=True)
-    publication = models.ForeignKey(Publication, on_delete=models.CASCADE, verbose_name='Publication')
-    users = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='User')
+class Comment(Abstract):
+    date = models.DateTimeField(default=timezone.now, verbose_name='date')
+    like = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name='likes', related_name='likes', blank=True)
+    publication_id = models.ForeignKey(Publication, on_delete=models.CASCADE, verbose_name='publication')
+    users = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='user')
     name, slug = None, None
 
     class Meta:
@@ -88,7 +88,7 @@ class RatingStar(models.Model):
 
 class Rating(models.Model):
     ip = models.CharField('IP', max_length=150)
-    published = models.ForeignKey(Publication, on_delete=models.CASCADE, verbose_name='publication')
+    publication_id = models.ForeignKey(Publication, on_delete=models.CASCADE, verbose_name='publication')
     star = models.ForeignKey(RatingStar, on_delete=models.CASCADE, verbose_name='star')
 
     class Meta:

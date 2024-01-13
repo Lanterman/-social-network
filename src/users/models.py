@@ -10,9 +10,9 @@ from config import settings
 class User(AbstractUser):
     """Customer user class"""
 
-    num_tel: str = models.CharField(max_length=20, verbose_name='Номер телефона')
+    num_tel: str = models.CharField(max_length=20, verbose_name='mobile number')
     slug: str = models.SlugField(max_length=40, verbose_name='URL', blank=True)
-    photo: bytes = models.ImageField(verbose_name='Фото', blank=True, upload_to='users/')
+    photo: bytes = models.ImageField(verbose_name='photo', blank=True, upload_to='users/')
     email: str = models.EmailField('email address', blank=False)
 
     class Meta:
@@ -27,7 +27,7 @@ class User(AbstractUser):
         return reverse('home', kwargs={'user_pk': self.pk})
 
 
-class Follower(models.Model): #  Сделать в первую очередь. Переписать логику друзей на подписчиков и подписки.
+class Follower(models.Model):
     """User followers"""
 
     follower_id: int = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, max_length=255, related_name="subscriptions")

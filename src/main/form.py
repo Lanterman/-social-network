@@ -3,7 +3,7 @@ import re
 from django import forms
 from django.core.exceptions import ValidationError
 
-from src.main.models import Publication, Groups, Rating, RatingStar
+from src.main.models import Publication, Group, Rating, RatingStar
 from src.users.models import User
 
 
@@ -21,7 +21,7 @@ class AddGroupForm(AbstractForm):
     photo = forms.ImageField(label='Аватарка')
 
     class Meta:
-        model = Groups
+        model = Group
         fields = ('name', 'photo')
 
 

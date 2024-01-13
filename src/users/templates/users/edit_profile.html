@@ -3,13 +3,13 @@
 {% block title%}{{ title }}{% endblock title %}
 
 {% block content %}
-    {% if users.pk == user.pk %}
+    {% if my_profile.pk == user.pk %}
         <h3 class="title"><i class="fas fa-users-cog"></i> {{ title }}</h3>
         <form method="post">
             {% csrf_token %}
 
             {% if form.errors %}
-            <p class="errors">Неудачно! Исправьте ошибки и попробуйте еще раз!</p>
+            <p class="errors">Unsuccessful. Correct the errors and try again!</p>
             {% endif %}
 
             {% for f in form %}
