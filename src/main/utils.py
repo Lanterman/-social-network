@@ -2,10 +2,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 menu = [
-    {'name': 'Главная страница', 'url': 'home'},
-    {'name': 'Сообщения', 'url': 'messages'},
-    {'name': 'Друзья', 'url': 'friends'},
-    {'name': 'Группы', 'url': 'groups'}
+    {'name': 'Home', 'url': 'home'},
+    {'name': 'Messengers', 'url': 'messages'},
+    # {'name': 'Followers', 'url': 'followers'},
+    # {'name': 'Subscriptions', 'url': 'subscriptions'},
+    {'name': 'Friends', 'url': 'friends'},
+    {'name': 'Groups', 'url': 'groups'}
 ]
 
 

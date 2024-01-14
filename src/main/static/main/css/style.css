@@ -8,7 +8,7 @@ body {
 
 .p {
     padding: 10px;
-    margin: 50px 0 50px 400px;
+    margin: 50px 0 50px 28%;
     width: 640px;
     box-shadow: 0 0 9px #666;
 }
@@ -83,43 +83,64 @@ header {
     background-color: black;
 }
 
-#as {
+#aside-block {
     background-color: #13eb28;
     border-right: solid 4px gray;
     border-bottom: solid 4px gray;
     float: left;
-    padding: 20px 15px;
+    padding: 25px 20px;
+    width: 200px;
 }
 
-#as img {
-    width: 100px;
-    height: 100px;
+#aside-block h3 {
+    font-size: 20px;
+    text-align: center;
 }
 
-#as a {
+#aside-block .aside-group {
+    /* background-color: #c7d6c9; */
+    width: 170px;
+    height: 170px;
+    margin-left: 0px;
+    padding: 5px 0px;
+}
+
+#aside-block #aside-group-name {
+    font-size: 18px;
+    margin-left: 16px;
+    padding-bottom: 5px;
+}
+
+#aside-block #aside-group-name span {
+    margin-left: 5px;
+}
+
+#aside-block img {
+    width: 130px;
+    height: 130px;
+    margin-left: 19px;
+}
+
+#aside-block a {
     text-decoration: None;
     font-size: 17px;
     color: blue;
 }
 
-#as p {
-    margin: 0 0 5px 5px;
-}
-
-#as a p:hover {
+#aside-block a p:hover {
     color: red;
 }
 
-#as div {
+#aside-block div {
     margin: 0 0 20px 40px;
     width: 110px;
 }
 
-#as div:hover {
+#aside-block div:hover {
     border: solid 1px;
 }
 
-#as h3 {
+#aside-block h3 {
     margin-bottom: 20px;
 }
 
@@ -131,29 +152,32 @@ header {
     margin: 70px 100px 60px 0;
 }
 
-#aps a, #aps1 a {
+#pub-bottom-info .pub-bottom-item a {
     text-decoration: None;
     font-size: 18px;
-    margin: 0 30px 0 88px;
     color: blue;
 }
 
-#aps .ia32 {
-    margin: 0 0 0 0px;
-}
-
-#aps .a32 {
-    margin: 0px;
-    float:right;
-    width: 180px;
-}
-
-#aps .a34 {
-    margin: 0 0 0 5px;
-}
-
-#aps a:hover, #aps1 a:hover {
+#pub-bottom-info a:hover {
     color: red;
+}
+
+#pub-bottom-info .rating-label {
+    margin-left: 20px;
+    width: 300px;
+}
+
+#pub-bottom-info .pub-comments {
+    margin-left: 15%
+}
+
+#pub-bottom-info #block-owner {
+    float: right;
+    margin-right: 20px;
+}
+
+#pub-bottom-info .pub-owner {
+    margin-left: 2px;
 }
 
 .div123 {
@@ -170,13 +194,13 @@ header {
     font-size: 23px;
 }
 
-#as #a {
+#aside-block #a {
     color: yellow;
     font-size: 20px;
     margin-left: 45px;
 }
 
-#as #a:hover {
+#aside-block #a:hover {
     color: red;
 }
 
@@ -216,7 +240,7 @@ color: blue;
 }
 
 .aps {
-    margin-top 50px;
+    margin-top: 50px;
     text-align: center;
 }
 
@@ -642,18 +666,23 @@ color: blue;
 .rating > label:hover:before,  .rating > label:hover ~ label:before,  .rating:not(:hover) > :checked ~ label:before { opacity: 1; }
 
 .search {
-    margin: 20px 650px 0px 600px;
-    padding: 10px 0px 0px 23px;
+    width: 400px;
+    height: 120px;
+    margin: 30px 35%;
     border: solid 4px gray;
+    
 }
 
 .search .Content {
-    font-size: 19px;
-    margin-bottom: 10px;
+    font-size: 22px;
+    margin: 15px 0px;
+    text-align: center;
 }
 
 .form .input {
     padding: 4px;
+    margin-left: 11%;
+    font-size: 19px;
 }
 
 .form .input:hover {
@@ -664,6 +693,7 @@ color: blue;
     margin-left: 10px;
     padding: 6px 8px 6px 8px;
     border-radius: 30px;
+    font-size: 17px;
 }
 
 .form .buttonForm:hover {

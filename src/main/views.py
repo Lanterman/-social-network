@@ -18,7 +18,7 @@ from src.users.models import User, Follower, Chat, Message
 
 
 class NewsView(ListView):
-    """Main page"""
+    """News page endpoint"""
 
     template_name = 'main/index.html'
     paginate_by = 5
@@ -28,7 +28,7 @@ class NewsView(ListView):
         context['menu'] = menu
         context['title'] = 'Новости'
         context['object'] = self.object
-        context['name'] = 'Поиск записи'
+        context['name'] = 'Search for publications'
         context['act'] = 'search_published'
         return context
 
@@ -36,20 +36,21 @@ class NewsView(ListView):
         if request.user.is_authenticated:
             self.object = Group.objects.exclude(users__username=request.user.username)[:3]
             self.group = Group.objects.filter(users__username=request.user.username)
-            self.published = Publication.objects.filter(
+            self.publications = Publication.objects.filter(
                 group_id__in=[gr.id for gr in self.group]).select_related('owner').annotate(
-                rat=Avg('rating__star_id')).order_by('-date')
+                rat=Avg('rating__star_id')).order_by('-date')            
         else:
             self.object = Group.objects.all()[:3]
-            self.published = Publication.objects.all().select_related('owner').annotate(
+            self.publications = Publication.objects.all().select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
+        
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.published
+        return self.publications
 
 
-class HomeView(DataMixin, UpdateView):  # Оптимизировать
+class HomeView(DataMixin, UpdateView):
     """User page"""
 
     model = User
@@ -86,7 +87,7 @@ class HomeView(DataMixin, UpdateView):  # Оптимизировать
         return context | self.get_context()
 
 
-class MessagesView(DataMixin, ListView):
+class MessagesView(DataMixin, ListView): ###
     """User messages page"""
 
     context_object_name = 'chats'
@@ -116,7 +117,7 @@ class MessagesView(DataMixin, ListView):
         return self.chats
 
 
-class ChatDetailView(DataMixin, View):
+class ChatDetailView(DataMixin, View): ###
     """Chat page"""
 
     def get(self, request, chat_id):
@@ -138,7 +139,7 @@ class ChatDetailView(DataMixin, View):
         return HttpResponse(status=200)
 
 
-class CreateDialogView(View):
+class CreateDialogView(View): ###
     """Page for creating new chat"""
 
     @staticmethod
@@ -153,7 +154,7 @@ class CreateDialogView(View):
         return redirect(chat)
 
 
-class FriendsView(DataMixin, SingleObjectMixin, ListView):
+class FriendsView(DataMixin, SingleObjectMixin, ListView): ###
     """User friends page"""
 
     template_name = 'main/friends.html'
@@ -177,7 +178,7 @@ class FriendsView(DataMixin, SingleObjectMixin, ListView):
         return self.users
 
 
-class GroupsView(DataMixin, ListView):
+class GroupsView(DataMixin, ListView): # Оптимизация поиска
     """User groups page"""
 
     template_name = 'main/groups.html'
@@ -190,9 +191,9 @@ class GroupsView(DataMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Мои группы'
+        context['title'] = 'My groups'
         context['object'] = self.object
-        context['name'] = 'Поиск группы'
+        context['name'] = 'Search for groups'
         context['act'] = 'search_group'
         return context | self.get_context()
 

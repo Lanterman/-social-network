@@ -1,40 +1,39 @@
-.pa {
-    margin: -30px 0 -70px 760px;
+.block-group-title {
+    margin-left: 41%;
+    margin-top: 50px;
 }
 
-.pa i {
-    margin-right: -70px;
+.block-group-title .group-title {
+    font-size: 28px;
+    
 }
 
-.ss a {
-    float: right;
-    margin: -5px 670px 0 0;
+.group-block-add a {
     font-size: 22px;
     color: blue;
+    margin-bottom: 0px;
 }
 
-.ss a:hover {
+.group-block-add a:hover {
     color: red;
 }
 
-.mar {
-    margin: 0px 0 150px 0;
-}
 
-.div1 {
+
+.block-include-group {
     width: 920px;
-    height: 30px;
-    padding: 10px 30px 100px 20px;;
-    margin: 50px 190px -20px 370px;
+    height: 33px;
+    padding: 10px 30px 100px 20px;
+    margin: 50px 190px -20px 20%;
     background-color: #ADFF2F;
     box-shadow: 0 0 10px #666;
 }
 
-.div1 #us_mar {
+.block-include-group #us_mar {
     margin-top: -200px;
 }
 
-.div1 #pub_date {
+.block-include-group #pub_date {
     float:right;
     font-size: 16px;
     color: gray;
@@ -42,19 +41,19 @@
     margin: 5px 0 0 0;
 }
 
-.div1 #us_name {
+.block-include-group #us_name {
     font-size: 25px;
     margin: 2px 400px -10px 180px;
 }
 
-.div1 #messages {
+.block-include-group #messages {
     background-color: #2E8B57;
     font-size: 21px;
     padding: 5px;
     margin: 40px 5px 0 170px;
 }
 
-.div1 img {
+.block-include-group img {
     margin-right: 70px;
     float: left;
     border-radius: 140px;
@@ -64,43 +63,43 @@
     border: solid 1px black;
 }
 
-.div1 a {
+.block-include-group a {
     font-size: 22px;
     color: blue;
     text-decoration: None;
 }
 
-.div1 a:hover, .div1 .del:hover {
+.block-include-group a:hover, .div1 .del:hover {
     color: red;
 }
 
-.div1 img:hover {
+.block-include-group img:hover {
     transform: scale(1.03);
 }
 
-.div1 .del {
+.block-include-group .del {
     float: right;
     margin: -65px -11px 0 0;
     color: black;
 }
 
-.div1 .group_margin{
+.block-include-group .group_margin{
     margin: 24px 0 17px 0;
 }
 
-.div1 .group_us {
+.block-include-group .group_us {
     font-size: 18px;
 }
 
-.div1 .us-mes {
+.block-include-group .us-mes {
     font-size: 19px;
 }
 
-.div1 #mag1, .div1 #mag2 {
+.block-include-group #mag1, .block-include-group #mag2 {
     margin-left: 60px;
 }
 
-.div1 #mag2 {
+.block-include-group #mag2 {
     padding: 5px;
     font-size: 18px;
     border: solid 2px gray;
@@ -108,7 +107,7 @@
     color: black;
 }
 
-.div1 #mag2:hover {
+.block-include-group #mag2:hover {
     background-color: yellow;
 }
 
@@ -159,13 +158,17 @@
     margin-left: 190px;
 }
 
-.global_search {
-    text-align: center;
+.global-search {
     margin: 70px 0px -20px 0px;
     border-top: solid 2px;
     font-size: 22px;
     padding-top: 10px;
     color: #382736;
+}
+
+.global-search #global-search-name {
+    margin-left: 30%;
+    font-size: 23px;
 }
 
 #title_group {

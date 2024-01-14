@@ -1,25 +1,30 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }} |</h6>
-    <p id="aps" class="pa">
-        <div class="ss">
+    <div class="block-group-title">
+        <span class="group-title"><i class="fas fa-user-friends"></i> {{ title }} |</span>
+
+        <span class="group-block-add">
             <a href="{% url 'add_group' %}"> <i class="fas fa-plus"></i></a>
-        </div>
+        </span>
+    </div>
+
     <br><br>
+
     <div class="block" id="search">
         <div class="search">
             {% include 'main/include/search.html' %}
         </div>
     </div>
-    <div class="mar">
+
+    <div class="block-group-list">
         {% if groups %}
             {% for p in groups %}
                 {% include 'main/include/group_include.html' %}
             {% endfor %}
         {% endif %}
         {% if global %}
-            <p class="global_search">Глобальный поиск</p>
+            <p class="global-search"><span id="global-search-name">Global search</span></p>
             {% for p in global %}
                 {% include 'main/include/group_include.html' %}
             {% endfor %}
@@ -27,6 +32,7 @@
             <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Вы не вступали в группы!" }}</p>
         {% endif %}
     </div>
+
     {{ groups.count|json_script:"groups" }}
 {% endblock content %}
 
@@ -38,7 +44,7 @@
 <script>
     if (groups.value) {
         leave_the_group.onclick = function() {
-            if (!confirm('Выйти из группы?')) {
+            if (!confirm('Do you really want to leave the group??')) {
                 this.href = '';
             };
         };
