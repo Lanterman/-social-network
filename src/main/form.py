@@ -12,13 +12,13 @@ class AbstractForm(forms.ModelForm):
         name = self.cleaned_data['name']
         re_value = re.findall(r'[^\w ]', name)
         if re_value:
-            raise ValidationError(f"Имя не может содержать данные символ(-ы): {', '.join(re_value)}")
+            raise ValidationError(f"Name can not these characters: {', '.join(re_value)}")
         return name
 
 
 class AddGroupForm(AbstractForm):
-    name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
-    photo = forms.ImageField(label='Аватарка')
+    name = forms.CharField(label='Name', widget=forms.TextInput(attrs={'placeholder': 'Name'}))
+    photo = forms.ImageField(label='Photo')
 
     class Meta:
         model = Group
@@ -26,10 +26,10 @@ class AddGroupForm(AbstractForm):
 
 
 class AddPublishedForm(AbstractForm):
-    name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
-    photo = forms.ImageField(label='Аватарка', required=False)
-    biography = forms.CharField(label='Биография',
-                                widget=forms.Textarea(attrs={'placeholder': 'Написать биографию', 'rows': 5, 'cols': 35}))
+    name = forms.CharField(label='Name', widget=forms.TextInput(attrs={'placeholder': 'Name'}))
+    photo = forms.ImageField(label='Photo', required=False, localize=True)
+    biography = forms.CharField(label='Biography',
+                                widget=forms.Textarea(attrs={'placeholder': 'Write biography', 'rows': 5, 'cols': 35}))
 
     class Meta:
         model = Publication

@@ -1,0 +1,97 @@
+    .title {
+    text-align: center;
+    font-size: 26px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.add-form {
+    margin-left: 35%;
+    width: 30%;
+}
+
+.add-form .add-field {
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.add-form .add-field .add-value {
+    float: right;
+    width: 50%;
+    font-size: 16px;
+}
+
+.add-form .textarea {
+    padding-bottom: 60px;
+}
+
+.add-form .add-field .add-value textarea {
+    resize: none;
+}
+
+.add-button {
+    float: right;
+    margin-top: 20px;
+    font-size: 17px;
+}
+
+/* .a {
+    font-size: 18px;
+    color: blue;
+    margin: 25px 0 100px 40px;
+    float: left;
+}
+
+.a:hover {
+    color: red;
+    text-decoration: None;
+} */
+
+.add-errors {
+    font-size: 19px;
+    margin-bottom: 20px;
+    color: red;
+}
+
+/* .p2 {
+    font-size: 20px;
+    margin-left: 650px;
+    margin-bottom: 20px;
+}
+
+.p2 #i1 {
+    margin-left: 150px;
+}
+
+.p2 #i2 {
+    margin-left: 150px;
+}
+
+.p2 #i3 {
+    margin-left: 184px;
+}
+
+
+.p2 #i4 {
+    margin-left: 107px;
+}
+
+#id2 {
+    margin-top: 50px;
+    margin-left: 680px;
+}
+
+.a3 i{
+
+    font-size: 20px;
+    color: blue;
+
+}
+
+.a3 i:hover {
+    color: red;
+}
+
+.a3 {
+    text-decoration: None;
+} */

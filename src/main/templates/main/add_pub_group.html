@@ -2,28 +2,37 @@
 
 {% block content %}
     <h6 class="title"><i class="fas fa-user-friends"></i> {{ title }}</h6>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" class="add-form" enctype="multipart/form-data">
         {% csrf_token %}
+
         {% if form.errors %}
-            <p class="errors" id="errors">Ошибка создания!</p>
+            <p class="add-errors" id="errors">Group creation error!</p>
         {% endif %}
-        {% for f in form %}
-            {% if form.photo == f and form.photo.value %}
-                <p class="form">
-                    {{ f.label_tag }}
-                    <i id="form_photo">{{ f.value|truncatechars_html:25 }}</i><br><br>
-                    {% if  not delete %}
-                        <label for="photo-clear_id">Удалить фото</label>
-                        <input type="checkbox" name="photo-clear" id="photo-clear_id"><br><br>
-                    {% endif %}
-                    <label for="id_photo">Изменить фото </label>
-                    <input type="file" name="photo" accept="image/*" id="id_photo">
-                </p>
-            {% else %}
-                <p class="form">{{ f.label_tag }}<i>{{ f }}</i></p>
-                <div class="errors">{{ f.errors }}</div>
-            {% endif %}
-        {% endfor %}
-        <button class="button" type="submit">Создать</button>
+
+        <div class="add-block-field">
+            {% for f in form %}
+                {% if form.photo == f and form.photo.value %}
+                    <p class="add-field">
+                        {{ f.label_tag }}
+                        <i id="form_photo">{{ f.value|truncatechars_html:25 }}</i><br><br>
+                        {% if  not delete %}
+                            <label class="add-label" for="photo-clear_id">Remove photo</label>
+                            <input class="add-value" type="checkbox" name="photo-clear" id="photo-clear_id"><br><br>
+                        {% endif %}
+                        <label class="add-label" for="id_photo">Change photo </label>
+                        <input class="add-value" type="file" name="photo" accept="image/*" id="id_photo">
+                        
+                    </p>
+                {% else %}
+                    <p class="add-field {% if f.name == 'biography' %}textarea{% endif %}">
+                        <label class="add-label">{{ f.label_tag }}</label>
+                        <span class="add-value">{{ f }}</span>
+                    </p>
+                    <div class="add-errors">{{ f.errors }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <button class="add-button" type="submit">Submit</button>
     </form>
 {% endblock content %}

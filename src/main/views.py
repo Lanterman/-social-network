@@ -178,15 +178,18 @@ class FriendsView(DataMixin, SingleObjectMixin, ListView): ###
         return self.users
 
 
-class GroupsView(DataMixin, ListView): # Оптимизация поиска
+class GroupsView(DataMixin, ListView): ### Search groups with ws
     """User groups page"""
 
     template_name = 'main/groups.html'
     context_object_name = 'groups'
 
     def get(self, request, *args, **kwargs):
-        self.group = Group.objects.filter(users__pk=request.user.pk).prefetch_related('users')
-        self.object = Group.objects.exclude(users__pk=request.user.pk)[:3]
+        self.group = Group.objects.filter(
+            Q(users__pk=request.user.pk) | Q(owner__pk=request.user.pk)
+        ).prefetch_related('users').distinct()
+
+        self.object = Group.objects.exclude(users__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:3]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -209,7 +212,7 @@ class AddGroup(DataMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Создать группу'
+        context['title'] = 'Create group'
         return context | self.get_context()
 
     def post(self, request, *args, **kwargs):
@@ -223,7 +226,7 @@ class AddGroup(DataMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
 
-class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
+class DetailGroupView(DataMixin, SingleObjectMixin, ListView): #
     """Detail group page"""
 
     template_name = 'main/detail_group.html'
