@@ -1,9 +1,9 @@
 // comments, use websocket
 
-const publish_slug = JSON.parse(document.getElementById('publish_slug').textContent);
-const publish_id = JSON.parse(document.getElementById('publish_id').textContent);
+const publication_slug = JSON.parse(document.getElementById('publication_slug').textContent);
+const publication_id = JSON.parse(document.getElementById('publication_id').textContent);
 const user_id = JSON.parse(document.getElementById('user_id').textContent);
-const commentsSocket = new WebSocket('ws://' + window.location.host + '/ws/publish/' + publish_slug + '/comments/');
+const commentsSocket = new WebSocket('ws://' + window.location.host + '/ws/publish/' + publication_id + '/comments/');
 
 commentsSocket.onopen = function(e) {
     console.log("Ok");
@@ -47,26 +47,28 @@ commentsSocket.onmessage = function(e) {
 function action_with_like(comment_id) {
     if (!user_id) {
         window.location.pathname = '/users/login/';
-    }
-    commentsSocket.send(JSON.stringify({
-        'comment_id': comment_id,
-        'type': 'like',
-    }));
+    } else {
+        commentsSocket.send(JSON.stringify({
+            'comment_id': comment_id,
+            'type': 'like',
+        }));
+    };
 };
 
 function create_comment() {
     if (!user_id) {
         window.location.pathname = '/users/login/';
-    }
-    const message = document.querySelector("#comment_input");
-    message.reportValidity()
-    if (message.value) {
-        commentsSocket.send(JSON.stringify({
-            'publish_id': publish_id,
-            'user_id': user_id,
-            'message': message.value,
-            'type': 'comment',
-        }));
-        message.value = '';
+    } else {
+        const message = document.querySelector("#comment_input");
+        message.reportValidity()
+        if (message.value) {
+            commentsSocket.send(JSON.stringify({
+                'publication_id': publication_id,
+                'user_id': user_id,
+                'message': message.value,
+                'type': 'comment',
+            }));
+            message.value = '';
+        };
     };
 };

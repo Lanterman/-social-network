@@ -17,8 +17,8 @@ class AbstractAdmin(admin.ModelAdmin):
 class GroupAdmin(AbstractAdmin):
     ordering = ('-id',)
     list_display = ('id', 'name', 'slug', 'photo')
-    fields = ('name', 'slug', 'photo', 'users', 'owner')
-    raw_id_fields = ('users',)  # удобная вещь при связях
+    fields = ('name', 'slug', 'photo', 'followers', 'owner')
+    raw_id_fields = ('followers',)  # удобная вещь при связях
 
 
 @admin.register(Publication)

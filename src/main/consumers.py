@@ -1,7 +1,7 @@
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
-from src.main.models import Comments
+from src.main.models import Comment
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -55,8 +55,8 @@ class CommentConsumer(WebsocketConsumer):
     """The consumer of the comment"""
 
     def connect(self):
-        self.publish_slug = self.scope['url_route']['kwargs']['publish_slug']
-        self.publication_comments_group = 'publication_comments_%s' % self.publish_slug
+        self.publication_id = self.scope['url_route']['kwargs']['publication_id']
+        self.publication_comments_group = 'publication_comments_%s' % self.publication_id
         self.user = self.scope['user']
         async_to_sync(self.channel_layer.group_add)(self.publication_comments_group, self.channel_name)
         self.accept()
@@ -68,7 +68,7 @@ class CommentConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         if text_data_json["type"] == "like":
             comment_id = text_data_json["comment_id"]
-            comment = Comments.objects.prefetch_related('like').get(id=comment_id)
+            comment = Comment.objects.prefetch_related('like').get(id=comment_id)
             data = {"like_from_me": 1}
             if self.user in comment.like.all():
                 comment.like.remove(self.user)
@@ -80,9 +80,9 @@ class CommentConsumer(WebsocketConsumer):
                 {'likes_info': data, 'action_type': "action_like"}
             ))
         else:
-            publish_id = text_data_json["publish_id"]
+            publication_id = int(text_data_json["publication_id"])
             message = text_data_json["message"]
-            comment = Comments.objects.create(biography=message, published_id=publish_id, users_id=self.user.id)
+            comment = Comment.objects.create(biography=message, publication_id_id=publication_id, users_id=self.user.id)
             comment_info = {
                 "author_username": self.user.username,
                 "author_url": self.user.get_absolute_url(),

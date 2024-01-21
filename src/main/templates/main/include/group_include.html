@@ -2,5 +2,5 @@
     <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a>
     <p class="group_margin"><a href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a></p>
     <a class="del" id="leave_the_group" href="{% url 'group_quit_primary' p.slug %}"><i class="fas fa-backspace"></i></a>
-    <p class="group_us">Followers: {{ p.users.count }}</p>
+    <p class="group_us">Followers: {{ p.followers.count }}</p>
 </div>

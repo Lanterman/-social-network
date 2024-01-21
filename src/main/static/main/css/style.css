@@ -229,7 +229,7 @@ color: blue;
     padding: 30px;
 }
 
-.p3 pre {
+.p3 .publish-date {
     text-align: center;
     margin-bottom: 10px;
 }
@@ -242,6 +242,16 @@ color: blue;
 .aps {
     margin-top: 50px;
     text-align: center;
+}
+
+.pub-block-comments {
+    text-decoration: none;
+    color: blue;
+    font-size: 22px;
+}
+
+.pub-block-comments:hover {
+    color: red;
 }
 
 #comment_block #h1 {

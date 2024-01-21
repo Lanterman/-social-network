@@ -39,7 +39,7 @@ class Publication(Abstract):
 
 class Group(Abstract):
     photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='groups_user', verbose_name='users')
+    followers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='groups_followers', verbose_name='followers')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='owner', on_delete=models.SET_NULL, null=True,
                               related_name='my_groups')
     biography = None
@@ -68,10 +68,10 @@ class Comment(Abstract):
         db_table = 'Comments'
 
     def __str__(self):
-        return self.published.name
+        return self.publication_id.name
 
     def get_absolute_url(self):
-        return reverse('comments', kwargs={'publish_slug': self.published.slug})
+        return reverse('comments', kwargs={'publish_slug': self.publication_id.slug})
 
 
 class RatingStar(models.Model):
@@ -96,4 +96,4 @@ class Rating(models.Model):
         verbose_name_plural = 'Ratings'
 
     def __str__(self):
-        return f'{self.star} - {self.published}: {self.ip}'
+        return f'{self.star} - {self.publication_id}: {self.ip}'

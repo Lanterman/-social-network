@@ -1,21 +1,21 @@
 {% extends 'main/base.html' %}
 
-{% block title %}{{ published.name }}{% endblock title %}
+{% block title %}{{ publication.name }}{% endblock title %}
 
 {% block content %}
     <div class="p3">
-        <p class="aps"><a id="group1" href="{{ published.group.get_absolute_url }}">{{ published.group.name|capfirst }}</a></p>
-        <p id="p1">{{ published.name|capfirst }}</p>
-        <pre><big>Обновленно </big>{{ published.date }}</pre>
+        <p class="aps"><a id="group1" href="{{ publication.group.get_absolute_url }}">{{ publication.group.name|capfirst }}</a></p>
+        <p id="p1">{{ publication.name|capfirst }}</p>
+        <pre class="publish-date"><big>Обновленно </big>{{ publication.date }}</pre>
         <div class="div123">
             {% if request.user.is_authenticated %}
                 <form action="{% url 'add_rating' %}" method="post" name="rating">
-                    <b class="b1">Моя оценка:</b>
+                    <b class="b1">My rating:</b>
                     {% csrf_token %}
-                    <input type="hidden" value="{{ published.id }}" name="published">
+                    <input type="hidden" value="{{ publication.id }}" name="publication">
                     <span class="rating">
                         {% for k, v in star_form.fields.star.choices %}
-                            {% if user1.star.value == k %}
+                            {% if rating.star.value == k %}
                                 <input id="rating{{ v }}" type="radio" name="star" value="{{ k }}" checked>
                                 <label for="rating{{ v }}">{{ k }}</label>
                             {% else %}
@@ -27,22 +27,22 @@
                     <p id="pb"></p>
                 </form>
             {% endif %}
-            <b class="b1">Оценка пользователей:</b>
-            {% if published.rat %}
-                <span class="editContent">{{ published.rat }} / 5,0</span>
+            <b class="b1">User rating:</b>
+            {% if publication.rat %}
+                <span class="editContent">{{ publication.rat }} / 5,0</span>
             {% else%}
-                <span class="editContent">Нет</span>
+                <span class="editContent">None</span>
             {% endif %}
         </div>
-        {% if published.photo %}
-            <img src="{{ published.photo.url }}" alt="photo">
+        {% if publication.photo %}
+            <img src="{{ publication.photo.url }}" alt="photo">
         {% endif %}
-        <p id="ap1">{{ published.biography|linebreaksbr|safe|capfirst }}</p>
+        <p id="ap1">{{ publication.biography|linebreaksbr|safe|capfirst }}</p>
     </div>
-    <p id="p123">Автор: <a class="owner" id="a1" href="{{ published.owner.get_absolute_url }}"><i>{{ published.owner }}</i></a></p>
+    <p id="p123">Автор: <a class="owner" id="a1" href="{{ publication.owner.get_absolute_url }}"><i>{{ publication.owner }}</i></a></p>
     <p id="aps1" class="aps">
-        <a href="{% url 'comments' published.slug %}">
-            <i id="ia1"><i class="fas fa-comments"></i> Комментарии: {{ published.comments_set.count }}</i>
+        <a class="pub-block-comments" href="{% url 'comments' publication.slug %}">
+            <i id="pub-comments"><i class="fas fa-comments"></i> Comments: {{ publication.comment_set.count }}</i>
         </a>
     </p>
 {% endblock content %}

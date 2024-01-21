@@ -13,7 +13,7 @@ urlpatterns = [
     path('groups/add_group/', AddGroup.as_view(), name='add_group'),
     path('groups/<slug:group_slug>/', DetailGroupView.as_view(), name='detail_group'),
     path('groups/<slug:group_slug>/add_published/', AddPublished.as_view(), name='add_published'),
-    path('publish/<slug:publish_slug>/', DetailPublish.as_view(), name='detail_publish'),
+    path('publish/<slug:publish_slug>/', DetailPublication.as_view(), name='detail_publish'),
     path('publish/<slug:publish_slug>/comments/', PublishedCommentsView.as_view(), name='comments'),
     # logic
     path('groups/<slug:group_slug>/del_group/', del_group, name='del_group'),  # del group
