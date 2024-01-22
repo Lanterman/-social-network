@@ -111,6 +111,12 @@
     background-color: yellow;
 }
 
+.block-include-group .block-my-group {
+    color: rgb(71, 65, 65);
+    float: right;
+    width: 50%;
+}
+
 #errors {
     text-align: center;
     margin-left: 0px;

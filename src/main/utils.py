@@ -4,9 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 menu = [
     {'name': 'Home', 'url': 'home'},
     {'name': 'Messengers', 'url': 'messages'},
-    # {'name': 'Followers', 'url': 'followers'},
+    {'name': 'Followers', 'url': 'followers'},
     # {'name': 'Subscriptions', 'url': 'subscriptions'},
-    {'name': 'Friends', 'url': 'friends'},
     {'name': 'Groups', 'url': 'groups'}
 ]
 

@@ -15,21 +15,34 @@
     </div>
     <div class="mar">
         {% if object_list %}
-            {% for friend in object_list %}
-                {% include 'main/include/friends.html' %}
+            {% for obj_user in object_list %}
+                {% if act == 'search_followers' %}
+                    {% include 'main/include/followers.html' %}
+                {% else %}
+                    <p>hi lox</p>
+                {% endif %}
             {% endfor %}
         {% endif %}
+        
         {% if global %}
-            <p class="global_search">Глобальный поиск</p>
+            <p class="global_search">Global search</p>
             {% for friend in global %}
-                {% include 'main/include/friends.html' %}
+                {% if act == 'search_followers' %}
+                    {% include 'main/include/followers.html' %}
+                {% else %}
+                    <p>hi lox</p>
+                {% endif %}
             {% endfor %}
         {% elif not global and not object_list %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"У вас нет друзей!" }}</p>
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Empty list!" }}</p>
         {% endif %}
     </div>
 {% endblock content %}
 
 {% block groups %}
-    {% include 'main/include/aside.html' %}
+    {% if act == 'search_followers' %}
+        {% include 'main/include/aside_followers.html' %}
+    {% else %}
+        <p>hi lox</p>
+    {% endif %}
 {% endblock groups %}

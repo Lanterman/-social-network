@@ -152,7 +152,7 @@ class CreateDialogView(View): ###
         return redirect(chat)
 
 
-class FriendsView(DataMixin, SingleObjectMixin, ListView): ###
+class FollowersView(DataMixin, SingleObjectMixin, ListView):
     """User friends page"""
 
     template_name = 'main/friends.html'
@@ -160,20 +160,20 @@ class FriendsView(DataMixin, SingleObjectMixin, ListView): ###
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Мои друзья'
-        context['act'] = 'search_friends'
-        context['name'] = 'Поиск друзей'
-        context['recommendation'] = 'друзья'
+        context['title'] = 'My followers'
+        context['act'] = 'search_followers'
+        context['name'] = 'Search followers'
         context['object'] = self.object
         return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
-        self.users = User.objects.filter(friends__pk=request.user.pk)
-        self.object = User.objects.exclude(friends=request.user.pk).exclude(pk=request.user.pk)[:3]
+        self.followers = Follower.objects.filter(subscription_id__id=request.user.id)
+        self.object = Follower.objects.exclude(subscription_id__id=request.user.pk)
+        print(self.object)
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.users
+        return self.followers
 
 
 class GroupsView(DataMixin, ListView): ### Search groups with ws
@@ -426,22 +426,22 @@ def friend_del_primary(request, user_pk): ###
     return redirect(reverse('friends', kwargs={'user_pk': request.user.pk}))
 
 
-def group_activity(request, group_slug): ###
+def group_activity(request, group_slug):
     """logic for group entry"""
 
-    q = Group.objects.prefetch_related('users').get(slug=group_slug)
-    if request.user in q.users.all():
-        q.users.remove(request.user)
+    q = Group.objects.prefetch_related('followers').get(slug=group_slug)
+    if request.user in q.followers.all():
+        q.followers.remove(request.user)
     else:
-        q.users.add(request.user)
+        q.followers.add(request.user)
     return redirect(q)
 
 
-def group_quit_primary(request, group_slug): ###
+def group_quit_primary(request, group_slug):
     """Leave group"""
 
     q = Group.objects.get(slug=group_slug)
-    q.users.remove(request.user)
+    q.followers.remove(request.user)
     return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
 
 
@@ -462,7 +462,7 @@ class AddStarRating(View):
             return HttpResponse(status=400)
 
 
-class SearchPublished(NewsView): ###
+class SearchPublished(NewsView): ### ws
     """Search for publications by name or owner username"""
 
     def get_queryset(self):
@@ -478,7 +478,7 @@ class SearchPublished(NewsView): ###
         return context
 
 
-class SearchGroups(GroupsView): ###
+class SearchGroups(GroupsView): ### ws
     """Search for groups by name"""
 
     def get_queryset(self):
@@ -492,7 +492,7 @@ class SearchGroups(GroupsView): ###
         return context
 
 
-class SearchFriends(FriendsView): ###
+class SearchFriends(FollowersView): ### ws
     """Search for friends by username, first name or last name"""
 
     def get_queryset(self):
@@ -514,7 +514,7 @@ class SearchFriends(FriendsView): ###
         return context
 
 
-class SearchMessages(MessagesView):  # Убрать из members текущего пользователя(из запроса, а не базы данных) ###
+class SearchMessages(MessagesView):  # Убрать из members текущего пользователя(из запроса, а не базы данных) ### ws
     """Search for messages by last name or first name of members"""
 
     def get_queryset(self):
