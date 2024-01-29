@@ -29,3 +29,14 @@ http://127.0.0.1:8000/
 P.S.
 
 Celery is currently down due to security issues with Gmail.
+
+P.S.S.
+Work for the future
+
+1. Correct views (Followers, Subscrabtions, Messages and Chats)
+2. Correct Consumers
+3. Include searchs to Consumers
+4. Correct celery tasks
+5. Include django_filter, coresheaders, drf_yasg
+6. Set up user JWTTokens
+7. Set up OAuth2

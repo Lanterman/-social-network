@@ -13,25 +13,17 @@
             </form>
         </div>
     </div>
-    <div class="mar">
+    <div class="followers-block">
         {% if object_list %}
             {% for obj_user in object_list %}
-                {% if act == 'search_followers' %}
-                    {% include 'main/include/followers.html' %}
-                {% else %}
-                    <p>hi lox</p>
-                {% endif %}
+                {% include 'main/include/followers.html' %}
             {% endfor %}
         {% endif %}
         
         {% if global %}
             <p class="global_search">Global search</p>
             {% for friend in global %}
-                {% if act == 'search_followers' %}
-                    {% include 'main/include/followers.html' %}
-                {% else %}
-                    <p>hi lox</p>
-                {% endif %}
+                {% include 'main/include/followers.html' %}
             {% endfor %}
         {% elif not global and not object_list %}
             <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Empty list!" }}</p>
@@ -40,9 +32,5 @@
 {% endblock content %}
 
 {% block groups %}
-    {% if act == 'search_followers' %}
-        {% include 'main/include/aside_followers.html' %}
-    {% else %}
-        <p>hi lox</p>
-    {% endif %}
+    {% include 'main/include/aside_followers.html' %}
 {% endblock groups %}

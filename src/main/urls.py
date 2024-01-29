@@ -9,6 +9,7 @@ urlpatterns = [
     path('messages/chat/<int:chat_id>/', ChatDetailView.as_view(), name='chat'), ###
     path('messages/check/<int:user_id>/', CreateDialogView.as_view(), name='check'), ###
     path('followers/<int:user_pk>/', FollowersView.as_view(), name='followers'),
+    path('subscriptions/<int:user_pk>/', SubscriptionsView.as_view(), name='subscriptions'),
     path('groups/<int:user_pk>/', GroupsView.as_view(), name='groups'),
     path('groups/add_group/', AddGroup.as_view(), name='add_group'),
     path('groups/<slug:group_slug>/', DetailGroupView.as_view(), name='detail_group'),
@@ -35,5 +36,6 @@ urlpatterns = [
     path('p/', SearchPublished.as_view(), name='search_published'),  # news_search 
     path('g/', SearchGroups.as_view(), name='search_group'),  # group_search
     path('m/', SearchMessages.as_view(), name='search_messages'),  # search_messages
-    path('f-<int:user_pk>/', SearchFriends.as_view(), name='search_followers'),  # friend_search
+    path('f-<int:user_pk>/', SearchFollowers.as_view(), name='search_followers'),  # followers_search
+    path('s-<int:user_pk>/', SearchSubscriptions.as_view(), name='search_subscriptions'),  # subscriptions_search
 ]

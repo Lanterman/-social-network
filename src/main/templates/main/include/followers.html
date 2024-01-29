@@ -1,5 +1,5 @@
-<div class="div1">
-    <a id='a' href="{{ obj_user.follower_id.get_absolute_url }}">
+<div class="follower-block">
+    <a id='follower-url' href="{{ obj_user.follower_id.get_absolute_url }}">
         {% if obj_user.follower_id.photo %}
             <img src="{{ obj_user.follower_id.photo.url }}">
         {% else %}
@@ -8,11 +8,14 @@
             </div>
         {% endif %}
     </a>
-    <p class="group_margin">
-        <a href="{{ obj_user.follower_id.get_absolute_url }}"><i>{{ obj_user.follower_id.get_full_name|capfirst|default:'None' }}</i></a>
+
+    <p class="follower-name">
+        <a class="follower-url" href="{{ obj_user.follower_id.get_absolute_url }}">
+            <i>{{ obj_user.follower_id.get_full_name|capfirst|default:'None' }}</i>
+        </a>
     </p>
-    <a class="us-mes" href="{% url 'check' obj_user.follower_id.pk %}">Send message</a>
-    {% if obj_user in object_list %}
-        <a id="mag1" class="us-mes" href="{% url 'friend_del_primary' obj_user.follower_id.pk %}">Удалить из друзей</a>
-    {% endif %}
+
+    <a class="follower-send-message" href="{% url 'check' obj_user.follower_id.pk %}">Send message</a>
+
+    <a id="mag1" class="follower-block-user" href="{% url 'friend_del_primary' obj_user.follower_id.pk %}">Block user</a>
 </div>

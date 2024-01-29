@@ -152,10 +152,10 @@ class CreateDialogView(View): ###
         return redirect(chat)
 
 
-class FollowersView(DataMixin, SingleObjectMixin, ListView):
+class FollowersView(DataMixin, SingleObjectMixin, ListView): ### исключить из рекомендуемого списка пользователей, на которых я подписан
     """User friends page"""
 
-    template_name = 'main/friends.html'
+    template_name = 'main/followers.html'
     pk_url_kwarg = 'user_pk'
 
     def get_context_data(self, **kwargs):
@@ -167,13 +167,53 @@ class FollowersView(DataMixin, SingleObjectMixin, ListView):
         return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
-        self.followers = Follower.objects.filter(subscription_id__id=request.user.id)
-        self.object = Follower.objects.exclude(subscription_id__id=request.user.pk)
-        print(self.object)
+        self.followers = Follower.objects.filter(subscription_id__id=request.user.id).select_related("follower_id")
+        self.object = Follower.objects.exclude(subscription_id__id=request.user.pk).exclude(
+            follower_id__id=request.user.pk).select_related("follower_id")
+
+        self.followers_id = []
+        for index, follower in enumerate(self.object):
+            if follower.follower_id.id not in self.followers_id:
+                self.followers_id.append(follower.follower_id.id)
+            else:
+                self.object = self.object[: index] + self.object[index + 1:]
+
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         return self.followers
+
+
+class SubscriptionsView(DataMixin, SingleObjectMixin, ListView):
+    """User friends page"""
+
+    template_name = 'main/subscriptions.html'
+    pk_url_kwarg = 'user_pk'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'My subccriptions'
+        context['act'] = 'search_subscriptions'
+        context['name'] = 'Search subccriptions'
+        context['object'] = self.object
+        return context | self.get_context()
+
+    def get(self, request, *args, **kwargs):
+        self.subscriptions = Follower.objects.filter(follower_id__id=request.user.id).select_related("subscription_id")
+        self.object = Follower.objects.exclude(subscription_id__id=request.user.pk).exclude(
+            follower_id__id=request.user.pk).select_related("subscription_id")
+        
+        self.subs_id = []
+        for index, sub in enumerate(self.object):
+            if sub.subscription_id.id not in self.subs_id:
+                self.subs_id.append(sub.subscription_id.id)
+            else:
+                self.object = self.object[: index] + self.object[index + 1:]
+
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.subscriptions
 
 
 class GroupsView(DataMixin, ListView): ### Search groups with ws
@@ -492,8 +532,30 @@ class SearchGroups(GroupsView): ### ws
         return context
 
 
-class SearchFriends(FollowersView): ### ws
-    """Search for friends by username, first name or last name"""
+class SearchFollowers(FollowersView): ### ws
+    """Search for followers by username, first name or last name"""
+
+    def get_queryset(self):
+        queryset = self.users.filter(
+            Q(username__icontains=self.request.GET.get('search')) |
+            Q(first_name__icontains=self.request.GET.get('search')) |
+            Q(last_name__icontains=self.request.GET.get('search'))
+        )
+        return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['empty'] = 'Нет пользователей соответствующих запросу!'
+        context['global'] = User.objects.filter(
+            Q(username__icontains=self.request.GET.get('search')) |
+            Q(first_name__icontains=self.request.GET.get('search')) |
+            Q(last_name__icontains=self.request.GET.get('search'))
+        ).exclude(pk=self.request.user.pk)
+        return context
+
+
+class SearchSubscriptions(SubscriptionsView): ### ws
+    """Search for subscriptions by username, first name or last name"""
 
     def get_queryset(self):
         queryset = self.users.filter(

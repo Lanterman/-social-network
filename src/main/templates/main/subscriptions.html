@@ -1,0 +1,36 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+    <div class="block">
+        <div class="search">
+            <h3 class="Content">{{ name }}</h3>
+            <form action="{% url act request.user.pk %}" method="get" class="form">
+                <input type="search" name="search" class="input" required="">
+                <button type="submit" class="buttonForm">
+                    <span class="fa fa-search" aria-hidden="true"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="followers-block">
+        {% if object_list %}
+            {% for obj_user in object_list %}
+                {% include 'main/include/subscriptions.html' %}
+            {% endfor %}
+        {% endif %}
+        
+        {% if global %}
+            <p class="global_search">Global search</p>
+            {% for friend in global %}
+                {% include 'main/include/subscriptions.html' %}
+            {% endfor %}
+        {% elif not global and not object_list %}
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Empty list!" }}</p>
+        {% endif %}
+    </div>
+{% endblock content %}
+
+{% block groups %}
+    {% include 'main/include/aside_subscriptions.html' %}
+{% endblock groups %}

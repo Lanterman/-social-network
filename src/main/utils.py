@@ -5,7 +5,7 @@ menu = [
     {'name': 'Home', 'url': 'home'},
     {'name': 'Messengers', 'url': 'messages'},
     {'name': 'Followers', 'url': 'followers'},
-    # {'name': 'Subscriptions', 'url': 'subscriptions'},
+    {'name': 'Subscriptions', 'url': 'subscriptions'},
     {'name': 'Groups', 'url': 'groups'}
 ]
 

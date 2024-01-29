@@ -408,6 +408,65 @@ color: blue;
     box-shadow: 0 0 10px #666;
 }
 
+.followers-block {
+    margin-bottom: 100px;
+}
+
+.follower-block {
+    padding: 10px 30px 40px 30px;
+    margin: 10px 10px 0px 20%;
+    border: solid 2px green;
+    box-shadow: 0 0 10px #666;
+    height: 100px;
+    width: 50%;
+}
+
+.follower-block:hover {
+    transform: scale(1.01);
+}
+
+.follower-block #follower-url img, .follower-block #follower-url #no-photo {
+    margin-left: 20px;
+    float: left;
+    border-radius: 200px;
+    border: solid 4px rgb(185, 61, 61);
+    box-shadow: 0 0 9px #666;
+    width: 120px;
+    height: 120px;
+}
+
+.follower-block #follower-url img:hover, .follower-block #follower-url #no-photo:hover {
+    transform: scale(1.05);
+}
+
+.follower-block #follower-url #no-photo p {
+    margin-top: 40%;
+    margin-left: 14%;
+    font-size: 24px;
+    color: rgb(34, 31, 31);
+}
+
+.follower-block .follower-name {
+    font-size: 25px;
+    margin-left: 180px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.follower-block .follower-name .follower-url {
+    text-decoration: none;
+}
+
+.follower-block a:hover {
+    color: rgb(146, 13, 13);
+}
+
+.follower-block .follower-send-message, .follower-block .follower-block-user {
+    font-size: 20px;
+    text-decoration: none;
+    margin-left: 30px;
+}
+
 #div img {
     margin-left: 150px;
     float: left;
