@@ -419,6 +419,7 @@ color: blue;
     box-shadow: 0 0 10px #666;
     height: 100px;
     width: 50%;
+    background-color: #ADFF2F;
 }
 
 .follower-block:hover {
@@ -455,6 +456,11 @@ color: blue;
 
 .follower-block .follower-name .follower-url {
     text-decoration: none;
+    color: #0000CD;
+}
+
+.follower-block .follower-name .follower-url:hover {
+    color: rgb(146, 13, 13);
 }
 
 .follower-block a:hover {
@@ -465,6 +471,11 @@ color: blue;
     font-size: 20px;
     text-decoration: none;
     margin-left: 30px;
+    color: #0000CD;
+}
+
+.follower-block .follower-block-user {
+    color: rgb(197, 55, 55)
 }
 
 #div img {

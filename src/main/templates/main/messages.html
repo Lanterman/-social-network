@@ -8,32 +8,45 @@
             {% include 'main/include/search.html' %}
         </div>
     </div>
-    <div id="mar_can">
-        {% for p in chats %}
-            {% if p.set_mes %}
-                {% with last_message=p.set_mes.0 %}
-                    <a class="chat" href="{{ p.get_absolute_url }}">
-                        <pre id="pub_date">{{ last_message.pub_date }}</pre>
-                        {% for us in p.members.all %}
-                            {% if us.pk != user.pk %}
-                            <img src="{%if us.photo %}{{ us.photo.url }}{% else %}/media/users/slen/slen.png/{% endif %}">
-                            <p id="us_name"><i>{{ us.get_full_name|title|truncatechars_html:40|default:"None" }}</i></p>
-                            {% endif %}
-                        {% endfor %}
-                        <p class="{% if not last_message.is_readed %}unreaded{% endif %}" id="last_messages">
-                            {% autoescape off %}
-                                {% if last_message.author_id == user.pk %}
-                                    <i class="last_messages">Вы: {{ last_message|linebreaksbr|safe|truncatechars_html:66|replace_html:"<br>" }}</i>
-                                {% else %}
-                                    <i class="last_messages">{{ last_message|linebreaksbr|safe|truncatechars_html:60|replace_html:"<br>" }}</i>
+    <div id="block-chats">
+        {% for chat in chats %}
+            <div class="chat">
+                {% if chat.set_mes %}
+                    {% with last_message=chat.set_mes.0 %}
+                        <a class="chat-url" href="{{ chat.get_absolute_url }}">
+                            <pre id="pub_date">{{ last_message.pub_date }}</pre>
+                            {% for member in chat.members.all %}
+                                {% if member.pk != user.pk %}
+                                    <p class="aside-block-image">
+                                        {% if member.photo %}
+                                            <img src="{{ member.photo.url }}">
+                                        {% else %}
+                                            <div class="photo_frame_mes_user" id="no-photo">
+                                                <p class="user-no-photo">No image</p>
+                                            </div>
+                                        {% endif %}
+                                    </p>
+
+                                    <p class="user_name">
+                                        <i>{{ member.get_full_name|title|truncatechars_html:40|default:"None" }}</i>
+                                    </p>
                                 {% endif %}
-                            {% endautoescape %}
-                        </p>
-                    </a>
-                {% endwith %}
-            {% endif %}
+                            {% endfor %}
+                            <p class="{% if not last_message.is_readed %}unreaded{% else %}block-last_messages{% endif %}" id="last_messages">
+                                {% autoescape off %}
+                                    {% if last_message.author_id == user.pk %}
+                                        <i class="last_messages">Вы: {{ last_message|linebreaksbr|safe|truncatechars_html:66|replace_html:"<br>" }}</i>
+                                    {% else %}
+                                        <i class="last_messages">{{ last_message|linebreaksbr|safe|truncatechars_html:60|replace_html:"<br>" }}</i>
+                                    {% endif %}
+                                {% endautoescape %}
+                            </p>
+                        </a>
+                    {% endwith %}
+                {% endif %}
+            </div>
         {% empty %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> У вас нет начатых диалогов!"</p>
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> You don't have open chats!"</p>
         {% endfor %}
     </div>
 {% endblock content %}

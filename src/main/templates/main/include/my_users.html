@@ -1,0 +1,25 @@
+<div class="follower-block">
+    <a id='follower-url' href="{{ obj_user.get_absolute_url }}">
+        {% if obj_user.photo %}
+            <img src="{{ obj_user.photo.url }}">
+        {% else %}
+            <div class="photo_frame" id="no-photo">
+                <p>No image</p>
+            </div>
+        {% endif %}
+    </a>
+
+    <p class="follower-name">
+        <a class="follower-url" href="{{ obj_user.get_absolute_url }}">
+            <i>{{ obj_user.get_full_name|capfirst|default:'None' }}</i>
+        </a>
+    </p>
+
+    <a class="follower-send-message" href="{% url 'check' obj_user.pk %}">Send message</a>
+
+    {% if act == 'search_subscriptions' %}
+        <a id="del-user" class="follower-block-user" href="{% url 'friend_del_primary' obj_user.pk %}">Unsubscribe from user</a>
+    {% else %}
+        <a id="del-user" class="follower-block-user" href="{% url 'friend_del_primary' obj_user.pk %}">Block user</a>
+    {% endif %}
+</div>

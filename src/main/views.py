@@ -32,13 +32,13 @@ class NewsView(ListView): ### Search groups with ws
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            self.object = Group.objects.exclude(followers__username=request.user.username)[:3]
+            self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
             self.group = Group.objects.filter(followers__username=request.user.username)
             self.publications = Publication.objects.filter(
                 group_id__in=[gr.id for gr in self.group]).select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')            
         else:
-            self.object = Group.objects.all()[:3]
+            self.object = Group.objects.all()[:4]
             self.publications = Publication.objects.all().select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
         
@@ -85,7 +85,7 @@ class HomeView(DataMixin, UpdateView):
         return context | self.get_context()
 
 
-class MessagesView(DataMixin, ListView): ###
+class MessagesView(DataMixin, ListView): ### Optimizate queries
     """User messages page"""
 
     context_object_name = 'chats'
@@ -96,19 +96,19 @@ class MessagesView(DataMixin, ListView): ###
             'members',
             Prefetch(
                 'message_set',
-                queryset=Message.objects.filter(chat__members=request.user.id).order_by('-pub_date'),
+                queryset=Message.objects.filter(chat_id__members=request.user.id).order_by('-pub_date'),
                 to_attr='set_mes'
             )
         )  # Отсортировать
-        self.object = Group.objects.exclude(users__username=request.user.username)[:3]
+        self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['object'] = self.object
-        context['title'] = 'Мои сообщения'
+        context['title'] = 'My messages'
         context['act'] = 'search_messages'
-        context['name'] = 'Поиск сообщений'
+        context['name'] = 'Search messages'
         return context | self.get_context()
 
     def get_queryset(self):
@@ -152,10 +152,10 @@ class CreateDialogView(View): ###
         return redirect(chat)
 
 
-class FollowersView(DataMixin, SingleObjectMixin, ListView): ### исключить из рекомендуемого списка пользователей, на которых я подписан
+class FollowersView(DataMixin, SingleObjectMixin, ListView):
     """User friends page"""
 
-    template_name = 'main/followers.html'
+    template_name = 'main/my_users.html'
     pk_url_kwarg = 'user_pk'
 
     def get_context_data(self, **kwargs):
@@ -167,16 +167,12 @@ class FollowersView(DataMixin, SingleObjectMixin, ListView): ### исключи�
         return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
-        self.followers = Follower.objects.filter(subscription_id__id=request.user.id).select_related("follower_id")
-        self.object = Follower.objects.exclude(subscription_id__id=request.user.pk).exclude(
-            follower_id__id=request.user.pk).select_related("follower_id")
+        self.qs_main_followers = Follower.objects.filter(subscription_id__id=request.user.id).select_related("follower_id")
 
-        self.followers_id = []
-        for index, follower in enumerate(self.object):
-            if follower.follower_id.id not in self.followers_id:
-                self.followers_id.append(follower.follower_id.id)
-            else:
-                self.object = self.object[: index] + self.object[index + 1:]
+        self.followers = [follower.follower_id for follower in self.qs_main_followers]
+        self.users_id = [user.id for user in self.followers]
+
+        self.object = User.objects.exclude(id__in=self.users_id).exclude(id=request.user.id)[:4]
 
         return super().get(request, *args, **kwargs)
 
@@ -187,7 +183,7 @@ class FollowersView(DataMixin, SingleObjectMixin, ListView): ### исключи�
 class SubscriptionsView(DataMixin, SingleObjectMixin, ListView):
     """User friends page"""
 
-    template_name = 'main/subscriptions.html'
+    template_name = 'main/my_users.html'
     pk_url_kwarg = 'user_pk'
 
     def get_context_data(self, **kwargs):
@@ -199,21 +195,17 @@ class SubscriptionsView(DataMixin, SingleObjectMixin, ListView):
         return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
-        self.subscriptions = Follower.objects.filter(follower_id__id=request.user.id).select_related("subscription_id")
-        self.object = Follower.objects.exclude(subscription_id__id=request.user.pk).exclude(
-            follower_id__id=request.user.pk).select_related("subscription_id")
-        
-        self.subs_id = []
-        for index, sub in enumerate(self.object):
-            if sub.subscription_id.id not in self.subs_id:
-                self.subs_id.append(sub.subscription_id.id)
-            else:
-                self.object = self.object[: index] + self.object[index + 1:]
+        self.qs_main_subs = Follower.objects.filter(follower_id=request.user.id).select_related("subscription_id")
+
+        self.subs = [sub.subscription_id for sub in self.qs_main_subs]
+        self.users_id = [user.id for user in self.subs]
+
+        self.object = User.objects.exclude(id__in=self.users_id).exclude(id=request.user.id)[:4]
 
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.subscriptions
+        return self.subs
 
 
 class GroupsView(DataMixin, ListView): ### Search groups with ws
@@ -227,7 +219,7 @@ class GroupsView(DataMixin, ListView): ### Search groups with ws
             Q(followers__pk=request.user.pk) | Q(owner__pk=request.user.pk)
         ).prefetch_related('followers').distinct()
 
-        self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:3]
+        self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

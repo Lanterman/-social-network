@@ -16,14 +16,14 @@
     <div class="followers-block">
         {% if object_list %}
             {% for obj_user in object_list %}
-                {% include 'main/include/followers.html' %}
+                {% include 'main/include/my_users.html' %}
             {% endfor %}
         {% endif %}
         
         {% if global %}
             <p class="global_search">Global search</p>
-            {% for friend in global %}
-                {% include 'main/include/followers.html' %}
+            {% for obj_user in global %}
+                {% include 'main/include/my_users.html' %}
             {% endfor %}
         {% elif not global and not object_list %}
             <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Empty list!" }}</p>
@@ -32,5 +32,5 @@
 {% endblock content %}
 
 {% block groups %}
-    {% include 'main/include/aside_followers.html' %}
+    {% include 'main/include/aside_my_users.html' %}
 {% endblock groups %}

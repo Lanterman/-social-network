@@ -17,11 +17,11 @@ class UsersAdmin(admin.ModelAdmin):
 
 @admin.register(Follower)
 class FollowerAdmin(admin.ModelAdmin):
-    list_display = ('follower_id', 'subscription_id', 'date', 'is_checked')
+    list_display = ('id', 'follower_id', 'subscription_id', 'date', 'is_checked')
     list_display_links = ('follower_id',)
     fields = ('follower_id', 'subscription_id', 'is_checked')
     search_fields = ('follower_id', 'date', 'is_checked')
-    list_filter = ('follower_id', 'date', 'is_checked')
+    list_filter = ('follower_id', 'subscription_id', 'date', 'is_checked')
     list_max_show_all = 5
     list_per_page = 10
     actions = ["confirm_checking_followers, unconfirm_checking_followers"]
