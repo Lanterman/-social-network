@@ -119,7 +119,7 @@
                                 </span>
                             {% endif %}
                             <a class="group_name" href="{{ subscription.subscription_id.get_absolute_url }}">
-                                {{ subscription.subscription_id.get_full_name|default:'Anonymous'|truncatechars_html:23|title }}
+                                {{ subscription.subscription_id.get_full_name|default:'Anonymous'|truncatechars_html:13|title }}
                             </a><br><br><br>
                             {% if subscription.subscription_id.id != request.user.id %}
                                 <a class="button_home" href="{% url 'check' subscription.subscription_id.id %}">Send message</a>

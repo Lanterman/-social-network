@@ -16,8 +16,8 @@
     </div>
     <div id="comments">
         {% for comment in object_list %}
-        <div id="{{ c.id }}">
-            <p class="p4"><a href="{{ c.users.get_absolute_url }}">{{ comment.users.username }}</a> {{ comment.date }}</p>
+        <div id="{{ comment.id }}">
+            <p class="p4"><a href="{{ comment.users.get_absolute_url }}">{{ comment.users.username }}</a> {{ comment.date }}{{c}}</p>
             <p id="p2"><i>{{ comment.biography|linebreaksbr|safe }}</i></p>
             <p id="p3">
                 <a class="like_comment"  title="Лайки" onclick="action_with_like({{comment.id}})">

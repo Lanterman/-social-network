@@ -5,9 +5,9 @@ from src.main.views import *
 urlpatterns = [
     path('', NewsView.as_view(), name='news'),
     path('home/<int:user_pk>/', HomeView.as_view(), name='home'),
-    path('messages/<int:user_pk>/', MessagesView.as_view(), name='messages'), ###
-    path('messages/chat/<int:chat_id>/', ChatDetailView.as_view(), name='chat'), ###
-    path('messages/check/<int:user_id>/', CreateDialogView.as_view(), name='check'), ###
+    path('messages/<int:user_pk>/', MessagesView.as_view(), name='messages'),
+    path('chat/<int:chat_id>/', ChatDetailView.as_view(), name='chat'),
+    path('messages/check/<int:user_id>/', CreateDialogView.as_view(), name='check'),
     path('followers/<int:user_pk>/', FollowersView.as_view(), name='followers'),
     path('subscriptions/<int:user_pk>/', SubscriptionsView.as_view(), name='subscriptions'),
     path('groups/<int:user_pk>/', GroupsView.as_view(), name='groups'),

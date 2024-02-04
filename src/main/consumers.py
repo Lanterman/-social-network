@@ -5,7 +5,10 @@ from src.main.models import Comment
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    """The consumer of the chat"""
+    """
+    The consumer of the chat
+    Send message and read unread another user messages
+    """
 
     async def connect(self):
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
@@ -32,7 +35,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "message": message.replace("\n", "<br>"),
             "author_name": author_name if len(author_name) < 50 else author_name[:50] + "...",
             "author_url": self.user.get_absolute_url(),
-            "author_photo": self.user.photo.url if self.user.photo else "/media/users/slen/slen.png/"
+            "author_photo": self.user.photo.url if self.user.photo else None
         }
 
         await self.channel_layer.group_send(

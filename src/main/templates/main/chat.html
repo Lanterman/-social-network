@@ -10,13 +10,13 @@
         </div>
     {% else %}
         <div class="messages">
-            <p class="no_messages">У вас пока нет сообщений!</p>
+            <p class="no_messages">You haven't messages yet!</p>
         </div>
     {% endif %}
     <div class="panel">
         {% csrf_token %}
-        <textarea name="" id="chat-message-input" cols="85" rows="3" required placeholder="Введите сообщение"></textarea>
-        <input id="chat-message-submit" type="button" value="Отправить">
+        <textarea name="" id="chat-message-input" cols="85" rows="3" required placeholder="Enter message"></textarea>
+        <input id="chat-message-submit" type="button" value="Submit">
     </div>
     {{ chat_id|json_script:"chat_id" }}
     <script src="/static/main/js/chat.js"></script>

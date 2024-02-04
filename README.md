@@ -33,7 +33,7 @@ Celery is currently down due to security issues with Gmail.
 P.S.S.
 Work for the future
 
-1. Correct views (Followers, Subscrabtions, Messages and Chats)
+1. Correct views (logic functions)
 2. Correct Consumers
 3. Include searchs to Consumers
 4. Correct celery tasks

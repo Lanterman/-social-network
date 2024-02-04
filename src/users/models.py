@@ -63,14 +63,14 @@ class Chat(models.Model):
 class Message(models.Model):
     """User message for chat"""
 
-    chat_id: int = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE)
+    chat_id: int = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, related_name="message_set")
     author_id: int = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name="Author", on_delete=models.CASCADE)
     message: str = models.TextField("Message", blank=True)
     pub_date: datetime = models.DateTimeField('Date', auto_now_add=True)
     is_readed: bool = models.BooleanField('Is read', default=False)
 
     class Meta:
-        ordering = ['pub_date']
+        ordering = ['-pub_date']
         verbose_name = "Message"
         verbose_name_plural = "Messages"
 

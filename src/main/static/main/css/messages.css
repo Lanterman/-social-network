@@ -16,6 +16,26 @@
     box-shadow: 0 0 10px #666;
 }
 
+.panel #chat-message-input {
+    border-radius: 10px;
+}
+
+.panel #chat-message-input:hover {
+    background-color: #dddbdb;
+}
+
+.panel #chat-message-submit {
+    padding: 5px 10px;
+    margin: 50px 30px 0px 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+.panel #chat-message-submit:hover {
+    background-color: #dddbdb;
+}
+
 .messages_us, .unreaded  {
     margin: 15px 10px 20px 40px;
     padding: 10px 0px 10px 10px;
@@ -29,7 +49,7 @@
     height: 25px;
 }
 
-.avatar {
+.dialogue .avatar, .dialogue .photo_frame_mes_user {
     width: 60px;
     height: 60px;
     float: left;
@@ -128,7 +148,7 @@
     margin: 12px 25px 0 0;
 }
 
-.chat img, .chat .photo_frame_mes_user {
+.chat img, .chat .photo_frame_mes_user, .chat img {
     width: 100px;
     height: 100px;
     float: left;
@@ -147,6 +167,13 @@
     color: rgb(34, 31, 31);
 }
 
+.dialogue .photo_frame_mes_user .user-no-photo {
+    margin-top: 37%;
+    margin-left: 8%;
+    font-size: 13px;
+    color: rgb(34, 31, 31);
+}
+
 .chat .user_name {
     margin: 10px 0 10px 130px;
     font-size: 25px;
@@ -159,6 +186,10 @@
     color: blue;
     padding: 4px 10px;
     border-radius: 10px;
+}
+
+.chat .last_messages .my-message {
+    color: #030303;
 }
 
 .chat .block-last_messages {

@@ -85,21 +85,20 @@ class HomeView(DataMixin, UpdateView):
         return context | self.get_context()
 
 
-class MessagesView(DataMixin, ListView): ### Optimizate queries
+class MessagesView(DataMixin, ListView):
     """User messages page"""
 
     context_object_name = 'chats'
     template_name = 'main/messages.html'
 
     def get(self, request, *args, **kwargs):
+        message = Message.objects.filter(chat_id__members=request.user.id).select_related('author_id')
+
         self.chats = Chat.objects.filter(members=request.user.id).prefetch_related(
             'members',
-            Prefetch(
-                'message_set',
-                queryset=Message.objects.filter(chat_id__members=request.user.id).order_by('-pub_date'),
-                to_attr='set_mes'
-            )
-        )  # Отсортировать
+            Prefetch('message_set', queryset= message, to_attr='set_mes')
+        ).annotate(count_mes=Count("message_set")).filter(count_mes__gt=0)
+
         self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
         return super().get(request, *args, **kwargs)
 
@@ -112,32 +111,35 @@ class MessagesView(DataMixin, ListView): ### Optimizate queries
         return context | self.get_context()
 
     def get_queryset(self):
-        return self.chats
+        return sorted(self.chats, key=lambda x: x.set_mes[0].pub_date, reverse=True)
 
 
-class ChatDetailView(DataMixin, View): ###
+class ChatDetailView(DataMixin, View):
     """Chat page"""
 
     def get(self, request, chat_id):
-        self.group = Group.objects.exclude(users=request.user)[:3]
+        self.groups = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
         self.chat = Chat.objects.prefetch_related('members').get(id=chat_id)
+
         if request.user not in self.chat.members.all():
             raise PermissionDenied()
-        messages = Message.objects.filter(chat_id=chat_id).select_related('author')
-        messages.filter(is_readed=False).exclude(author_id=request.user.id).update(is_readed=True)
-        context = {'chat': self.chat, 'messages': messages, 'menu': menu, 'title': 'Мои сообщения',
-                   'object': self.group, "chat_id": chat_id, "user": request.user}
+        
+        messages = Message.objects.filter(chat_id=chat_id).select_related('author_id').order_by("pub_date")
+        messages.filter(is_readed=False).exclude(author_id__id=request.user.id).update(is_readed=True)
+
+        context = {'chat': self.chat, 'messages': messages, 'menu': menu, 'title': 'My message',
+                   'object': self.groups, "chat_id": chat_id}
         return render(request, 'main/chat.html', context)
 
     @staticmethod
     def post(request, chat_id):
         message = request.POST.get("message")
-        Message.objects.create(message=message, chat_id=chat_id, author_id=request.user.pk)
-        Message.objects.filter(chat_id=chat_id, is_readed=False).exclude(author_id=request.user.id).update(is_readed=True)
+        Message.objects.create(message=message, chat_id_id=chat_id, author_id_id=request.user.pk)
+        Message.objects.filter(chat_id_id=chat_id, is_readed=False).exclude(author_id_id=request.user.id).update(is_readed=True)
         return HttpResponse(status=200)
 
 
-class CreateDialogView(View): ###
+class CreateDialogView(View):
     """Page for creating new chat"""
 
     @staticmethod

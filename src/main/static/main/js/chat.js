@@ -17,17 +17,24 @@ chatSocket.onmessage = function(e) {
         if (no_messages) {
             no_messages.remove();
         };
+
         let mes_html = `<div class="unreaded"><input type="hidden" value="${data.user_id}">
-                            <a href="${data.message_info.author_url}">
-                                <img class="avatar" src="${data.message_info.author_photo}">
-                            </a>
+                            <div class="dialogue">
+                                <a href="${data.message_info.author_url}">
+                                    ${data.message_info.author_photo ?
+                                        `<img class="avatar" src="${data.message_info.author_photo}">` :
+                                        '<div class="photo_frame_mes_user" id="no-photo"><p class="user-no-photo">No image</p></div>'
+                                    }
+                                </a>
+                            </div>
+
                             <div class="reply-body">
                                 <strong>
                                     <a class="username" href="${data.message_info.author_url}">
                                         ${data.message_info.author_name}
                                     </a>
                                 </strong>
-                                 <span class="pub_date">Только что</span>
+                                 <span class="pub_date">Just</span>
                                  <p class="text">${data.message_info.message}</p>
                             </div>
                         </div>`;
@@ -56,7 +63,7 @@ document.querySelector('#chat-message-submit').onclick = function(e) {
         }));
 
         const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const request = new Request(`/messages/chat/${chat_id}/`, {headers: {'X-CSRFToken': csrf_token}});
+        const request = new Request(`/chat/${chat_id}/`, {headers: {'X-CSRFToken': csrf_token}});
         let data = new FormData();
         data.append("message", html_message.value)
         fetch(request, {method: 'POST', body: data})
