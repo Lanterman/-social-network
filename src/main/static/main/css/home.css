@@ -221,3 +221,33 @@
     text-align: center;
     margin: 10px 0 15px 0;
 }
+
+.users_subs .check {
+    color: blue;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.users_subs .check:hover {
+    color: red;
+}
+
+.users_subs .minus {
+    margin-left: 20px;
+    color: rgb(189, 45, 45);
+}
+
+.users_subs .del-sub {
+    color: rgb(189, 45, 45);
+    margin-left: 20px;
+}
+
+.users_subs .del-sub:hover {
+    color: red;
+}
+
+#subs_user .model #count-new-fol {
+    background-color: #a09797;
+    border-radius: 50%;
+    padding: 0px 5px;
+}

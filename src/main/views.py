@@ -63,11 +63,12 @@ class HomeView(DataMixin, UpdateView):
         )
 
         self.followers = self.object.followers.all()
-        self.subscriptions = self.object.subscriptions.all()
+        self.subs = self.object.subscriptions.all()
         self.groups = self.object.groups_followers.all()
         self.my_groups = self.object.my_groups.all()
 
         self.new_followers = [follower for follower in self.followers if not follower.is_checked]
+        self.old_followers = [follower for follower in self.followers if follower.is_checked]
 
         self.publications = Publication.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id'))
@@ -79,9 +80,11 @@ class HomeView(DataMixin, UpdateView):
         context['groups'] = self.groups
         context['my_groups'] = self.my_groups
         context['page_obj'] = self.publications
-        context['subscriptions'] = self.subscriptions
-        context['followers'] = self.followers
+        context['subs'] = self.subs
+        context['followers'] = self.old_followers
         context["new_followers"] = self.new_followers
+        context["count_old_followers"] = len(self.old_followers)
+        context["count_new_followers"] = len(self.new_followers)
         return context | self.get_context()
 
 
@@ -412,28 +415,17 @@ class UpdatePublished(AbstractUpdate):
         return redirect(publish)
 
 
-def friend_activity(request, user_pk): ###
-    """Logic for adding friends"""
+def conf_follower(request, follower_id: int):
+    """Confirm follower - home page endpoint"""
 
-    q = User.objects.get(pk=user_pk)
-    try:
-        subs = Follower.objects.select_related('user').get(
-            Q(owner=request.user.username, user_id=q.pk) |
-            Q(owner=q.username, user_id=request.user.pk)
-        )
-    except Exception:
-        subs = ''
-    if q in request.user.friends.all():
-        q.friends.remove(request.user)
-        Follower.objects.create(owner=request.user.username, user_id=q.id)
-    elif not subs:
-        Follower.objects.create(owner=q.username, user_id=request.user.id)
-    elif subs.owner != q.username:
-        request.user.friends.add(q)
-        Follower.objects.filter(owner=request.user.username, user_id=q.id).delete()
-    elif subs.owner == q.username:
-        Follower.objects.filter(owner=q.username, user_id=request.user.id).delete()
-    return redirect(q)
+    Follower.objects.filter(follower_id__id=follower_id, subscription_id__id=request.user.id).update(is_checked=True)
+    return HttpResponse(status=200)
+
+def cancel_follower(request, follower_id: int):
+    """Cancel follower - home page endpoint"""
+
+    Follower.objects.filter(follower_id__id=follower_id, subscription_id__id=request.user.id).delete()
+    return HttpResponse(status=204)
 
 
 def friend_hide(request, user_pk): ###
@@ -441,13 +433,6 @@ def friend_hide(request, user_pk): ###
 
     q = User.objects.get(pk=user_pk)
     Follower.objects.filter(owner=request.user.username, user_id=q.id).update(escape=True)
-    return redirect(request.user)
-
-
-def conf_followers(request, user_id: int): ###
-    """Confirm subscribers verification"""
-
-    Follower.objects.filter(follower_id__id=user_id, subscription_id__id=request.user.id).update(is_checked=True)
     return redirect(request.user)
 
 

@@ -24,28 +24,17 @@
             {% else %}
                 <a class="button_home" href="{% url 'check' user.pk %}">Send message</a>
                 <div id="button_home">
-                    <!-- {% if owner in users %}
-                        <a class="model_user" href="{% url 'friend_activity' user.pk %}" onclick="remove()" id="rem_fr">
-                            <i class="fas fa-user-check"></i> Удалить из друзей
-                        </a>
-                    {% elif not subs %}
-                        <a class="button_home" href="{% url 'friend_activity' user.pk %}">Добавить в друзья</a>
-                    {% elif subs.0.owner != user.username %}
-                        <a class="button_home" href="{% url 'friend_activity' user.pk %}" id="agr_fr" onclick="agree()">
-                            Ответить на заявку
-                        </a>
-                    {% elif subs.0.owner == user.username %}
-                        <a class="button_home" href="{% url 'friend_activity' user.pk %}" id="can_fr" onclick="cancel()">
-                            Отменить заявку
-                        </a>
-                    {% endif %} -->
+
                 </div>
             {% endif %}
         </div>
         <p id="subs_user">
-            <a class="model" href="#openModalSub">Followers ({{ followers.count }})</a>
+            <a class="model" href="#openModalSub">
+                Followers ({{ count_old_followers }})
+                <span id="count-new-fol">{{count_new_followers}}</span>
+            </a>
         </p><br>
-        <p><a class="model" href="#openModalSub1">Subscriptions: ({{ subscriptions.count }})</a></p><br>
+        <p><a class="model" href="#openModalSub1">Subscriptions: ({{ subs.count }})</a></p><br>
         <p><a class="model" href="#openModalGroup">Groups ({{ groups.count}})</a></p>
     </div>
     <p id="public">User publicashions</p>
@@ -109,7 +98,7 @@
                 <a href="#close" title="Close" class="close">×</a>
             </div>
             <div class="modal-body">
-                    {% for subscription in subscriptions %}
+                    {% for subscription in subs %}
                         <p class="users_subs" >
                             {% if subscription.subscription_id.photo %}
                                 <img src="{{ subscription.subscription_id.photo.url }}">
@@ -138,23 +127,5 @@
 {% endblock content %}
 
 {% block script %}
-<script>
-    function remove() {
-        if (!confirm('Удалить из друзей?')) {
-            rem_fr.href = '';
-        }
-    }
-
-    function agree() {
-        if (!confirm('Добавить в друзья?')) {
-            agr_fr.href = '';
-        }
-    }
-
-    function cancel() {
-        if (!confirm('Отменить заявку?')) {
-            can_fr.href = '';
-        }
-    }
-</script>
+        <script src="/static/main/js/home.js"></script>
 {% endblock script %}

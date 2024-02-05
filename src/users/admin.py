@@ -24,7 +24,7 @@ class FollowerAdmin(admin.ModelAdmin):
     list_filter = ('follower_id', 'subscription_id', 'date', 'is_checked')
     list_max_show_all = 5
     list_per_page = 10
-    actions = ["confirm_checking_followers, unconfirm_checking_followers"]
+    actions = ["confirm_checking_followers", "unconfirm_checking_followers"]
 
     @admin.action(description='Confirm checking followers')
     def confirm_checking_followers(self, request, queryset):
@@ -48,10 +48,10 @@ class MessageAdmin(admin.ModelAdmin):
     fields = ('chat_id', 'author_id', 'message', 'is_readed')
     actions = ['message_true', 'message_false']
 
-    @admin.action(description='Прочитать сообщения')
+    @admin.action(description='Read messages')
     def message_true(self, request, queryset):
         queryset.update(is_readed=True)
 
-    @admin.action(description='Отметить как непрочитанные')
+    @admin.action(description='Mark as unread')
     def message_false(self, request, queryset):
         queryset.update(is_readed=False)

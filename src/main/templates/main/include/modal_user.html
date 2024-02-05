@@ -9,7 +9,7 @@
                 {% if user.pk == request.user.pk and new_followers %}
                     <p class="groups_home">Announcements</p>
                     {% for follower in new_followers %}
-                        <p class="users_subs">
+                        <p class="users_subs" id="follower_{{follower.follower_id.id}}">
                             {% if follower.follower_id.photo %}
                                 <img src="{{ follower.follower_id.photo.url }}">
                             {% else %}
@@ -26,8 +26,13 @@
                                 <i>My profile</i>
                             {% endif %}
 
-                            <a class="primary" href="{% url 'conf_followers' follower.follower_id.pk %}">
-                                <i class="fas fa-user-check"> Ok</i></a>
+                            <span class="check plus" onclick="confirm_follower('{{follower.follower_id.id}}')">
+                                <i class="fas fa-user-check"> Ok</i>
+                            </span>
+
+                            <span class="check minus" onclick="cancel_follower('{{follower.follower_id.id}}')">
+                                <i class="fas fa-user-check"> Cancel</i>
+                            </span>
                         </p>
                     {% endfor %}
                     <br/><hr><br/>

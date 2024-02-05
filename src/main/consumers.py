@@ -4,6 +4,22 @@ from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 from src.main.models import Comment
 
 
+class HomeConsumer(AsyncWebsocketConsumer):
+    """
+    The consumer of the chat
+    Send message and read unread another user messages
+    """
+
+    async def connect(self):
+        self.user = self.scope['user']
+        self.room_group_name = f'home_{self.user.id}'
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+
+
 class ChatConsumer(AsyncWebsocketConsumer):
     """
     The consumer of the chat
