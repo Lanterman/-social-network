@@ -48,7 +48,7 @@ class NewsView(ListView): ### Search groups with ws
         return self.publications
 
 
-class HomeView(DataMixin, UpdateView):
+class HomeView(DataMixin, UpdateView): # Проверить оптимизацию эндпоинта. Продолжить модернизацию вспомогательных функций
     """User page"""
 
     model = User
@@ -413,19 +413,6 @@ class UpdatePublished(AbstractUpdate):
         publish.slug = publish.name.replace(" ", "")
         publish.save()
         return redirect(publish)
-
-
-def conf_follower(request, follower_id: int):
-    """Confirm follower - home page endpoint"""
-
-    Follower.objects.filter(follower_id__id=follower_id, subscription_id__id=request.user.id).update(is_checked=True)
-    return HttpResponse(status=200)
-
-def cancel_follower(request, follower_id: int):
-    """Cancel follower - home page endpoint"""
-
-    Follower.objects.filter(follower_id__id=follower_id, subscription_id__id=request.user.id).delete()
-    return HttpResponse(status=204)
 
 
 def friend_hide(request, user_pk): ###

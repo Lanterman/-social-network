@@ -1,6 +1,6 @@
 from django.urls import re_path, path
 
-from src.main import consumers
+from src.main.consumers import consumers
 
 websocket_urlpatterns = [
     path('ws/home/', consumers.HomeConsumer.as_asgi()),

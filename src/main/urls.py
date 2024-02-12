@@ -23,10 +23,6 @@ urlpatterns = [
     path('groups/<slug:group_slug>/update_group/', UpdateGroup.as_view(), name='update_group'),  # update group
     path('groups/<slug:pub_slug>/update_pub/', UpdatePublished.as_view(), name='update_pub'),  # update published
 
-    ### create with js
-    path('home/<int:follower_id>/confirm_follower/', conf_follower, name='conf_follower'),  # confirm follower
-    path('home/<int:follower_id>/cancel_follower/', cancel_follower, name='conf_follower'),  # cancel follower
-
     ###
     path('groups/<int:user_pk>/friend_hide/', friend_hide, name='friend_hide'),  # hide friend
     path('groups/<int:user_pk>/friend_del_primary/', friend_del_primary, name='friend_del_primary'),  # del friend primary
