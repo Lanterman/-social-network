@@ -43,7 +43,7 @@
                 <p class="groups_home">Followers</p>
                 <div id="old_followers">
                     {% for follower in followers %}
-                        <p class="users_subs">
+                        <p class="users_subs" id="oldFollower_{{follower.follower_id.id}}">
                             {% if follower.follower_id.photo %}
                                 <img src="{{ follower.follower_id.photo.url }}">
                             {% else %}
@@ -57,10 +57,17 @@
                             </a><br><br><br>
                             {% if follower.follower_id.pk != request.user.pk %}
                                 <a class="button_home" href="{% url 'check' follower.follower_id.id %}">Send message</a>
+
+                                {% if user.pk == request.user.pk %}
+                                    <span class="check minus" onclick="remove_follower('{{follower.follower_id.id}}')">
+                                        <i class="fas fa-user-check"> Block</i>
+                                    </span>
+                                {% endif %}
                             {% else %}
                                 <i>My profile</i>
                             {% endif %}
-                        </p><br>
+                            <br>
+                        </p>
                     {% empty %}
                         <h4 id="no_followers">No followers</h4>
                     {% endfor %}

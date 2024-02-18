@@ -2,12 +2,10 @@ import json
 import logging
 
 from asgiref.sync import async_to_sync
-from channels.db import database_sync_to_async
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 
 from . import db_queries, mixins
 from src.main.models import Comment
-from src.users.models import Follower
 
 
 class HomeConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
@@ -29,9 +27,9 @@ class HomeConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
 
+        # confrim follower (follower modal - announcement)
         if data["event_type"] == "confirm_follower":
             await db_queries.confirm_follower(data["follower_id"], self.user.id)
-
             checked_follower = await self.conf_follower(data["follower_id"])
             await self.send(text_data=json.dumps({
                 "follower": checked_follower, 
@@ -39,11 +37,35 @@ class HomeConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
                 "user_id": self.user.id
             }))
         
+        # cancel follower (follower modal - announcement)
         elif data["event_type"] == "cancel_follower":
-            await db_queries.cancel_follower(data["follower_id"], self.user.id)
-    
-    
+            await db_queries.remove_follower_instance(data["follower_id"], self.user.id)
+        
+        # remove follower (follower modal - old followers)
+        elif data["event_type"] == "remove_follower":
+            await db_queries.remove_follower_instance_by_follower_id(data["follower_id"], self.user.id)
+            await self.send(text_data=json.dumps({"event_type": "remove_follower"}))
+        
+        # confrim subscription (subscription modal)
+        elif data["event_type"] == "remove_subscription":
+            await db_queries.remove_follower_instance_by_sub_id(data["subscription_id"], self.user.id)
+            await self.send(text_data=json.dumps({"event_type": "remove_subscription"}))
+        
+        # subscribe to another user
+        elif data["event_type"] == "sub_user":
+            await db_queries.create_follower_instance_by_sub_id(data["user_id"], self.user.id)
+            await self.send(text_data=json.dumps({"event_type": "sub_user"}))
+        
+        # unsubscribe from another user
+        elif data["event_type"] == "unsub_user":
+            await db_queries.remove_follower_instance_by_sub_id(data["user_id"], self.user.id)
+            await self.send(text_data=json.dumps({"event_type": "unsub_user"}))
 
+        # block another user
+        elif data["event_type"] == "block_user":
+            await db_queries.remove_follower_instance_by_follower_id(data["user_id"], self.user.id)
+            await self.send(text_data=json.dumps({"event_type": "block_user"}))
+    
 
 class ChatConsumer(AsyncWebsocketConsumer):
     """

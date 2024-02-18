@@ -57,6 +57,22 @@ class HomeView(DataMixin, UpdateView): # Проверить оптимизаци
     pk_url_kwarg = 'user_pk'
     context_object_name = 'user'
 
+    @staticmethod
+    def check_if_i_am_follower(followers, user_id: int) -> bool | None:
+        """Checking if i'm a follower"""
+
+        for follower in followers:
+            if follower.follower_id.id == user_id:
+                return True
+    
+    @staticmethod
+    def check_if_i_am_sub(subs, user_id: int) -> bool | None:
+        """Checking if i'm a sub"""
+
+        for sub in subs:
+            if sub.subscription_id.id == user_id:
+                return True
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=User.objects.all().prefetch_related(
             'followers__follower_id', 'subscriptions__subscription_id', 'groups_followers', 'my_groups')
@@ -85,6 +101,11 @@ class HomeView(DataMixin, UpdateView): # Проверить оптимизаци
         context["new_followers"] = self.new_followers
         context["count_old_followers"] = len(self.old_followers)
         context["count_new_followers"] = len(self.new_followers)
+        
+        if self.object.id != self.request.user.id:
+            context["i_am_follower"] = self.check_if_i_am_follower(self.followers, self.request.user.id)
+            context["i_am_sub"] = self.check_if_i_am_sub(self.subs, self.request.user.id)
+
         return context | self.get_context()
 
 

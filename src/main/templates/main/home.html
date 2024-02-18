@@ -23,15 +23,39 @@
                 <p id="edit"><a class="model_user" href="#editPhoto">Change a photo</a></p>
             {% else %}
                 <a class="button_home" href="{% url 'check' user.pk %}">Send message</a>
-                <div id="button_home">
 
-                </div>
+                {% if user.id != request.user.id%}
+                    <div id="button_home">
+                        {% if not i_am_follower %}
+                            <p class="act_button" id="sub_user" onclick="sub_user('{{user.id}}')">
+                                <i class="fas fa-user-check" id="sub_user_icon"></i> 
+                                Subscribe
+                            </p>
+                        {% endif %}
+
+                        {% if i_am_follower %}
+                            <p class="act_button" id="unsub_user" onclick="unsub_user('{{user.id}}')">
+                                <i>Unsubscribe</i>
+                            </p>
+                        {% endif %}
+
+                        {% if i_am_sub %}
+                            <p class="act_button" id="block_user" onclick="block_user('{{user.id}}')">
+                                <i>Block user</i>
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
+        
         <p id="subs_user">
             <a class="model" href="#openModalSub">
                 Followers ({{ count_old_followers }})
-                <span id="count-new-fol">{{count_new_followers}}</span>
+
+                {% if user.pk == request.user.pk and count_new_followers %}
+                    <span id="count-new-fol">{{count_new_followers}}</span>
+                {% endif %}
             </a>
         </p><br>
         <p><a class="model" href="#openModalSub1">Subscriptions: ({{ subs.count }})</a></p><br>
@@ -80,6 +104,7 @@
                         <br/><hr>
                         <p class="groups_home">Groups</p>
                     {% endif %}
+
                     {% for group in groups %}
                         {% include 'main/include/home_include.html' %}
                     {% empty %}
@@ -97,9 +122,9 @@
                 <h3 class="modal-title"> Subscriptions</h3>
                 <a href="#close" title="Close" class="close">×</a>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="subscriptionBlock">
                     {% for subscription in subs %}
-                        <p class="users_subs" >
+                        <p class="users_subs" id="subscriptions_{{subscription.subscription_id.id}}">
                             {% if subscription.subscription_id.photo %}
                                 <img src="{{ subscription.subscription_id.photo.url }}">
                             {% else %}
@@ -108,14 +133,21 @@
                                 </span>
                             {% endif %}
                             <a class="group_name" href="{{ subscription.subscription_id.get_absolute_url }}">
-                                {{ subscription.subscription_id.get_full_name|default:'Anonymous'|truncatechars_html:13|title }}
+                                {{ subscription.subscription_id.get_full_name|default:'Anonymous'|truncatechars_html:20|title }}
                             </a><br><br><br>
                             {% if subscription.subscription_id.id != request.user.id %}
                                 <a class="button_home" href="{% url 'check' subscription.subscription_id.id %}">Send message</a>
+
+                                {% if user.pk == request.user.pk %}
+                                    <span class="check minus" onclick="remove_subscription('{{subscription.subscription_id.id}}')">
+                                        <i class="fas fa-user-check"> Unsub</i>
+                                    </span>
+                                {% endif %}
                             {% else %}
                                 <i>My profile</i>
                             {% endif %}
-                        </p><br>
+                            <br>
+                        </p>
                     {% empty %}
                         <h4>No subscriptions</h4>
                     {% endfor %}
