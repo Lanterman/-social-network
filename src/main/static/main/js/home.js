@@ -31,9 +31,6 @@ homeSocket.onmessage = function(e) {
 
     } else if (data.event_type == "unsub_user") {
         unsub_user_onmessage(data);
-
-    } else if (data.event_type == "block_user") {
-        block_user_onmessage(data);
     };
 
 };
@@ -84,15 +81,24 @@ function remove_subscription_onmessage() {
 };
 
 function sub_user_onmessage(data) {
-    console.log("Sonner...");
+    let buttonsBlock = document.getElementById("button_home");
+    let buttonsBlockValue = buttonsBlock.innerHTML;
+    buttonsBlock.innerHTML = `
+        <p class="act_button" id="unsub_user" onclick="unsub_user('${data.user_id}')">
+            <i>Unsubscribe</i>
+        </p>
+    ` + buttonsBlockValue;
 };
 
 function unsub_user_onmessage(data) {
-    console.log("Sonner...");
-};
-
-function block_user_onmessage(data) {
-    console.log("Sonner...");
+    let buttonsBlock = document.getElementById("button_home");
+    let buttonsBlockValue = buttonsBlock.innerHTML;
+    buttonsBlock.innerHTML = `
+        <p class="act_button" id="sub_user" onclick="sub_user('${data.user_id}')">
+            <i class="fas fa-user-check" id="sub_user_icon"></i> 
+            Subscribe
+        </p>
+    ` + buttonsBlockValue;
 };
 
 

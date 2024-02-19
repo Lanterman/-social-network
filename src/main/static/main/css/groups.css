@@ -18,7 +18,9 @@
     color: red;
 }
 
-
+.block-group-list {
+    margin-bottom: 150px;
+}
 
 .block-include-group {
     width: 920px;
@@ -81,6 +83,7 @@
     float: right;
     margin: -65px -11px 0 0;
     color: black;
+    cursor: pointer;
 }
 
 .block-include-group .group_margin{
@@ -181,4 +184,8 @@
     text-align: center;
     font-size: 35px;
     margin: 0px 0 20px 0;
+}
+
+#div2 .group_activity {
+    cursor: pointer;
 }

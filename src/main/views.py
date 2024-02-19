@@ -48,7 +48,7 @@ class NewsView(ListView): ### Search groups with ws
         return self.publications
 
 
-class HomeView(DataMixin, UpdateView): # Проверить оптимизацию эндпоинта. Продолжить модернизацию вспомогательных функций
+class HomeView(DataMixin, UpdateView):
     """User page"""
 
     model = User
@@ -109,7 +109,7 @@ class HomeView(DataMixin, UpdateView): # Проверить оптимизаци
         return context | self.get_context()
 
 
-class MessagesView(DataMixin, ListView):
+class MessagesView(DataMixin, ListView): # ---
     """User messages page"""
 
     context_object_name = 'chats'
@@ -138,7 +138,7 @@ class MessagesView(DataMixin, ListView):
         return sorted(self.chats, key=lambda x: x.set_mes[0].pub_date, reverse=True)
 
 
-class ChatDetailView(DataMixin, View):
+class ChatDetailView(DataMixin, View): # ---
     """Chat page"""
 
     def get(self, request, chat_id):
@@ -163,7 +163,7 @@ class ChatDetailView(DataMixin, View):
         return HttpResponse(status=200)
 
 
-class CreateDialogView(View):
+class CreateDialogView(View): # ---
     """Page for creating new chat"""
 
     @staticmethod
@@ -178,7 +178,7 @@ class CreateDialogView(View):
         return redirect(chat)
 
 
-class FollowersView(DataMixin, SingleObjectMixin, ListView):
+class FollowersView(DataMixin, SingleObjectMixin, ListView): # ---
     """User friends page"""
 
     template_name = 'main/my_users.html'
@@ -206,7 +206,7 @@ class FollowersView(DataMixin, SingleObjectMixin, ListView):
         return self.followers
 
 
-class SubscriptionsView(DataMixin, SingleObjectMixin, ListView):
+class SubscriptionsView(DataMixin, SingleObjectMixin, ListView): # ---
     """User friends page"""
 
     template_name = 'main/my_users.html'
@@ -306,8 +306,8 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
         return self.published
 
 
-class AddPublished(DataMixin, CreateView):
-    """PAge for creating new publish"""
+class AddPublication(DataMixin, CreateView): # ---
+    """Page for creating new publication"""
 
     form_class = AddPublishedForm
     template_name = 'main/add_pub_group.html'
@@ -329,7 +329,7 @@ class AddPublished(DataMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
 
-class DetailPublication(DataMixin, DetailView):
+class DetailPublication(DataMixin, DetailView): # ---
     """Detail publish page"""
 
     model = Publication
@@ -353,7 +353,7 @@ class DetailPublication(DataMixin, DetailView):
         return context | self.get_context()
 
 
-class PublishedCommentsView(SingleObjectMixin, ListView):
+class PublicationCommentsView(SingleObjectMixin, ListView): # ---
     """Publication comments page"""
 
     template_name = 'main/comments.html'
@@ -378,14 +378,14 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 
 # Logic
 
-def del_group(request, group_slug):
+def del_group(request, group_slug): ###
     """Delete group"""
 
     Group.objects.get(slug=group_slug).delete()
     return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
 
 
-def del_pub_group(request, pub_slug, group_slug):
+def del_pub_group(request, pub_slug, group_slug): ###
     """Delete group for owner"""
 
     group = Group.objects.get(slug=group_slug)
@@ -393,11 +393,11 @@ def del_pub_group(request, pub_slug, group_slug):
     return redirect(group)
 
 
-def del_published(request, pub_slug):
-    """Delete published for owner group or owner publication"""
+def delete_publication(request, pub_id: int) -> HttpResponse:
+    """Delete publication"""
 
-    Publication.objects.get(slug=pub_slug).delete()
-    return redirect(request.user)
+    Publication.objects.get(id=pub_id).delete()
+    return HttpResponse(status=204)
 
 
 class AbstractUpdate(DataMixin, UpdateView):
@@ -453,23 +453,16 @@ def friend_del_primary(request, user_pk): ###
     return redirect(reverse('friends', kwargs={'user_pk': request.user.pk}))
 
 
-def group_activity(request, group_slug):
-    """logic for group entry"""
+def group_activity(request, group_id: int) -> HttpResponse:
+    """Join to the group or leave the group"""
 
-    q = Group.objects.prefetch_related('followers').get(slug=group_slug)
+    q = Group.objects.prefetch_related('followers').get(id=group_id)
     if request.user in q.followers.all():
         q.followers.remove(request.user)
     else:
         q.followers.add(request.user)
-    return redirect(q)
 
-
-def group_quit_primary(request, group_slug):
-    """Leave group"""
-
-    q = Group.objects.get(slug=group_slug)
-    q.followers.remove(request.user)
-    return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
+    return HttpResponse(status=200)
 
 
 class AddStarRating(View):
