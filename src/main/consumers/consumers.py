@@ -68,6 +68,44 @@ class HomeConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
             await db_queries.remove_follower_instance_by_follower_id(data["user_id"], self.user.id)
     
 
+class SubscriptionConsumer(AsyncWebsocketConsumer):
+    """
+    The consumer of the home page.
+    1. Unsubscribe and subscribe subscriber.
+    2. Search my subscribers and global users.
+    """
+
+    async def connect(self):
+        self.user = self.scope['user']
+        self.subs_group_name = f'{self.user.id}_subs'
+        await self.channel_layer.group_add(self.subs_group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.subs_group_name, self.channel_name)
+    
+
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data)
+
+        # unsubscribe --- doesn't send anything
+        if data["event_type"] == "unsubscribe":
+            await db_queries.remove_follower_instance_by_sub_id(data["subscription_id"], self.user.id)
+
+        elif data["event_type"] == "search":
+            my_subs, global_users = await db_queries.subs_search(data["search_value"], self.user.id)
+            subs = []
+            for sub in my_subs:
+                subs.append({
+                    "user_pk": sub.subscription_id.id,
+                    "user_url": sub.subscription_id.get_absolute_url(),
+                    "user_full_name": sub.subscription_id.get_full_name().title(),
+                    "user_photo": sub.subscription_id.photo.url if sub.subscription_id.photo else None
+                })
+            
+            await self.send(text_data=json.dumps({'event_type': 'search', 'my_subs': subs}))
+
+
 class ChatConsumer(AsyncWebsocketConsumer):
     """
     The consumer of the chat

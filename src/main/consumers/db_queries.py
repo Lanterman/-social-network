@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models import Q
 from channels.db import database_sync_to_async
 
 from src.users.models import Follower
@@ -31,3 +32,16 @@ def remove_follower_instance_by_sub_id(subscription_id: int, user_id: int) -> No
     """Remove follower instance by subscription id"""
 
     Follower.objects.filter(follower_id__id=user_id, subscription_id__id=subscription_id).delete()
+
+
+@database_sync_to_async
+def subs_search(search_value: str, user_id: int) -> tuple:
+    """Subscriptions search"""
+
+    query = Follower.objects.filter(
+            Q(subscription_id__username__icontains=search_value, follower_id__id=user_id) |
+            Q(subscription_id__first_name__icontains=search_value, follower_id__id=user_id) |
+            Q(subscription_id__last_name__icontains=search_value, follower_id__id=user_id)
+        ).select_related("subscription_id")
+    
+    return list(query), "qwe"

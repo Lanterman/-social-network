@@ -214,9 +214,9 @@ class SubscriptionsView(DataMixin, SingleObjectMixin, ListView): # ---
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'My subccriptions'
+        context['title'] = 'My subscriptions'
         context['act'] = 'search_subscriptions'
-        context['name'] = 'Search subccriptions'
+        context['name'] = 'Search users'
         context['object'] = self.object
         return context | self.get_context()
 
@@ -448,7 +448,7 @@ def friend_del_primary(request, user_pk): ###
     """Delete from friends"""
 
     q = User.objects.get(pk=user_pk)
-    request.user.friends.remove(q)
+    request.user.friends.remove(q)#
     Follower.objects.create(owner=request.user.username, user_id=q.id)
     return redirect(reverse('friends', kwargs={'user_pk': request.user.pk}))
 

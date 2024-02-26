@@ -5,12 +5,12 @@
     <div class="block">
         <div class="search">
             <h3 class="Content">{{ name }}</h3>
-            <form action="{% url act request.user.pk %}" method="get" class="form">
-                <input type="search" name="search" class="input" required="">
-                <button type="submit" class="buttonForm">
+            <div class="form">
+                <input id="search-input" type="search" name="search" class="input" required="">
+                <button class="buttonForm" onclick="search()">
                     <span class="fa fa-search" aria-hidden="true"></span>
                 </button>
-            </form>
+            </div>
         </div>
     </div>
     <div class="followers-block">
@@ -26,7 +26,7 @@
                 {% include 'main/include/my_users.html' %}
             {% endfor %}
         {% elif not global and not object_list %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Empty list!" }}</p>
+            <p id="foo" class="foo"><i class="fas fa-ban"></i>No users!</p>
         {% endif %}
     </div>
 {% endblock content %}
@@ -34,3 +34,11 @@
 {% block groups %}
     {% include 'main/include/aside_my_users.html' %}
 {% endblock groups %}
+
+{% block script %}
+    {% if title == 'My subscriptions' %}
+        <script src="/static/main/js/subscriptions_page.js"></script>
+    {% elif title == 'My followers' %}
+        <script src="/static/main/js/followers_page.js"></script>
+    {% endif %}
+{% endblock script %}
