@@ -34,5 +34,4 @@ urlpatterns = [
     path('g/', SearchGroups.as_view(), name='search_group'),  # group_search
     path('m/', SearchMessages.as_view(), name='search_messages'),  # search_messages
     path('f-<int:user_pk>/', SearchFollowers.as_view(), name='search_followers'),  # followers_search
-    path('s-<int:user_pk>/', SearchSubscriptions.as_view(), name='search_subscriptions'),  # subscriptions_search
 ]

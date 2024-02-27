@@ -412,6 +412,23 @@ color: blue;
     margin-bottom: 100px;
 }
 
+.followers-block .global_search {
+    font-size: 24px;
+    padding: 0px 45%;
+    color: #2b5a3f;
+    border-bottom: 1px solid #2b5a3f;
+    margin: 40px 0px;
+}
+
+.followers-block #foo {
+    font-size: 24px;
+    margin: 0px 45%;
+}
+
+.followers-block #foo i {
+    margin-right: 3px;
+}
+
 .follower-block {
     padding: 10px 30px 40px 30px;
     margin: 10px 10px 0px 20%;
@@ -467,7 +484,7 @@ color: blue;
     color: rgb(146, 13, 13);
 }
 
-.follower-block .follower-send-message, .follower-block .follower-block-user {
+.follower-block .follower-send-message, .follower-block .follower-block-user, .follower-block #subscribe {
     font-size: 20px;
     text-decoration: none;
     margin-left: 30px;
@@ -477,6 +494,10 @@ color: blue;
 
 .follower-block .follower-block-user {
     color: rgb(197, 55, 55)
+}
+
+.follower-block #subscribe:hover {
+    color: blue;
 }
 
 #div img {
@@ -523,16 +544,6 @@ color: blue;
 
 #div #p2 {
     margin-left: 460px;
-}
-
-#foo  {
-    font-size: 20px;
-    text-align: center;
-    margin: 100px 0 100px 0;
-}
-
-#foo i {
-    font-size: 30px;
 }
 
 #as3 {

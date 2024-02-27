@@ -534,28 +534,6 @@ class SearchFollowers(FollowersView): ### ws
         return context
 
 
-class SearchSubscriptions(SubscriptionsView): ### ws
-    """Search for subscriptions by username, first name or last name"""
-
-    def get_queryset(self):
-        queryset = self.users.filter(
-            Q(username__icontains=self.request.GET.get('search')) |
-            Q(first_name__icontains=self.request.GET.get('search')) |
-            Q(last_name__icontains=self.request.GET.get('search'))
-        )
-        return queryset
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет пользователей соответствующих запросу!'
-        context['global'] = User.objects.filter(
-            Q(username__icontains=self.request.GET.get('search')) |
-            Q(first_name__icontains=self.request.GET.get('search')) |
-            Q(last_name__icontains=self.request.GET.get('search'))
-        ).exclude(pk=self.request.user.pk)
-        return context
-
-
 class SearchMessages(MessagesView):  # Убрать из members текущего пользователя(из запроса, а не базы данных) ### ws
     """Search for messages by last name or first name of members"""
 

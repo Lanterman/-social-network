@@ -19,14 +19,14 @@
                 {% include 'main/include/my_users.html' %}
             {% endfor %}
         {% endif %}
-        
+
         {% if global %}
             <p class="global_search">Global search</p>
             {% for obj_user in global %}
                 {% include 'main/include/my_users.html' %}
             {% endfor %}
         {% elif not global and not object_list %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i>No users!</p>
+            <p id="foo" class="foo"><i class="fas fa-ban"></i> No users!</p>
         {% endif %}
     </div>
 {% endblock content %}

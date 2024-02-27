@@ -3,7 +3,7 @@ import logging
 from django.db.models import Q
 from channels.db import database_sync_to_async
 
-from src.users.models import Follower
+from src.users.models import Follower, User
 
 
 @database_sync_to_async
@@ -44,4 +44,17 @@ def subs_search(search_value: str, user_id: int) -> tuple:
             Q(subscription_id__last_name__icontains=search_value, follower_id__id=user_id)
         ).select_related("subscription_id")
     
-    return list(query), "qwe"
+    return list(query)
+
+
+@database_sync_to_async
+def users_search(search_value: str, user_id: int) -> tuple:
+    """Users search"""
+
+    query = User.objects.exclude(id=user_id).filter(
+            Q(username__icontains=search_value) | 
+            Q(first_name__icontains=search_value) |
+            Q(last_name__icontains=search_value)
+        )[:10]
+    
+    return list(query)
