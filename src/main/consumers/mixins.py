@@ -32,24 +32,30 @@ class ConfirmFollower:
         return output_data
 
 
-class AllTypesOfSearch(types_of_search.SearchForSubscriptions,
+class AllTypesOfSearch(types_of_search.SearchForFollowers,
+                       types_of_search.SearchForSubscriptions,
                        types_of_search.GlobalSearch):
     """
     All types of search:
       1. Search publications
       2. Search messages
-      3. Search followers
+      3. Search followers     +
       4. Search subscriptions +
       5. Global search users  +
       5. Search groups
     """
+
+    async def followers_for_search(self, search_value: str, user_id: int) -> list:
+        """Search followers"""
+
+        return await self._followers_for_search(search_value, user_id)
 
     async def subscriptions_for_search(self, search_value: str, user_id: int) -> list:
         """Search subscriptions"""
 
         return await self._subscriptions_for_search(search_value, user_id)
     
-    async def global_users_search(self, search_value: str, user_id: int, subs: list) -> list:
+    async def global_users_search(self, search_value: str, user_id: int, subs: list, followers=None) -> list:
         """Global user search"""
 
-        return await self._global_users_search(search_value, user_id, subs)
+        return await self._global_users_search(search_value, user_id, subs, followers)

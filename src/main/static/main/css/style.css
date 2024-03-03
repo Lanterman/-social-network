@@ -201,6 +201,11 @@ header {
     margin: 30px 0 -15px 35px;
 }
 
+.div123 #my-rating, .div123 #user-rating {
+    font-size: 19px;
+    margin-right: 10px;
+}
+
 #p123 {
     float:right;
     margin: 20px 150px 0 0;
@@ -824,4 +829,30 @@ color: blue;
 
 #search {
     margin-top: -20px;
+}
+
+#publicationsBlock #no-publications {
+    font-size: 24px;
+    text-align: center;
+    margin-top: 10%;
+}
+
+#no-instances {
+    font-size: 24px;
+    margin: 10% 25%;
+}
+
+.followers-block #no-users {
+    font-size: 24px;
+    margin: 5% 43%;
+}
+
+.user-title{
+    margin: 50px 40% 80px 40%;
+    font-size: 28px;
+}
+
+#no-messages {
+    font-size: 24px;
+    margin: 5% 38%;
 }

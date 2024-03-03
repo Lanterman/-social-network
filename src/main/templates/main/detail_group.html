@@ -48,12 +48,12 @@
 
     <div id="openModalGroupFollowers" class="modal">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content" id="followers-group">
                 <div class="modal-header">
                     <h3 class="modal-title">Followers</h3>
                     <a href="#close" title="Close" class="close">×</a>
                 </div>
-                    <p class="groups_home">Followers</p>
+                    <p class="follower-title">Followers</p>
                     {% for follower in followers %}
                         <p class="users_subs">
 
@@ -75,7 +75,7 @@
                             {% endif %}
                         </p><br>
                     {% empty %}
-                        <h4>No followers</h4>
+                        <p id="no-users">No followers</p>
                     {% endfor %}
                 </div>
             </div>

@@ -1,7 +1,7 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+    <p class="user-title"><i class="fas fa-user-friends"></i> {{ title }}</p>
     <div class="block">
         <div class="search">
             <h3 class="Content">{{ name }}</h3>
@@ -18,15 +18,8 @@
             {% for obj_user in object_list %}
                 {% include 'main/include/my_users.html' %}
             {% endfor %}
-        {% endif %}
-
-        {% if global %}
-            <p class="global_search">Global search</p>
-            {% for obj_user in global %}
-                {% include 'main/include/my_users.html' %}
-            {% endfor %}
-        {% elif not global and not object_list %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> No users!</p>
+        {% elif not object_list %}
+            <p id="no-users"><i class="fas fa-ban"></i> No users!</p>
         {% endif %}
     </div>
 {% endblock content %}

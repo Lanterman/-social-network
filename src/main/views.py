@@ -31,14 +31,23 @@ class NewsView(ListView): ### Search groups with ws
         return context
 
     def get(self, request, *args, **kwargs):
+        # if a user is authenticated
         if request.user.is_authenticated:
+            # recommended groups
             self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
+
+            # publications of groups I follow
             self.group = Group.objects.filter(followers__username=request.user.username)
             self.publications = Publication.objects.filter(
                 group_id__in=[gr.id for gr in self.group]).select_related('owner').annotate(
-                rat=Avg('rating__star_id')).order_by('-date')            
+                rat=Avg('rating__star_id')).order_by('-date')
+
+        # if a user isn't authenticated       
         else:
+            # recommended groups
             self.object = Group.objects.all()[:4]
+
+            # all publications
             self.publications = Publication.objects.all().select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
         
@@ -178,7 +187,7 @@ class CreateDialogView(View): # ---
         return redirect(chat)
 
 
-class FollowersView(DataMixin, SingleObjectMixin, ListView): # ---
+class FollowersView(DataMixin, SingleObjectMixin, ListView):
     """User friends page"""
 
     template_name = 'main/my_users.html'
@@ -193,11 +202,13 @@ class FollowersView(DataMixin, SingleObjectMixin, ListView): # ---
         return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
+        # create a list of my followers
         self.qs_main_followers = Follower.objects.filter(subscription_id__id=request.user.id).select_related("follower_id")
-
         self.followers = [follower.follower_id for follower in self.qs_main_followers]
-        self.users_id = [user.id for user in self.followers]
 
+        # create a QuerySet of recommended users
+        self.qs_main_subs = Follower.objects.filter(follower_id=request.user.id).select_related("subscription_id")
+        self.users_id = [user.subscription_id.id for user in self.qs_main_subs]
         self.object = User.objects.exclude(id__in=self.users_id).exclude(id=request.user.id)[:4]
 
         return super().get(request, *args, **kwargs)
@@ -206,7 +217,7 @@ class FollowersView(DataMixin, SingleObjectMixin, ListView): # ---
         return self.followers
 
 
-class SubscriptionsView(DataMixin, SingleObjectMixin, ListView): # ---
+class SubscriptionsView(DataMixin, SingleObjectMixin, ListView):
     """User friends page"""
 
     template_name = 'main/my_users.html'
@@ -221,11 +232,12 @@ class SubscriptionsView(DataMixin, SingleObjectMixin, ListView): # ---
         return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
+        # create a list of my subscriptions
         self.qs_main_subs = Follower.objects.filter(follower_id=request.user.id).select_related("subscription_id")
-
         self.subs = [sub.subscription_id for sub in self.qs_main_subs]
-        self.users_id = [user.id for user in self.subs]
 
+        # create a QuerySet of recommended users
+        self.users_id = [user.id for user in self.subs]
         self.object = User.objects.exclude(id__in=self.users_id).exclude(id=request.user.id)[:4]
 
         return super().get(request, *args, **kwargs)
@@ -306,7 +318,7 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
         return self.published
 
 
-class AddPublication(DataMixin, CreateView): # ---
+class AddPublication(DataMixin, CreateView):
     """Page for creating new publication"""
 
     form_class = AddPublishedForm
@@ -329,26 +341,30 @@ class AddPublication(DataMixin, CreateView): # ---
         return super().post(request, *args, **kwargs)
 
 
-class DetailPublication(DataMixin, DetailView): # ---
+class DetailPublication(DataMixin, DetailView):
     """Detail publish page"""
 
     model = Publication
     slug_url_kwarg = 'publish_slug'
     template_name = 'main/detail_publish.html'
-    queryset = Publication.objects.all().select_related('group', 'owner').annotate(rat=Avg('rating__star_id'))
     context_object_name = "publication"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(
+            Publication.objects.all().select_related('group', 'owner').annotate(rat=Avg('rating__star_id'))
+        )
+        self.rating = Rating.objects.filter(publication_id__name=self.object.name).select_related('star').filter(
+            ip=self.request.user.username)
+        
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['star_form'] = RatingForm()
 
         if self.request.user.is_authenticated:
-            try:
-                context['rating'] = Rating.objects.filter(publication_id__name=self.object.name).select_related(
-                    'star').get(
-                    ip=self.request.user.username)
-            except Exception:
-                pass
+            context['rating'] = self.rating[0] if self.rating else None
 
         return context | self.get_context()
 
@@ -377,20 +393,11 @@ class PublicationCommentsView(SingleObjectMixin, ListView): # ---
 
 
 # Logic
-
-def del_group(request, group_slug): ###
-    """Delete group"""
+def del_group(request, group_slug):
+    """Delete group for owner"""
 
     Group.objects.get(slug=group_slug).delete()
     return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
-
-
-def del_pub_group(request, pub_slug, group_slug): ###
-    """Delete group for owner"""
-
-    group = Group.objects.get(slug=group_slug)
-    Publication.objects.get(slug=pub_slug).delete()
-    return redirect(group)
 
 
 def delete_publication(request, pub_id: int) -> HttpResponse:
@@ -434,23 +441,6 @@ class UpdatePublished(AbstractUpdate):
         publish.slug = publish.name.replace(" ", "")
         publish.save()
         return redirect(publish)
-
-
-def friend_hide(request, user_pk): ###
-    """Leave in subscribers"""
-
-    q = User.objects.get(pk=user_pk)
-    Follower.objects.filter(owner=request.user.username, user_id=q.id).update(escape=True)
-    return redirect(request.user)
-
-
-def friend_del_primary(request, user_pk): ###
-    """Delete from friends"""
-
-    q = User.objects.get(pk=user_pk)
-    request.user.friends.remove(q)#
-    Follower.objects.create(owner=request.user.username, user_id=q.id)
-    return redirect(reverse('friends', kwargs={'user_pk': request.user.pk}))
 
 
 def group_activity(request, group_id: int) -> HttpResponse:
@@ -509,28 +499,6 @@ class SearchGroups(GroupsView): ### ws
         context['empty'] = 'Нет групп соответствующих запросу!'
         context['global'] = Group.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related(
             'users')
-        return context
-
-
-class SearchFollowers(FollowersView): ### ws
-    """Search for followers by username, first name or last name"""
-
-    def get_queryset(self):
-        queryset = self.users.filter(
-            Q(username__icontains=self.request.GET.get('search')) |
-            Q(first_name__icontains=self.request.GET.get('search')) |
-            Q(last_name__icontains=self.request.GET.get('search'))
-        )
-        return queryset
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет пользователей соответствующих запросу!'
-        context['global'] = User.objects.filter(
-            Q(username__icontains=self.request.GET.get('search')) |
-            Q(first_name__icontains=self.request.GET.get('search')) |
-            Q(last_name__icontains=self.request.GET.get('search'))
-        ).exclude(pk=self.request.user.pk)
         return context
 
 

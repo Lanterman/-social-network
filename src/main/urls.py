@@ -16,16 +16,14 @@ urlpatterns = [
     path('groups/<slug:group_slug>/add_publication/', AddPublication.as_view(), name='add_publication'),
     path('publish/<slug:publish_slug>/', DetailPublication.as_view(), name='detail_publish'),
     path('publish/<slug:publish_slug>/comments/', PublicationCommentsView.as_view(), name='comments'),
+    
     # logic
     path('groups/<slug:group_slug>/del_group/', del_group, name='del_group'),  # del group
-    path('groups/<slug:pub_slug>/<slug:group_slug>/del_published/', del_pub_group, name='del_pub_group'),  # del pub_group
     path('groups/<int:pub_id>/del_publication/', delete_publication, name='delete_publication'),  # delete publication
     path('groups/<slug:group_slug>/update_group/', UpdateGroup.as_view(), name='update_group'),  # update group
     path('groups/<slug:pub_slug>/update_pub/', UpdatePublished.as_view(), name='update_pub'),  # update published
 
     ###
-    path('groups/<int:user_pk>/friend_hide/', friend_hide, name='friend_hide'),  # hide friend
-    path('groups/<int:user_pk>/friend_del_primary/', friend_del_primary, name='friend_del_primary'),  # del friend primary
     path('groups/<int:group_id>/group_activity/', group_activity, name='group_activity'),  # group activity
     path("add-rating/", AddStarRating.as_view(), name='add_rating'),  # star_rating
 
@@ -33,5 +31,4 @@ urlpatterns = [
     path('p/', SearchPublished.as_view(), name='search_published'),  # news_search 
     path('g/', SearchGroups.as_view(), name='search_group'),  # group_search
     path('m/', SearchMessages.as_view(), name='search_messages'),  # search_messages
-    path('f-<int:user_pk>/', SearchFollowers.as_view(), name='search_followers'),  # followers_search
 ]

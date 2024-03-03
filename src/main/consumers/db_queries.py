@@ -7,6 +7,13 @@ from src.users.models import Follower, User
 
 
 @database_sync_to_async
+def get_user_by_id(user_id: int) -> User:
+    """Get a user by id"""
+
+    return User.objects.get(id=user_id)
+
+
+@database_sync_to_async
 def confirm_follower(follower_id: int, user_id: int) -> None:
     """Confirm follower"""
 
@@ -21,6 +28,16 @@ def create_follower_instance_by_sub_id(subscription_id: int, user_id: int) -> No
 
 
 @database_sync_to_async
+def remove_follower_instances(follower_id: int, user_id: int) -> None:
+    """Remove instances where user's a subscriber and user's a follower"""
+
+    Follower.objects.filter(
+        Q(follower_id__id=follower_id, subscription_id__id=user_id) |
+        Q(follower_id__id=user_id, subscription_id__id=follower_id)                  
+    ).delete()
+
+
+@database_sync_to_async
 def remove_follower_instance_by_follower_id(follower_id: int, user_id: int) -> None:
     """Remove follower instance by follower id"""
 
@@ -32,6 +49,19 @@ def remove_follower_instance_by_sub_id(subscription_id: int, user_id: int) -> No
     """Remove follower instance by subscription id"""
 
     Follower.objects.filter(follower_id__id=user_id, subscription_id__id=subscription_id).delete()
+
+
+@database_sync_to_async
+def followers_search(search_value: str, user_id: int) -> tuple:
+    """Followers search"""
+
+    query = Follower.objects.filter(
+            Q(follower_id__username__icontains=search_value, subscription_id__id=user_id) |
+            Q(follower_id__first_name__icontains=search_value, subscription_id__id=user_id) |
+            Q(follower_id__last_name__icontains=search_value, subscription_id__id=user_id)
+        ).select_related("follower_id")
+    
+    return list(query)
 
 
 @database_sync_to_async

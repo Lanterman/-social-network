@@ -29,7 +29,7 @@
                 {% include 'main/include/group_include.html' %}
             {% endfor %}
         {% elif not global and not groups %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"You do not have your own groups or groups that you are subscribed to!" }}</p>
+            <p id="no-instances"><i class="fas fa-ban"></i> {{ empty|default:"You do not have your own groups or groups that you are subscribed to!" }}</p>
         {% endif %}
     </div>
 

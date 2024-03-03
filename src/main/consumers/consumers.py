@@ -4,7 +4,7 @@ import logging
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 
-from . import db_queries, mixins
+from . import db_queries, mixins, services
 from src.main.models import Comment
 
 
@@ -66,12 +66,54 @@ class HomeConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
         # block another user
         elif data["event_type"] == "block_user":
             await db_queries.remove_follower_instance_by_follower_id(data["user_id"], self.user.id)
+
+
+class FollowerConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
+    """
+    The consumer of the home page.
+    1. Block and subscribe user.
+    2. Search my followers and global users.
+    """
+
+    async def connect(self):
+        self.user = self.scope['user']
+        self.subs_group_name = f'{self.user.id}_subs'
+        await self.channel_layer.group_add(self.subs_group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.subs_group_name, self.channel_name)
     
+
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data)
+
+        # unsubscribe --- doesn't send anything
+        if data["event_type"] == "block_user":
+            await db_queries.remove_follower_instances(data["user_id"], self.user.id)
+        
+        # unsubscribe --- doesn't send anything
+        elif data["event_type"] == "unsubscribe":
+            await db_queries.remove_follower_instance_by_sub_id(data["user_id"], self.user.id)
+
+        # subscribe --- doesn't send anything
+        elif data["event_type"] == "subscribe":
+            await db_queries.create_follower_instance_by_sub_id(data["user_id"], self.user.id)
+
+        # search for subscriptions and global users search --- response exists
+        elif data["event_type"] == "search":
+            my_subs = await self.subscriptions_for_search(data["search_value"], self.user.id)
+            my_followers = await self.followers_for_search(data["search_value"], self.user.id)
+            global_users = await self.global_users_search(data["search_value"], self.user.id, my_subs, my_followers)
+            await self.send(text_data=json.dumps(
+                {'event_type': 'search', 'my_followers': my_followers, "global_users": global_users})
+            )
+
 
 class SubscriptionConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
     """
     The consumer of the home page.
-    1. Unsubscribe and subscribe subscriber.
+    1. Unsubscribe and subscribe user.
     2. Search my subscribers and global users.
     """
 
@@ -93,9 +135,11 @@ class SubscriptionConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
             await db_queries.remove_follower_instance_by_sub_id(data["subscription_id"], self.user.id)
 
         # subscribe --- doesn't send anything
-        if data["event_type"] == "subscribe":
+        elif data["event_type"] == "subscribe":
             await db_queries.create_follower_instance_by_sub_id(data["subscription_id"], self.user.id)
-            await self.send(text_data=json.dumps(data))
+            new_sub = await db_queries.get_user_by_id(data["subscription_id"])
+            dict_of_user = services.create_dict_of_user(new_sub)
+            await self.send(text_data=json.dumps({"event_type": "subscribe", "new_sub": dict_of_user}))
 
         # search for subscriptions and global users search --- response exists
         elif data["event_type"] == "search":

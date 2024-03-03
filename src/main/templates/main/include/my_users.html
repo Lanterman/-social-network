@@ -20,6 +20,6 @@
     {% if act == 'search_subscriptions' %}
         <a id="del-user" class="follower-block-user" onclick="unsubscribe('{{obj_user.pk}}')">Unsubscribe from user</a>
     {% else %}
-        <a id="del-user" class="follower-block-user" href="{% url 'friend_del_primary' obj_user.pk %}">Block user</a>
+        <a id="del-user" class="follower-block-user" onclick="blockUser('{{obj_user.pk}}')">Block user</a>
     {% endif %}
 </div>

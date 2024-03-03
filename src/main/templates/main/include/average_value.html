@@ -39,6 +39,6 @@
             </p>
         </div>
     {% empty %}
-        <p id="foo"><i class="fas fa-poo"></i> {{ empty|default:"No publications yet!" }}</p>
+        <p id="no-publications"><i class="fas fa-poo"></i> {{ empty|default:"No publications yet!" }}</p>
     {% endfor %}
 </div>

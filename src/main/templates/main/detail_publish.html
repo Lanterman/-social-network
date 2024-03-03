@@ -10,7 +10,7 @@
         <div class="div123">
             {% if request.user.is_authenticated %}
                 <form action="{% url 'add_rating' %}" method="post" name="rating">
-                    <b class="b1">My rating:</b>
+                    <b id="my-rating">My rating:</b>
                     {% csrf_token %}
                     <input type="hidden" value="{{ publication.id }}" name="publication">
                     <span class="rating">
@@ -27,7 +27,7 @@
                     <p id="pb"></p>
                 </form>
             {% endif %}
-            <b class="b1">User rating:</b>
+            <b id="user-rating">User rating:</b>
             {% if publication.rat %}
                 <span class="editContent">{{ publication.rat }} / 5,0</span>
             {% else%}

@@ -3,7 +3,7 @@
 {% load filter_for_messages %}
 
 {% block content %}
-    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }}</h6>
+    <p class="user-title"><i class="fas fa-user-friends"></i> {{ title }}</p>
     <div class="block">
         <div class="search">
             {% include 'main/include/search.html' %}
@@ -50,7 +50,7 @@
                 {% endif %}
             </div>
         {% empty %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> You don't have open chats!"</p>
+            <p id="no-messages"><i class="fas fa-ban"></i> You don't have open chats!"</p>
         {% endfor %}
     </div>
 {% endblock content %}

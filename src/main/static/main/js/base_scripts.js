@@ -3,7 +3,7 @@ function delete_publication(publicationID) {
 
     if (!document.getElementsByClassName("publicationBlock").length) {
         document.getElementById("publicationsBlock").innerHTML = `
-            <p id="foo">
+            <p id="no-publications">
                 <i class="fas fa-poo"></i> No publications yet!
             </p>`;
     };
@@ -19,7 +19,7 @@ function leave_the_group(groupID) {
 
         if (!document.getElementsByClassName("block-include-group").length) {
             document.getElementById("blockGroupList").innerHTML = `
-                <p id="foo" class="foo">
+                <p id="no-instances">
                     <i class="fas fa-ban"></i> You do not have your own groups or groups that you are subscribed to!
                 </p>`;
         };

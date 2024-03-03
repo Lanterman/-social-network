@@ -4,7 +4,7 @@ const subscriptionSocket = new WebSocket('ws://' + window.location.host + '/ws/s
 
 
 subscriptionSocket.onopen = function(e) {
-    console.log("Ok");
+    console.log("Subscriptions socket opened");
 };
 
 subscriptionSocket.onclose = function(e) {
@@ -27,6 +27,10 @@ subscriptionSocket.onmessage = function(e) {
         } else {
             noResponseToSearch(followersBlock);
         };
+    
+    } else if (data["event_type"] === "subscribe") {
+        const followersBlock = document.getElementsByClassName("followers-block")[0];
+        followersBlock.innerHTML = drawUser(data["new_sub"]) + followersBlock.innerHTML;
     };
 };
 
@@ -34,38 +38,7 @@ subscriptionSocket.onmessage = function(e) {
 // event types logic of onmessage
 function responseToSearch(users, followersBlock, typeOfSearch) {
     Object.values(users).forEach((user) => {
-        followersBlock.innerHTML += (`
-            <div class="follower-block" id="sub_${user.user_pk}">
-                <a id='follower-url' href="${user.user_url}">
-                    ${user.user_photo ?
-                        `<img src="${user.user_photo}">` :
-                        `<div class="photo_frame" id="no-photo"><p>No image</p></div>`
-                    }
-                </a>
-            
-                <p class="follower-name">
-                    <a class="follower-url" href="${user.user_url}">
-                        <i>${user.user_full_name}</i>
-                    </a>
-                </p>
-
-                <a class="follower-send-message" href="/messages/check/${user.user_pk}">Send message</a>
-
-                ${typeOfSearch === "global" ?
-                    (user.my_sub ?
-                        (`<a id="del-user" class="follower-block-user" onclick="unsubscribe('${user.user_pk}')">
-                            Unsubscribe from user
-                        </a>`) :
-                        (`<a id="subscribe" onclick="subscribe('${user.user_pk}')">
-                            Subscribe from user
-                        </a>`))
-                    :
-                    (`<a id="del-user" class="follower-block-user" onclick="unsubscribe('${user.user_pk}')">
-                        Unsubscribe from user
-                    </a>`)
-                }
-            </div>
-        `);
+        followersBlock.innerHTML += drawUser(user, typeOfSearch)
     });
 };
 
@@ -74,10 +47,48 @@ function noResponseToSearch(followersBlock) {
 };
 
 
+// extra function
+function drawUser(user, typeOfSearch=null) {
+    return (`
+        <div class="follower-block" id="sub_${user.user_pk}">
+            <a id='follower-url' href="${user.user_url}">
+                ${user.user_photo ?
+                    `<img src="${user.user_photo}">` :
+                    `<div class="photo_frame" id="no-photo"><p>No image</p></div>`
+                }
+            </a>
+        
+            <p class="follower-name">
+                <a class="follower-url" href="${user.user_url}">
+                    <i>${user.user_full_name}</i>
+                </a>
+            </p>
+
+            <a class="follower-send-message" href="/messages/check/${user.user_pk}">Send message</a>
+
+            ${typeOfSearch === "global" ?
+                (user.my_sub ?
+                    (`<a id="del-user" class="follower-block-user" onclick="unsubscribe('${user.user_pk}')">
+                        Unsubscribe from user
+                    </a>`) :
+                    (`<a id="subscribe" onclick="subscribe('${user.user_pk}')">
+                        Subscribe from user
+                    </a>`))
+                :
+                (`<a id="del-user" class="follower-block-user" onclick="unsubscribe('${user.user_pk}')">
+                    Unsubscribe from user
+                </a>`)
+            }
+        </div>
+    `);
+};
+
+
 // events
 // unsubscribe - event
 function unsubscribe(subscription_id) {
     document.getElementById(`sub_${subscription_id}`).remove();
+    document.getElementById(`sub_${subscription_id}`)?.remove();
 
     if (!document.getElementsByClassName('follower-block').length) {
         document.getElementsByClassName('followers-block')[0].innerHTML = (
@@ -93,10 +104,13 @@ function unsubscribe(subscription_id) {
 
 // subscribe - event
 function subscribe(subscription_id) {
-    console.log(subscription_id);
     const newSub = document.getElementById(`sub_${subscription_id}`);
     newSub.remove();
-    /// ДОДЕЛАТЬ ПОДПИСКУ (УДАЛЯТЬ ИЗ ГЛОБАЛЬНОГО И ДОБАВЛЯТЬ В СПИСОК САБОВ)
+
+    subscriptionSocket.send(JSON.stringify({
+        'event_type': "subscribe",
+        'subscription_id': subscription_id,
+    }));
 };
 
 // search user - event 
