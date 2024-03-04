@@ -40,20 +40,20 @@ homeSocket.onmessage = function(e) {
 function confirm_follower_onmessage(data) {
     let oldFollowersBlock = document.getElementById("old_followers");
     const checkedUser = `
-        <p class="users_subs" id="oldFollower_${data.follower.follower_id}">
-            ${data.follower.follower_photo ?
-                `<img src="${data.follower.follower_photo}">` :
+        <p class="users_subs" id="oldFollower_${data.follower.id}">
+            ${data.follower.photo ?
+                `<img src="${data.follower.photo}">` :
                 '<span class="user_photo"><span>No image</span></span>'
             }
 
-            <a class="group_name" href=${data.follower.follower_url}>
-                ${data.follower.follower_full_name}
+            <a class="group_name" href=${data.follower.user_url}>
+                ${data.follower.user_full_name}
             </a><br><br><br>
 
-            ${data.follower.follower_id != data.user_id ?
+            ${data.follower.id != data.user_id ?
                 (`
-                    <a class="button_home" href="/messages/check/${data.follower.follower_id}">Send message</a>
-                    <span class="check minus" onclick="remove_follower(${data.follower.follower_id})">
+                    <a class="button_home" href="/messages/check/${data.follower.id}">Send message</a>
+                    <span class="check minus" onclick="remove_follower(${data.follower.id})">
                         <i class="fas fa-user-check"> Block</i>
                     </span>
                 `) :

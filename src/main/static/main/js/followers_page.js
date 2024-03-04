@@ -45,11 +45,12 @@ function noResponseToSearch(followersBlock) {
 
 // extra function
 function drawUser(user, typeOfSearch=null) {
+    console.log(user)
     return (`
-        <div class="follower-block" id="sub_${user.user_pk}">
+        <div class="follower-block" id="sub_${user.id}">
             <a id='follower-url' href="${user.user_url}">
-                ${user.user_photo ?
-                    `<img src="${user.user_photo}">` :
+                ${user.photo ?
+                    `<img src="${user.photo}">` :
                     `<div class="photo_frame" id="no-photo"><p>No image</p></div>`
                 }
             </a>
@@ -60,22 +61,22 @@ function drawUser(user, typeOfSearch=null) {
                 </a>
             </p>
 
-            <a class="follower-send-message" href="/messages/check/${user.user_pk}">Send message</a>
+            <a class="follower-send-message" href="/messages/check/${user.id}">Send message</a>
 
             ${typeOfSearch === "global" ?
                 !user.my_follower ?
                     (user.my_sub ?
-                        (`<a id="del-user" class="follower-block-user" onclick="unsubscribe('${user.user_pk}')">
+                        (`<a id="del-user" class="follower-block-user" onclick="unsubscribe('${user.id}')">
                             Unubscribe from user
                         </a>`) :
-                        (`<a id="subscribe" onclick="subscribe('${user.user_pk}')">
+                        (`<a id="subscribe" onclick="subscribe('${user.id}')">
                             Subscribe from user
                         </a>`))
                     :
-                    (`<a id="del-user" class="follower-block-user" onclick="blockUser('${user.user_pk}')">
+                    (`<a id="del-user" class="follower-block-user" onclick="blockUser('${user.id}')">
                         Block user
                     </a>`) :
-                (`<a id="del-user" class="follower-block-user" onclick="blockUser('${user.user_pk}')">
+                (`<a id="del-user" class="follower-block-user" onclick="blockUser('${user.id}')">
                     Block user
                 </a>`)
             }

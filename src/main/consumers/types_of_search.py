@@ -1,63 +1,32 @@
-from . import db_queries, services
+from . import db_queries
+
+from . import serializers
 
 
 class SearchForFollowers:
     """Search for followers"""
 
-    @staticmethod
-    def create_followers_list(followers) -> list:
-        """Create followers list"""
-
-        followers_list = []
-
-        for follower in followers:
-                followers_list.append(services.create_dict_of_user(follower.follower_id))
-        
-        return followers_list
-
     async def _followers_for_search(self, search_value: str, user_id: int) -> list:
         """Searching, processing and returning a list of followers"""
 
-        subs = await db_queries.followers_search(search_value, user_id)
-        sub_list = self.create_followers_list(subs)
-        return sub_list
+        followers = await db_queries.followers_search(search_value, user_id)
+        followers_list = serializers.FollowerSearchSerialazer(followers, many=True)
+        return followers_list.data
 
 
 class SearchForSubscriptions:
     """Search for subscriptions"""
 
-    @staticmethod
-    def create_sub_list(subs) -> list:
-        """Create sub list"""
-
-        sub_list = []
-
-        for sub in subs:
-                sub_list.append(services.create_dict_of_user(sub.subscription_id))
-        
-        return sub_list
-
     async def _subscriptions_for_search(self, search_value: str, user_id: int) -> list:
         """Searching, processing and returning a list of subscriptions"""
 
         subs = await db_queries.subs_search(search_value, user_id)
-        sub_list = self.create_sub_list(subs)
-        return sub_list
+        sub_list = serializers.SubscriptionsSearchSerialazer(subs, many=True)
+        return sub_list.data
 
 
 class GlobalSearch:
     """Global Search"""
-
-    @staticmethod
-    def create_user_list(users) -> list:
-        """Create user list"""
-
-        user_list = []
-
-        for user in users:
-                user_list.append(services.create_dict_of_user(user))
-        
-        return user_list
     
     @staticmethod
     def find_connections_from_global_search(global_users: list, subs: list, followers: list) -> None:
@@ -93,7 +62,7 @@ class GlobalSearch:
         """Searching, processing and returning a list of users"""
 
         global_users = await db_queries.users_search(search_value, user_id)
-        global_user_list = self.create_user_list(global_users)
+        global_user_list = serializers.UserSearchSerialazer(global_users, many=True).data
 
         if followers:
             self.find_connections_from_global_search(global_user_list, subs, followers)

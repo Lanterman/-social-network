@@ -4,7 +4,7 @@ import logging
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 
-from . import db_queries, mixins, services
+from . import db_queries, mixins, serializers
 from src.main.models import Comment
 
 
@@ -138,7 +138,7 @@ class SubscriptionConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
         elif data["event_type"] == "subscribe":
             await db_queries.create_follower_instance_by_sub_id(data["subscription_id"], self.user.id)
             new_sub = await db_queries.get_user_by_id(data["subscription_id"])
-            dict_of_user = services.create_dict_of_user(new_sub)
+            dict_of_user = serializers.UserSearchSerialazer(new_sub).data
             await self.send(text_data=json.dumps({"event_type": "subscribe", "new_sub": dict_of_user}))
 
         # search for subscriptions and global users search --- response exists
