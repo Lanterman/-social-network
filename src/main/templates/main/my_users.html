@@ -2,23 +2,15 @@
 
 {% block content %}
     <p class="user-title"><i class="fas fa-user-friends"></i> {{ title }}</p>
-    <div class="block">
-        <div class="search">
-            <h3 class="Content">{{ name }}</h3>
-            <div class="form">
-                <input id="search-input" type="search" name="search" class="input" required="">
-                <button class="buttonForm" onclick="search()">
-                    <span class="fa fa-search" aria-hidden="true"></span>
-                </button>
-            </div>
-        </div>
-    </div>
+
+    {% include 'main/include/search.html' %}
+    
     <div class="followers-block">
         {% if object_list %}
             {% for obj_user in object_list %}
                 {% include 'main/include/my_users.html' %}
             {% endfor %}
-        {% elif not object_list %}
+        {% else %}
             <p id="no-users"><i class="fas fa-ban"></i> No users!</p>
         {% endif %}
     </div>

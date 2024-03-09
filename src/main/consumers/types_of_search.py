@@ -3,13 +3,24 @@ from . import db_queries
 from . import serializers
 
 
+class SearchForPublications:
+    """Search for publications"""
+    
+    async def _search_for_publications(self, search_value: str) -> list:
+        """Searching, processing and returning a list of publications"""
+
+        publications = await db_queries.get_publications_by_search(search_value)
+        publications_list = serializers.PublicationSerialazer(publications, many=True)
+        return publications_list.data
+
+
 class SearchForFollowers:
     """Search for followers"""
 
-    async def _followers_for_search(self, search_value: str, user_id: int) -> list:
+    async def _search_for_followers(self, search_value: str, user_id: int) -> list:
         """Searching, processing and returning a list of followers"""
 
-        followers = await db_queries.followers_search(search_value, user_id)
+        followers = await db_queries.get_followers_search(search_value, user_id)
         followers_list = serializers.FollowerSearchSerialazer(followers, many=True)
         return followers_list.data
 
@@ -17,10 +28,10 @@ class SearchForFollowers:
 class SearchForSubscriptions:
     """Search for subscriptions"""
 
-    async def _subscriptions_for_search(self, search_value: str, user_id: int) -> list:
+    async def _search_for_subscriptions(self, search_value: str, user_id: int) -> list:
         """Searching, processing and returning a list of subscriptions"""
 
-        subs = await db_queries.subs_search(search_value, user_id)
+        subs = await db_queries.get_subs_search(search_value, user_id)
         sub_list = serializers.SubscriptionsSearchSerialazer(subs, many=True)
         return sub_list.data
 
@@ -58,10 +69,10 @@ class GlobalSearch:
              if user in subs:
                   user["my_sub"] = True
 
-    async def _global_users_search(self, search_value: str, user_id: int, subs: list, followers: list) -> list:
+    async def _search_for_global_users(self, search_value: str, user_id: int, subs: list, followers: list) -> list:
         """Searching, processing and returning a list of users"""
 
-        global_users = await db_queries.users_search(search_value, user_id)
+        global_users = await db_queries.get_users_search(search_value, user_id)
         global_user_list = serializers.UserSearchSerialazer(global_users, many=True).data
 
         if followers:

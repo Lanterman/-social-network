@@ -28,7 +28,6 @@ urlpatterns = [
     path("add-rating/", AddStarRating.as_view(), name='add_rating'),  # star_rating
 
     ### greacte with ws
-    path('p/', SearchPublished.as_view(), name='search_published'),  # news_search 
     path('g/', SearchGroups.as_view(), name='search_group'),  # group_search
     path('m/', SearchMessages.as_view(), name='search_messages'),  # search_messages
 ]

@@ -8,7 +8,33 @@ from . import db_queries, mixins, serializers
 from src.main.models import Comment
 
 
-class HomeConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
+class NewsPageConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
+    """
+    The consumer of the news page.
+    1. Search publications.
+    """
+
+    async def connect(self):
+        self.user = self.scope['user']
+        self.room_group_name = f'news_{self.user.id}'
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+    
+
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data)
+
+        # search for publications --- response exists
+        if data["event_type"] == "search":
+            publications = await self.search_for_publications(data["search_value"])
+            output_data= {'event_type': 'search', 'publications': publications, "user_id": self.user.id}
+            await self.send(text_data=json.dumps(output_data))
+
+
+class HomePageConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
     """
     The consumer of the home page.
     1. Confirm or cancel new subscribers.
@@ -41,7 +67,7 @@ class HomeConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
         
         # cancel follower (follower modal - announcement)
         elif data["event_type"] == "cancel_follower":
-            await db_queries.remove_follower_instance(data["follower_id"], self.user.id)
+            await db_queries.remove_follower_instance_by_follower_id(data["follower_id"], self.user.id)
         
         # remove follower (follower modal - old followers) --- response exists
         elif data["event_type"] == "remove_follower":
@@ -77,12 +103,12 @@ class FollowerConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
 
     async def connect(self):
         self.user = self.scope['user']
-        self.subs_group_name = f'{self.user.id}_subs'
-        await self.channel_layer.group_add(self.subs_group_name, self.channel_name)
+        self.room_group_name = f'{self.user.id}_follower'
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.subs_group_name, self.channel_name)
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     
 
     async def receive(self, text_data=None, bytes_data=None):
@@ -102,9 +128,9 @@ class FollowerConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
 
         # search for subscriptions and global users search --- response exists
         elif data["event_type"] == "search":
-            my_subs = await self.subscriptions_for_search(data["search_value"], self.user.id)
-            my_followers = await self.followers_for_search(data["search_value"], self.user.id)
-            global_users = await self.global_users_search(data["search_value"], self.user.id, my_subs, my_followers)
+            my_subs = await self.search_for_subscriptions(data["search_value"], self.user.id)
+            my_followers = await self.search_for_followers(data["search_value"], self.user.id)
+            global_users = await self.search_for_global_users(data["search_value"], self.user.id, my_subs, my_followers)
             await self.send(text_data=json.dumps(
                 {'event_type': 'search', 'my_followers': my_followers, "global_users": global_users})
             )
@@ -119,12 +145,12 @@ class SubscriptionConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
 
     async def connect(self):
         self.user = self.scope['user']
-        self.subs_group_name = f'{self.user.id}_subs'
-        await self.channel_layer.group_add(self.subs_group_name, self.channel_name)
+        self.room_group_name = f'{self.user.id}_sub'
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.subs_group_name, self.channel_name)
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     
 
     async def receive(self, text_data=None, bytes_data=None):
@@ -141,11 +167,37 @@ class SubscriptionConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
             dict_of_user = serializers.UserSearchSerialazer(new_sub).data
             await self.send(text_data=json.dumps({"event_type": "subscribe", "new_sub": dict_of_user}))
 
-        # search for subscriptions and global users search --- response exists
+        # search for subscriptions and global users --- response exists
         elif data["event_type"] == "search":
-            my_subs = await self.subscriptions_for_search(data["search_value"], self.user.id)
-            global_users = await self.global_users_search(data["search_value"], self.user.id, my_subs)
+            my_subs = await self.search_for_subscriptions(data["search_value"], self.user.id)
+            global_users = await self.search_for_global_users(data["search_value"], self.user.id, my_subs)
             await self.send(text_data=json.dumps({'event_type': 'search', 'my_subs': my_subs, "global_users": global_users}))
+
+
+class GroupsPageConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
+    """
+    The consumer of the groups page.
+    1. Search groups.
+    """
+
+    async def connect(self):
+        self.user = self.scope['user']
+        self.room_group_name = f'groups_{self.user.id}'
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+    
+
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data)
+
+        # search for publications --- response exists
+        if data["event_type"] == "search":
+            publications = await self.search_for_publications(data["search_value"])
+            output_data= {'event_type': 'search', 'publications': publications, "user_id": self.user.id}
+            await self.send(text_data=json.dumps(output_data))
 
 
 class ChatConsumer(AsyncWebsocketConsumer):

@@ -119,6 +119,9 @@ function search() {
     html_message.reportValidity();
 
     if (html_message.value) {
+        const baseURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        history.pushState(null, null, `${baseURL}?search=${html_message.value}`);
+        
         subscriptionSocket.send(JSON.stringify({
             'event_type': "search",
             'search_value': html_message.value,

@@ -1,9 +1,9 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-    <div class="search">
-        {% include 'main/include/search.html' %}
-    </div>
+    <p class="user-title"><i class="fas fa-user-friends"></i> {{ title }}</p>
+    
+    {% include 'main/include/search.html' %}
     {% include 'main/include/average_value.html' %}
     {{ block.super }}
 {% endblock content %}
@@ -13,3 +13,7 @@
 {% include 'main/include/aside.html' %}
 
 {% endblock groups %}
+
+{% block script %}
+    <script src="/static/main/js/news_page.js"></script>
+{% endblock script %}

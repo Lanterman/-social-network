@@ -11,25 +11,15 @@
 
     <br><br>
 
-    <div class="block" id="search">
-        <div class="search">
-            {% include 'main/include/search.html' %}
-        </div>
-    </div>
+    {% include 'main/include/search.html' %}
 
     <div class="block-group-list" id="blockGroupList">
         {% if groups %}
             {% for group in groups %}
                 {% include 'main/include/group_include.html' %}
             {% endfor %}
-        {% endif %}
-        {% if global %}
-            <p class="global-search"><span id="global-search-name">Global search</span></p>
-            {% for group in global %}
-                {% include 'main/include/group_include.html' %}
-            {% endfor %}
-        {% elif not global and not groups %}
-            <p id="no-instances"><i class="fas fa-ban"></i> {{ empty|default:"You do not have your own groups or groups that you are subscribed to!" }}</p>
+        {% else %}
+            <p id="no-instances"><i class="fas fa-ban"></i> "You do not have your own groups or groups that you are subscribed to!"</p>
         {% endif %}
     </div>
 
@@ -38,3 +28,7 @@
 {% block groups %}
     {% include 'main/include/aside.html' %}
 {% endblock groups %}
+
+{% block script %}
+    <script src="/static/main/js/groups_page.js"></script>
+{% endblock script %}

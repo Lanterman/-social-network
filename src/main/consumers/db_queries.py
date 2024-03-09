@@ -1,9 +1,10 @@
 import logging
 
-from django.db.models import Q
+from django.db.models import Q, Avg
 from channels.db import database_sync_to_async
 
 from src.users.models import Follower, User
+from src.main.models import Publication, Group
 
 
 @database_sync_to_async
@@ -13,6 +14,7 @@ def get_user_by_id(user_id: int) -> User:
     return User.objects.get(id=user_id)
 
 
+# Follower activity
 @database_sync_to_async
 def confirm_follower(follower_id: int, user_id: int) -> None:
     """Confirm follower"""
@@ -51,9 +53,21 @@ def remove_follower_instance_by_sub_id(subscription_id: int, user_id: int) -> No
     Follower.objects.filter(follower_id__id=user_id, subscription_id__id=subscription_id).delete()
 
 
+# All types of search
 @database_sync_to_async
-def followers_search(search_value: str, user_id: int) -> tuple:
-    """Followers search"""
+def get_publications_by_search(search_value: str) -> list:
+    """Get publications by search"""
+
+    query = Publication.objects.filter(
+            Q(name__icontains=search_value) | Q(owner__username__icontains=search_value)
+        ).select_related('owner').annotate(rat=Avg('rating__star_id'))
+    
+    return list(query)    
+
+
+@database_sync_to_async
+def get_followers_search(search_value: str, user_id: int) -> list:
+    """Get followers by search"""
 
     query = Follower.objects.filter(
             Q(follower_id__username__icontains=search_value, subscription_id__id=user_id) |
@@ -65,8 +79,8 @@ def followers_search(search_value: str, user_id: int) -> tuple:
 
 
 @database_sync_to_async
-def subs_search(search_value: str, user_id: int) -> tuple:
-    """Subscriptions search"""
+def get_subs_search(search_value: str, user_id: int) -> list:
+    """Get subscriptions by search"""
 
     query = Follower.objects.filter(
             Q(subscription_id__username__icontains=search_value, follower_id__id=user_id) |
@@ -78,8 +92,8 @@ def subs_search(search_value: str, user_id: int) -> tuple:
 
 
 @database_sync_to_async
-def users_search(search_value: str, user_id: int) -> tuple:
-    """Users search"""
+def get_users_search(search_value: str, user_id: int) -> list:
+    """Get user by search"""
 
     query = User.objects.exclude(id=user_id).filter(
             Q(username__icontains=search_value) | 

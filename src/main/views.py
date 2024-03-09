@@ -15,7 +15,7 @@ from src.main.utils import *
 from src.users.models import User, Follower, Chat, Message
 
 
-class NewsView(ListView): ### Search groups with ws
+class NewsView(ListView):
     """News page endpoint"""
 
     template_name = 'main/index.html'
@@ -24,10 +24,9 @@ class NewsView(ListView): ### Search groups with ws
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
-        context['title'] = 'Новости'
+        context['title'] = 'News'
         context['object'] = self.object
         context['name'] = 'Search for publications'
-        context['act'] = 'search_published'
         return context
 
     def get(self, request, *args, **kwargs):
@@ -196,7 +195,6 @@ class FollowersView(DataMixin, SingleObjectMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'My followers'
-        context['act'] = 'search_followers'
         context['name'] = 'Search followers'
         context['object'] = self.object
         return context | self.get_context()
@@ -226,7 +224,6 @@ class SubscriptionsView(DataMixin, SingleObjectMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'My subscriptions'
-        context['act'] = 'search_subscriptions'
         context['name'] = 'Search users'
         context['object'] = self.object
         return context | self.get_context()
@@ -265,7 +262,6 @@ class GroupsView(DataMixin, ListView): ### Search groups with ws
         context['title'] = 'My groups'
         context['object'] = self.object
         context['name'] = 'Search for groups'
-        context['act'] = 'search_group'
         return context | self.get_context()
 
     def get_queryset(self):
@@ -470,22 +466,6 @@ class AddStarRating(View):
             return HttpResponse(status=201)
         else:
             return HttpResponse(status=400)
-
-
-class SearchPublished(NewsView): ### ws
-    """Search for publications by name or owner username"""
-
-    def get_queryset(self):
-        return Publication.objects.filter(
-            Q(name__icontains=self.request.GET.get('search')) |
-            Q(owner__username__icontains=self.request.GET.get('search'))
-        ).select_related('owner').annotate(rat=Avg('rating__star_id')).order_by('-date')
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет записей соответствующих запросу!'
-        context['search'] = f'search={self.request.GET.get("search")}&'
-        return context
 
 
 class SearchGroups(GroupsView): ### ws

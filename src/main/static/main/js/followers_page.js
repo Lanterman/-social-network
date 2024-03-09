@@ -45,7 +45,6 @@ function noResponseToSearch(followersBlock) {
 
 // extra function
 function drawUser(user, typeOfSearch=null) {
-    console.log(user)
     return (`
         <div class="follower-block" id="sub_${user.id}">
             <a id='follower-url' href="${user.user_url}">
@@ -130,6 +129,9 @@ function search() {
     html_message.reportValidity();
 
     if (html_message.value) {
+        const baseURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        history.pushState(null, null, `${baseURL}?search=${html_message.value}`);
+
         followerSocket.send(JSON.stringify({
             'event_type': "search",
             'search_value': html_message.value,

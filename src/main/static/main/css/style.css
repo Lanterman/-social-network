@@ -848,7 +848,8 @@ color: blue;
 }
 
 .user-title{
-    margin: 50px 40% 80px 40%;
+    margin: 30px 20% 50px 0px;
+    text-align: center;
     font-size: 28px;
 }
 
