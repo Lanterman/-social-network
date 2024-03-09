@@ -96,7 +96,7 @@ class HomePageConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
 
 class FollowerConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
     """
-    The consumer of the home page.
+    The consumer of the follower page.
     1. Block and subscribe user.
     2. Search my followers and global users.
     """
@@ -138,7 +138,7 @@ class FollowerConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
 
 class SubscriptionConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
     """
-    The consumer of the home page.
+    The consumer of the subscriptions page.
     1. Unsubscribe and subscribe user.
     2. Search my subscribers and global users.
     """
@@ -193,10 +193,16 @@ class GroupsPageConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
 
-        # search for publications --- response exists
+        # search for groups and global groups --- response exists
         if data["event_type"] == "search":
-            publications = await self.search_for_publications(data["search_value"])
-            output_data= {'event_type': 'search', 'publications': publications, "user_id": self.user.id}
+            my_groups = await self.search_for_groups(data["search_value"], self.user.id)
+            global_groups = await self.search_for_global_groups(data["search_value"])
+            output_data = {
+                'event_type': 'search', 
+                'my_groups': my_groups, 
+                "global_groups": global_groups, 
+                "user_id": self.user.id
+            }
             await self.send(text_data=json.dumps(output_data))
 
 

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from rest_framework.serializers import ModelSerializer
 
-from src.main.models import Publication
+from src.main.models import Publication, Group
 from src.users.models import User
 
 
@@ -111,3 +111,18 @@ class SubscriptionsSearchSerialazer(UserSearchSerialazer):
     
     def to_representation(self, instance):
         return super().to_representation(instance.subscription_id)
+
+
+class GroupsSearchSerialazer(ModelSerializer):
+    """The group serializer is designed to convert groups to display in search"""
+
+    class Meta:
+        model = Group
+        fields = ("id", "name", "photo", "owner", "followers")
+    
+    def to_representation(self, instance):
+        instance.name = instance.name.title()
+
+        ret = super().to_representation(instance)
+        ret["group_url"] = instance.get_absolute_url()
+        return ret

@@ -55,8 +55,8 @@ def remove_follower_instance_by_sub_id(subscription_id: int, user_id: int) -> No
 
 # All types of search
 @database_sync_to_async
-def get_publications_by_search(search_value: str) -> list:
-    """Get publications by search"""
+def get_publications_using_search(search_value: str) -> list:
+    """Get publications using search"""
 
     query = Publication.objects.filter(
             Q(name__icontains=search_value) | Q(owner__username__icontains=search_value)
@@ -66,8 +66,8 @@ def get_publications_by_search(search_value: str) -> list:
 
 
 @database_sync_to_async
-def get_followers_search(search_value: str, user_id: int) -> list:
-    """Get followers by search"""
+def get_followers_using_search(search_value: str, user_id: int) -> list:
+    """Get followers using search"""
 
     query = Follower.objects.filter(
             Q(follower_id__username__icontains=search_value, subscription_id__id=user_id) |
@@ -79,8 +79,8 @@ def get_followers_search(search_value: str, user_id: int) -> list:
 
 
 @database_sync_to_async
-def get_subs_search(search_value: str, user_id: int) -> list:
-    """Get subscriptions by search"""
+def get_subs_using_search(search_value: str, user_id: int) -> list:
+    """Get subscriptions using search"""
 
     query = Follower.objects.filter(
             Q(subscription_id__username__icontains=search_value, follower_id__id=user_id) |
@@ -92,8 +92,8 @@ def get_subs_search(search_value: str, user_id: int) -> list:
 
 
 @database_sync_to_async
-def get_users_search(search_value: str, user_id: int) -> list:
-    """Get user by search"""
+def get_users_using_search(search_value: str, user_id: int) -> list:
+    """Get user using search"""
 
     query = User.objects.exclude(id=user_id).filter(
             Q(username__icontains=search_value) | 
@@ -101,4 +101,22 @@ def get_users_search(search_value: str, user_id: int) -> list:
             Q(last_name__icontains=search_value)
         )[:10]
     
+    return list(query)
+
+
+@database_sync_to_async
+def get_groups_using_search(search_value: str, user_id: int) -> list:
+    """Get my groups and groups that I follow using search"""
+
+    query = Group.objects.filter(Q(followers__pk=user_id) | Q(owner__pk=user_id)).filter(
+        name__icontains=search_value).prefetch_related('followers').distinct()
+    
+    return list(query)
+
+
+@database_sync_to_async
+def get_global_groups_using_search(search_value: str) -> list:
+    """Get global groups using search"""
+
+    query = Group.objects.filter(name__icontains=search_value).prefetch_related('followers')
     return list(query)

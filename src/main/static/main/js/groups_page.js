@@ -16,24 +16,25 @@ groupsPageSocket.onmessage = function(e) {
     console.log(data);
 
     if (data["event_type"] === "search") {
-        document.getElementsByClassName("nav")[0]?.remove();
-        const publicationsBlock = document.getElementsByClassName("publications-block")[0];
-        publicationsBlock.innerHTML = "";
+        const groupsBlock = document.getElementsByClassName("block-group-list")[0];
+        groupsBlock.innerHTML = "";
+
+        responseToSearch(data["user_id"], data["my_groups"], groupsBlock);
+        groupsBlock.innerHTML += '<p class="global-search"><span id="global-search-name">Global search</span></p>';
         
-        if (data["publications"].length) {
-            responseToSearch(data["user_id"], data["publications"], publicationsBlock);
-            console.log("ok")
+        if (data["global_groups"].length) {
+            responseToSearch(data["user_id"], data["global_groups"], groupsBlock);
         } else {
-            noResponseToSearch(publicationsBlock);
+            noResponseToSearch(groupsBlock);
         };
     };
 };
 
 
 // event types logic of onmessage
-function responseToSearch(user_id, publications, publicationsBlock) {
-    Object.values(publications).forEach((publication) => {
-        publicationsBlock.innerHTML += drawPublication(publication, user_id)
+function responseToSearch(user_id, groups, groupsBlock) {
+    Object.values(groups).forEach((group) => {
+        groupsBlock.innerHTML += drawGroup(group, user_id)
     });
 };
 
@@ -48,51 +49,25 @@ function noResponseToSearch(publicationsBlock) {
 
 
 // extra function
-function drawPublication(publication, user_id) {
+function drawGroup(group, user_id) {
 
     return (`
-        <div class="p publicationBlock" id="publicationBlock_${publication.id}">
-            <a class="a1" href="${publication.publication_url}">${publication.name}</a>
-
-            ${publication.owner.id === user_id ?
-                (`<a class="pub_menu" id="del" onclick="delete_publication(${publication.id})">
-                    <i class="fas fa-backspace"></i>
-                </a>
-                <a class="pub_menu" href="/groups/${publication.slug}/update_pub/">
-                    <i class="fas fa-pen"></i>
-                </a>`) :
-                ""
-            }
+        <div class="block-include-group" id="groupBlock_${group.id}">
+            <a href="${group.group_url}"><img src="${group.photo}"></a>
             
-            <pre>${publication.date}</pre>
+            <p class="group_margin">
+                <a href="${group.group_url}">
+                    <i>${group.name}</i>
+                </a>
+            </p>
 
-            <safescript>
-            <p id="ap">${publication.biography}</p>
-            </safescript>
+            <a class="del" id="leave_the_group" onclick="leave_the_group(${group.id})">
+                ${group.followers.includes(user_id) ? '<i class="fas fa-backspace"></i>' : ''}
+            </a>
 
-            ${publication.photo ? `<img src="${publication.photo}" alt="photo"><br><br>` : ""}
-
-            <p id="pub-bottom-info">
-                <span class="pub-bottom-item">
-                    <b class="rating-label">User rating:</b>
-                    ${publication.rating ?
-                        `<span class="editContent">${publication.rating} / 5.0</span>` :
-                        `<span class="editContent">None</span>`
-                    }
-                </span>
-
-                <span class="pub-bottom-item">
-                    <i>
-                        <a class="pub-comments" href="/publish/${publication.slug}/comments/">
-                        <i class="fas fa-comments"></i> Comments</a>
-                    </i>
-                </span>
-
-                <span id="block-owner" class="pub-bottom-item">Author:
-                    <a class="pub-owner" href="${publication.owner.user_url}" title="Owner">
-                        <i>${publication.owner.username}</i>
-                    </a>
-                </span>
+            <p class="group_us">
+                <span>Followers: ${group.followers.length}</span>
+                ${user_id === group.owner ? '<span class="block-my-group">My group</span>' : ""}
             </p>
         </div>
     `);

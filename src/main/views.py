@@ -243,7 +243,7 @@ class SubscriptionsView(DataMixin, SingleObjectMixin, ListView):
         return self.subs
 
 
-class GroupsView(DataMixin, ListView): ### Search groups with ws
+class GroupsView(DataMixin, ListView):
     """User groups page"""
 
     template_name = 'main/groups.html'
@@ -466,20 +466,6 @@ class AddStarRating(View):
             return HttpResponse(status=201)
         else:
             return HttpResponse(status=400)
-
-
-class SearchGroups(GroupsView): ### ws
-    """Search for groups by name"""
-
-    def get_queryset(self):
-        return self.group.filter(name__icontains=self.request.GET.get('search'))
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет групп соответствующих запросу!'
-        context['global'] = Group.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related(
-            'users')
-        return context
 
 
 class SearchMessages(MessagesView):  # Убрать из members текущего пользователя(из запроса, а не базы данных) ### ws

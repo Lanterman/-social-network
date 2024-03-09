@@ -22,12 +22,9 @@ urlpatterns = [
     path('groups/<int:pub_id>/del_publication/', delete_publication, name='delete_publication'),  # delete publication
     path('groups/<slug:group_slug>/update_group/', UpdateGroup.as_view(), name='update_group'),  # update group
     path('groups/<slug:pub_slug>/update_pub/', UpdatePublished.as_view(), name='update_pub'),  # update published
-
-    ###
     path('groups/<int:group_id>/group_activity/', group_activity, name='group_activity'),  # group activity
     path("add-rating/", AddStarRating.as_view(), name='add_rating'),  # star_rating
 
     ### greacte with ws
-    path('g/', SearchGroups.as_view(), name='search_group'),  # group_search
     path('m/', SearchMessages.as_view(), name='search_messages'),  # search_messages
 ]

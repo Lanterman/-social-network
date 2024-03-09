@@ -16,6 +16,7 @@ function delete_publication(publicationID) {
 function leave_the_group(groupID) {
     if (confirm('Do you really want to leave the group?')) {
         document.getElementById(`groupBlock_${groupID}`).remove();
+        document.getElementById(`groupBlock_${groupID}`)?.remove();
 
         if (!document.getElementsByClassName("block-include-group").length) {
             document.getElementById("blockGroupList").innerHTML = `

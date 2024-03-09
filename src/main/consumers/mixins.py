@@ -2,7 +2,7 @@ import logging
 
 from channels.db import database_sync_to_async
 
-from src.users.models import Follower, User
+from src.users.models import User
 from . import types_of_search, serializers
 
 
@@ -18,7 +18,9 @@ class ConfirmFollower:
 class AllTypesOfSearch(types_of_search.SearchForPublications,
                        types_of_search.SearchForFollowers,
                        types_of_search.SearchForSubscriptions,
-                       types_of_search.GlobalSearch):
+                       types_of_search.GlobalSearchForUser,
+                       types_of_search.SearchForGroups,
+                       types_of_search.GlobalSearchForGroups):
     """
     All types of search:
       1. Search publications  +
@@ -26,7 +28,8 @@ class AllTypesOfSearch(types_of_search.SearchForPublications,
       3. Search followers     +
       4. Search subscriptions +
       5. Global search users  +
-      5. Search groups
+      5. Search groups        +
+      6. Global search groups +
     """
 
     async def search_for_publications(self, search_value: str) -> list:
@@ -48,3 +51,13 @@ class AllTypesOfSearch(types_of_search.SearchForPublications,
         """Search for global user"""
 
         return await self._search_for_global_users(search_value, user_id, subs, followers)
+    
+    async def search_for_groups(self, search_value: str, user_id: int) -> list:
+        """Search for groups"""
+
+        return await self._search_for_groups(search_value, user_id)
+    
+    async def search_for_global_groups(self, search_value: str) -> list:
+        """Search for globalgroups"""
+
+        return await self._search_for_global_groups(search_value)

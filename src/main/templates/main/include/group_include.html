@@ -8,7 +8,7 @@
     </p>
 
     <a class="del" id="leave_the_group" onclick="leave_the_group('{{group.id}}')">
-        {% if request.user.id != group.owner_id %}
+        {% if request.user in group.followers.all %}
             <i class="fas fa-backspace"></i>
         {% endif %}
     </a>

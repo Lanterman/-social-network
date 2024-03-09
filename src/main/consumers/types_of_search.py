@@ -9,7 +9,7 @@ class SearchForPublications:
     async def _search_for_publications(self, search_value: str) -> list:
         """Searching, processing and returning a list of publications"""
 
-        publications = await db_queries.get_publications_by_search(search_value)
+        publications = await db_queries.get_publications_using_search(search_value)
         publications_list = serializers.PublicationSerialazer(publications, many=True)
         return publications_list.data
 
@@ -20,7 +20,7 @@ class SearchForFollowers:
     async def _search_for_followers(self, search_value: str, user_id: int) -> list:
         """Searching, processing and returning a list of followers"""
 
-        followers = await db_queries.get_followers_search(search_value, user_id)
+        followers = await db_queries.get_followers_using_search(search_value, user_id)
         followers_list = serializers.FollowerSearchSerialazer(followers, many=True)
         return followers_list.data
 
@@ -31,13 +31,13 @@ class SearchForSubscriptions:
     async def _search_for_subscriptions(self, search_value: str, user_id: int) -> list:
         """Searching, processing and returning a list of subscriptions"""
 
-        subs = await db_queries.get_subs_search(search_value, user_id)
+        subs = await db_queries.get_subs_using_search(search_value, user_id)
         sub_list = serializers.SubscriptionsSearchSerialazer(subs, many=True)
         return sub_list.data
 
 
-class GlobalSearch:
-    """Global Search"""
+class GlobalSearchForUser:
+    """Global Search for users"""
     
     @staticmethod
     def find_connections_from_global_search(global_users: list, subs: list, followers: list) -> None:
@@ -72,7 +72,7 @@ class GlobalSearch:
     async def _search_for_global_users(self, search_value: str, user_id: int, subs: list, followers: list) -> list:
         """Searching, processing and returning a list of users"""
 
-        global_users = await db_queries.get_users_search(search_value, user_id)
+        global_users = await db_queries.get_users_using_search(search_value, user_id)
         global_user_list = serializers.UserSearchSerialazer(global_users, many=True).data
 
         if followers:
@@ -80,4 +80,26 @@ class GlobalSearch:
         else:
             self.find_subs_from_global_search(global_user_list, subs)
 
+        return global_user_list
+
+
+class SearchForGroups:
+    """Search for my groups and groups that I follow"""
+
+    async def _search_for_groups(self, search_value: str, user_id: int) -> list:
+        """Searching, processing and returning a list of groups"""
+
+        groups = await db_queries.get_groups_using_search(search_value, user_id)
+        group_list = serializers.GroupsSearchSerialazer(groups, many=True).data
+        return group_list
+
+
+class GlobalSearchForGroups:
+    """Global Search for groups"""
+
+    async def _search_for_global_groups(self, search_value: str) -> list:
+        """Searching, processing and returning a list of users"""
+
+        global_users = await db_queries.get_global_groups_using_search(search_value)
+        global_user_list = serializers.GroupsSearchSerialazer(global_users, many=True).data
         return global_user_list
