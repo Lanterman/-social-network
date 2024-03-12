@@ -4,12 +4,10 @@
 
 {% block content %}
     <p class="user-title"><i class="fas fa-user-friends"></i> {{ title }}</p>
-    <div class="block">
-        <div class="search">
-            {% include 'main/include/search.html' %}
-        </div>
-    </div>
-    <div id="block-chats">
+
+    {% include 'main/include/search.html' %}
+
+    <div id="block-chats" class="messengersBlock">
         {% for chat in chats %}
             <div class="chat">
                 {% if chat.set_mes %}
@@ -34,16 +32,14 @@
                                 {% endif %}
                             {% endfor %}
                             <p class="{% if not last_message.is_readed %}unreaded{% else %}block-last_messages{% endif %}" id="last_messages">
-                                {% autoescape off %}
-                                    {% if last_message.author_id.id == user.pk %}
-                                        <i class="last_messages">
-                                            <span class="my-message">Вы:</span> 
-                                            {{ last_message|linebreaksbr|safe|truncatechars_html:66|replace_html:"<br>" }}
-                                        </i>
-                                    {% else %}
-                                        <i class="last_messages">{{ last_message|linebreaksbr|safe|truncatechars_html:60|replace_html:"<br>" }}</i>
-                                    {% endif %}
-                                {% endautoescape %}
+                                {% if last_message.author_id.id == user.pk %}
+                                    <i class="last_messages">
+                                        <span class="my-message">Вы:</span> 
+                                        {{ last_message|linebreaksbr|safe|truncatechars_html:80|replace_html:"<br>" }}
+                                    </i>
+                                {% else %}
+                                    <i class="last_messages">{{ last_message|linebreaksbr|safe|truncatechars_html:80|replace_html:"<br>" }}</i>
+                                {% endif %}
                             </p>
                         </a>
                     {% endwith %}
@@ -58,3 +54,7 @@
 {% block groups %}
     {% include 'main/include/aside.html' %}
 {% endblock groups %}
+
+{% block script %}
+    <script src="/static/main/js/messengers_page.js"></script>
+{% endblock script %}

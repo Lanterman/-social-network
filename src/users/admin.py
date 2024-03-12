@@ -2,6 +2,10 @@ from django.contrib import admin
 
 from src.users.models import User, Follower, Chat, Message
 
+# Inline Message model to ChatAdmin (ability to instantiate Message model for ChatAdmin)
+class MessageInline(admin.TabularInline):
+    model = Message
+
 
 @admin.register(User)
 class UsersAdmin(admin.ModelAdmin):
@@ -39,6 +43,7 @@ class FollowerAdmin(admin.ModelAdmin):
 class ChatAdmin(admin.ModelAdmin):
     raw_id_fields = ('members',)
     fields = ('members',)
+    inlines = [MessageInline]
 
 
 @admin.register(Message)

@@ -117,7 +117,7 @@ class HomeView(DataMixin, UpdateView):
         return context | self.get_context()
 
 
-class MessagesView(DataMixin, ListView): # ---
+class MessagesView(DataMixin, ListView):
     """User messages page"""
 
     context_object_name = 'chats'
@@ -466,18 +466,3 @@ class AddStarRating(View):
             return HttpResponse(status=201)
         else:
             return HttpResponse(status=400)
-
-
-class SearchMessages(MessagesView):  # Убрать из members текущего пользователя(из запроса, а не базы данных) ### ws
-    """Search for messages by last name or first name of members"""
-
-    def get_queryset(self):
-        return self.chats.filter(
-            Q(members__first_name__icontains=self.request.GET.get('search')) |
-            Q(members__last_name__icontains=self.request.GET.get('search'))
-        ).distinct()
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет диалогов соответствующих запросу!'
-        return context

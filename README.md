@@ -35,8 +35,7 @@ Work for the future
 
 1. Correct views (logic functions)
 2. Correct Consumers
-3. Include searchs to Consumers
-4. Попробовать сделать вывод списков записей с помощью докачки в js, т.е. если дошел до конца списка - получить следующие с помощью запроса к бекенду
+3. Попробовать сделать вывод списков записей с помощью докачки в js, т.е. если дошел до конца списка - получить следующие с помощью запроса к бекенду
 4. Correct celery tasks
 5. Include django_filter, coresheaders, drf_yasg
 6. Set up user JWTTokens

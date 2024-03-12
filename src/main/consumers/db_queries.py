@@ -1,9 +1,9 @@
 import logging
 
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, Prefetch,Count
 from channels.db import database_sync_to_async
 
-from src.users.models import Follower, User
+from src.users.models import Follower, User, Chat, Message
 from src.main.models import Publication, Group
 
 
@@ -64,6 +64,20 @@ def get_publications_using_search(search_value: str) -> list:
     
     return list(query)    
 
+
+@database_sync_to_async
+def get_chats_using_search(search_value: str, user_id: int) -> list:
+    """Get chats using search"""
+    
+    query = Chat.objects.filter(members=user_id).prefetch_related(
+        'message_set',
+        Prefetch('members', queryset= User.objects.exclude(id=user_id))
+        ).filter(
+            Q(members__first_name__icontains=search_value) |
+            Q(members__last_name__icontains=search_value)
+        ).annotate(count_mes=Count("message_set")).filter(count_mes__gt=0).distinct()
+    
+    return list(query)
 
 @database_sync_to_async
 def get_followers_using_search(search_value: str, user_id: int) -> list:

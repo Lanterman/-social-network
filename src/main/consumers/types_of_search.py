@@ -10,8 +10,19 @@ class SearchForPublications:
         """Searching, processing and returning a list of publications"""
 
         publications = await db_queries.get_publications_using_search(search_value)
-        publications_list = serializers.PublicationSerialazer(publications, many=True)
+        publications_list = serializers.PublicationSearchSerialazer(publications, many=True)
         return publications_list.data
+
+
+class SearchForChats:
+    """Search for chats"""
+    
+    async def _search_for_messengers(self, search_value: str, user_id: int) -> list:
+        """Searching, processing and returning a list of chats"""
+
+        chats = await db_queries.get_chats_using_search(search_value, user_id)
+        chats_list = serializers.ChatSearchSerialazer(chats, many=True)
+        return chats_list.data
 
 
 class SearchForFollowers:

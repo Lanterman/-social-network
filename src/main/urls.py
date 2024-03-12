@@ -24,7 +24,4 @@ urlpatterns = [
     path('groups/<slug:pub_slug>/update_pub/', UpdatePublished.as_view(), name='update_pub'),  # update published
     path('groups/<int:group_id>/group_activity/', group_activity, name='group_activity'),  # group activity
     path("add-rating/", AddStarRating.as_view(), name='add_rating'),  # star_rating
-
-    ### greacte with ws
-    path('m/', SearchMessages.as_view(), name='search_messages'),  # search_messages
 ]

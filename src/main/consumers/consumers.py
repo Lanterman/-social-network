@@ -94,6 +94,32 @@ class HomePageConsumer(AsyncWebsocketConsumer, mixins.ConfirmFollower):
             await db_queries.remove_follower_instance_by_follower_id(data["user_id"], self.user.id)
 
 
+class MessengersPageConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
+    """
+    The consumer of the messengers page.
+    1. Search chats.
+    """
+
+    async def connect(self):
+        self.user = self.scope['user']
+        self.room_group_name = f'messengers_{self.user.id}'
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+    
+
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data)
+
+        # search for publications --- response exists
+        if data["event_type"] == "search":
+            chats = await self.search_for_messengers(data["search_value"], self.user.id)
+            output_data= {'event_type': 'search', 'chats': chats, "user_id": self.user.id}
+            await self.send(text_data=json.dumps(output_data))
+
+
 class FollowerConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearch):
     """
     The consumer of the follower page.
