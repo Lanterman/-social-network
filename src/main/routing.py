@@ -10,5 +10,5 @@ websocket_urlpatterns = [
     path('ws/followers/', consumers.FollowerConsumer.as_asgi()),
     path('ws/subscriptions/', consumers.SubscriptionConsumer.as_asgi()),
     path('ws/groups/', consumers.GroupsPageConsumer.as_asgi()),
-    path('ws/publish/<publication_id>/comments/', consumers.CommentConsumer.as_asgi()),
+    path('ws/publication/<publication_id>/comments/', consumers.CommentConsumer.as_asgi()),
 ]

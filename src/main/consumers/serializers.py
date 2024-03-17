@@ -2,7 +2,7 @@ from datetime import datetime
 
 from rest_framework.serializers import ModelSerializer
 
-from src.main.models import Publication, Group
+from src.main.models import Publication, Group, Comment
 from src.users.models import User, Chat, Message
 
 
@@ -47,6 +47,20 @@ class UserForPublication(ModelSerializer):
         return ret
 
 
+class UserForCommentOfPub(ModelSerializer):
+    """The user serializator for a publication (CommentOfPublicationSerializer)"""
+
+    class Meta:
+        model = User
+        fields = ["id", "username"]
+    
+    def to_representation(self, instance):
+        instance.username = FormattingClass.get_short_field_value(instance.username, 200)
+        ret = super().to_representation(instance)
+        ret["url"] = instance.get_absolute_url()
+        return ret
+
+
 class MemberForChatSerialazer(ModelSerializer):
     """The member for chat serializer for chat (ChatSearchSerializer)"""
 
@@ -58,6 +72,27 @@ class MemberForChatSerialazer(ModelSerializer):
         ret = super().to_representation(instance)
         ret["user_full_name"] = FormattingClass.get_formatted_user_full_name(instance.get_full_name(), 40)
         ret["user_url"] = instance.get_absolute_url()
+        return ret
+
+
+class AuthorForChatMessageSerialazer(ModelSerializer):
+    """The author for chat message serializer"""
+
+    class Meta:
+        model = User
+        fields = ("id", "photo")
+    
+    @staticmethod
+    def get_author_name(instance: User) -> str:
+        """Get an author name"""
+
+        author_name = instance.get_full_name() or instance.username
+        return FormattingClass.get_short_field_value(author_name, 50)
+    
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret["name"] = self.get_author_name(instance)
+        ret["url"] = instance.get_absolute_url()
         return ret
 
 
@@ -86,6 +121,17 @@ class ConfirmFollowerSerialazer(ModelSerializer):
         ret["user_full_name"] = FormattingClass.get_formatted_user_full_name(instance.get_full_name())
         ret["user_url"] = instance.get_absolute_url()
         return ret
+
+
+# A serialzier for a comments of publication page
+class CommentOfPublicationSerializer(ModelSerializer):
+    """the serializer is designed to convert the comment of publication"""
+
+    users = UserForCommentOfPub()
+
+    class Meta:
+        model = Comment
+        fields = ("id", "biography", "users")
 
 
 # All types of search serializers

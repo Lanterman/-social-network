@@ -3,7 +3,7 @@ from . import db_queries
 from . import serializers
 
 
-class SearchForPublications:
+class SearchForPublicationsMixin:
     """Search for publications"""
     
     async def _search_for_publications(self, search_value: str) -> list:
@@ -14,7 +14,7 @@ class SearchForPublications:
         return publications_list.data
 
 
-class SearchForChats:
+class SearchForChatsMixin:
     """Search for chats"""
     
     async def _search_for_messengers(self, search_value: str, user_id: int) -> list:
@@ -25,7 +25,7 @@ class SearchForChats:
         return chats_list.data
 
 
-class SearchForFollowers:
+class SearchForFollowersMixin:
     """Search for followers"""
 
     async def _search_for_followers(self, search_value: str, user_id: int) -> list:
@@ -36,7 +36,7 @@ class SearchForFollowers:
         return followers_list.data
 
 
-class SearchForSubscriptions:
+class SearchForSubscriptionsMixin:
     """Search for subscriptions"""
 
     async def _search_for_subscriptions(self, search_value: str, user_id: int) -> list:
@@ -47,7 +47,7 @@ class SearchForSubscriptions:
         return sub_list.data
 
 
-class GlobalSearchForUser:
+class GlobalSearchForUserMixin:
     """Global Search for users"""
     
     @staticmethod
@@ -94,7 +94,7 @@ class GlobalSearchForUser:
         return global_user_list
 
 
-class SearchForGroups:
+class SearchForGroupsMixin:
     """Search for my groups and groups that I follow"""
 
     async def _search_for_groups(self, search_value: str, user_id: int) -> list:
@@ -105,7 +105,7 @@ class SearchForGroups:
         return group_list
 
 
-class GlobalSearchForGroups:
+class GlobalSearchForGroupsMixin:
     """Global Search for groups"""
 
     async def _search_for_global_groups(self, search_value: str) -> list:

@@ -3,10 +3,10 @@ import logging
 from channels.db import database_sync_to_async
 
 from src.users.models import User
-from . import types_of_search, serializers
+from . import types_of_search, serializers, db_queries
 
 
-class ConfirmFollower:
+class ConfirmFollowerMixin:
     """Confirm follower mixin"""
 
     @database_sync_to_async
@@ -15,13 +15,64 @@ class ConfirmFollower:
         return user.data
 
 
-class AllTypesOfSearch(types_of_search.SearchForPublications,
-                       types_of_search.SearchForChats,
-                       types_of_search.SearchForFollowers,
-                       types_of_search.SearchForSubscriptions,
-                       types_of_search.GlobalSearchForUser,
-                       types_of_search.SearchForGroups,
-                       types_of_search.GlobalSearchForGroups):
+class ChatMessageMixin:
+    """Chat message mixin"""
+
+    @staticmethod
+    def get_sent_message(message: str, author: User) -> dict:
+        """Get a sent chat message"""
+
+        return {
+            "message": message.replace("\n", "<br>"),
+            "author": serializers.AuthorForChatMessageSerialazer(author).data    
+        }
+
+
+class PublicationCommentMixin:
+    """
+    Comments on a publication implement the next functions: 
+      1. Like a comment 
+      2. Create and send a comment
+    """
+
+    @database_sync_to_async
+    def get_comment_likes_dict(self, comment, is_my_like: int) -> dict:
+        """Create and pass comment likes dictionary"""
+
+        return is_my_like | {'comment_id': comment.id, 'likes_count': comment.like.count()}
+
+    @database_sync_to_async
+    def add_or_remove_like(self, comment, user: User) -> dict:
+        """Add or remove my like"""
+
+        if user in comment.like.all():
+            comment.like.remove(user)
+            return {"like_from_me": 0}
+        
+        comment.like.add(user)
+        return {"like_from_me": 1}
+    
+    async def comment_likes_activity(self, comment_id: int, user: User) -> dict:
+        """Put or remove a like"""
+
+        comment_db = await db_queries.get_pub_comment_with_likes(comment_id)
+        is_my_like = await self.add_or_remove_like(comment_db, user)
+        return await self.get_comment_likes_dict(comment_db, is_my_like)
+
+    async def get_comment(self, comment_value: str, publication_id: int, user: User) -> dict:
+        """Create and return a new comment"""
+
+        comment_db = await db_queries.create_pub_comment(comment_value, publication_id, user)
+        return serializers.CommentOfPublicationSerializer(comment_db).data
+
+
+class AllTypesOfSearchMixin(types_of_search.SearchForPublicationsMixin,
+                            types_of_search.SearchForChatsMixin,
+                            types_of_search.SearchForFollowersMixin,
+                            types_of_search.SearchForSubscriptionsMixin,
+                            types_of_search.GlobalSearchForUserMixin,
+                            types_of_search.SearchForGroupsMixin,
+                            types_of_search.GlobalSearchForGroupsMixin):
     """
     All types of search:
       1. Search publications  +

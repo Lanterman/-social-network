@@ -3,8 +3,8 @@ import logging
 from django.db.models import Q, Avg, Prefetch,Count
 from channels.db import database_sync_to_async
 
-from src.users.models import Follower, User, Chat, Message
-from src.main.models import Publication, Group
+from src.users.models import Follower, User, Chat
+from src.main.models import Publication, Group, Comment
 
 
 @database_sync_to_async
@@ -134,3 +134,18 @@ def get_global_groups_using_search(search_value: str) -> list:
 
     query = Group.objects.filter(name__icontains=search_value).prefetch_related('followers')
     return list(query)
+
+
+# comment of publication page
+@database_sync_to_async
+def create_pub_comment(comment: str, publication_id: int, user: User) -> Comment:
+    """Create comment of publciation"""
+
+    return Comment.objects.create(biography=comment, publication_id_id=publication_id, users=user)
+
+
+@database_sync_to_async
+def get_pub_comment_with_likes(comment_id: int):
+    """Get comment of publication with its likes"""
+    
+    return Comment.objects.prefetch_related('like').get(id=comment_id)

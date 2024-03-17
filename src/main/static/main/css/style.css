@@ -857,3 +857,9 @@ color: blue;
     font-size: 24px;
     margin: 5% 38%;
 }
+
+#comments #no-comments {
+    font-size: 24px;
+    text-align: center;
+    margin-top: 10%;
+}

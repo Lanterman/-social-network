@@ -146,7 +146,7 @@ class MessagesView(DataMixin, ListView):
         return sorted(self.chats, key=lambda x: x.set_mes[0].pub_date, reverse=True)
 
 
-class ChatDetailView(DataMixin, View): # ---
+class ChatDetailView(DataMixin, View):
     """Chat page"""
 
     def get(self, request, chat_id):
@@ -171,7 +171,7 @@ class ChatDetailView(DataMixin, View): # ---
         return HttpResponse(status=200)
 
 
-class CreateDialogView(View): # ---
+class CreateDialogView(View):
     """Page for creating new chat"""
 
     @staticmethod
@@ -365,7 +365,7 @@ class DetailPublication(DataMixin, DetailView):
         return context | self.get_context()
 
 
-class PublicationCommentsView(SingleObjectMixin, ListView): # ---
+class PublicationCommentsView(SingleObjectMixin, ListView):
     """Publication comments page"""
 
     template_name = 'main/comments.html'
@@ -379,7 +379,7 @@ class PublicationCommentsView(SingleObjectMixin, ListView): # ---
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Комментарии'
+        context['title'] = 'Comments'
         context['menu'] = menu
         context['publication'] = self.object
         return context
