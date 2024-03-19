@@ -13,7 +13,6 @@ messengersPageSocket.onclose = function(e) {
 
 messengersPageSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    console.log(data)
 
     if (data["event_type"] === "search") {
         const messengersBlock = document.getElementsByClassName("messengersBlock")[0];

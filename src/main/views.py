@@ -1,6 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Avg, Count, Prefetch
 from django.db.models.base import Model as Model
+from django.forms import BaseModelForm
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -278,16 +279,15 @@ class AddGroup(DataMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Create group'
         return context | self.get_context()
+    
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        group = form.save(commit=False)
+        group.slug = group.name.replace(" ", "_")
+        group.owner_id=self.request.user.pk
+        group.save()
 
-    def post(self, request, *args, **kwargs):
-        form = AddGroupForm(request.POST, request.FILES)
-        if form.is_valid():
-            group = Group.objects.create(**form.cleaned_data, owner_id=request.user.pk)
-            # tasks.send_message_about_group.delay(group.name, group.slug, user.email)
-            group.slug = group.name.replace(" ", "_")
-            group.save()
-            return redirect(group)
-        return super().post(request, *args, **kwargs)
+        tasks.send_message_about_group.delay(group.name, group.slug, self.request.user.email)
+        return redirect(group)
 
 
 class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
@@ -332,7 +332,8 @@ class AddPublication(DataMixin, CreateView):
             published = Publication.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
             published.slug = published.name.replace(" ", "_")
             published.save()
-            # tasks.send_message_about_published.delay(published.name, published.slug, user.email)
+
+            tasks.send_message_about_published.delay(published.name, published.slug, request.user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
 

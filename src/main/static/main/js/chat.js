@@ -17,7 +17,6 @@ chatSocket.onclose = function(e) {
 
 chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    console.log(data);
 
     if (data.type === "send_message") {
         // remove block 'no_message' if it exists

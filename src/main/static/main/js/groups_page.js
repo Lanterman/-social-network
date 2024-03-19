@@ -13,7 +13,6 @@ groupsPageSocket.onclose = function(e) {
 
 groupsPageSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    console.log(data);
 
     if (data["event_type"] === "search") {
         const groupsBlock = document.getElementsByClassName("block-group-list")[0];

@@ -21,7 +21,6 @@ newsPageSocket.onmessage = function(e) {
         
         if (data["publications"].length) {
             responseToSearch(data["user_id"], data["publications"], publicationsBlock);
-            console.log("ok")
         } else {
             noResponseToSearch(publicationsBlock);
         };

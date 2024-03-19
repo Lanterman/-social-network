@@ -33,7 +33,6 @@ Celery is currently down due to security issues with Gmail.
 P.S.S.
 Work for the future
 
-1. Correct celery tasks
-2. Include django_filter, coresheaders, drf_yasg
-3. Set up user JWTTokens
-4. Set up OAuth2
+1. Include coresheaders, drf_yasg
+2. Set up user JWTTokens
+3. Set up OAuth2

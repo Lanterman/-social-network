@@ -13,7 +13,6 @@ subscriptionSocket.onclose = function(e) {
 
 subscriptionSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    console.log(data);
 
     if (data["event_type"] === "search") {
         const followersBlock = document.getElementsByClassName("followers-block")[0];

@@ -6,16 +6,12 @@ homeSocket.onopen = function(e) {
     console.log("Ok");
 };
 
-
 homeSocket.onclose = function(e) {
     console.error('Home socket closed unexpectedly');
 };
 
-
 homeSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-
-    console.log(data)
 
     if (data.event_type == "confirm_follower") {
         confirm_follower_onmessage(data);

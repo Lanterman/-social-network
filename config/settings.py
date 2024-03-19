@@ -13,6 +13,8 @@ import os
 import json
 import logging
 
+import redis
+
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
@@ -221,7 +223,6 @@ PASSWORD_HASHERS = [
 
 
 # Celery settings
-
 REDIS_HOST = os.environ.get('DOC_HOST_CL', os.environ['REDIS_HOST'])
 REDIS_PORT = 6379
 REDIS_PASSWORD = os.environ.get('DOC_REDIS_PASSWORD', os.environ['REDIS_PASSWORD'])
@@ -237,7 +238,6 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
 # smtp
-
 EMAIL_HOST = os.environ.get('DOC_EMAIL_HOST', os.environ['EMAIL_HOST'])
 EMAIL_PORT = 2525 #587
 EMAIL_HOST_USER = os.environ.get('DOC_EMAIL_HOST_USER', os.environ['EMAIL_HOST_USER'])
@@ -247,9 +247,18 @@ EMAIL_USE_SSL = False
 
 
 # Other
-
 INTERNAL_IPS = [
     'Redis',
     '0.0.0.0',
     '127.0.0.1',
 ]
+
+# redis instance
+redis_instance = redis.Redis(
+    host=REDIS_HOST, 
+    port=REDIS_PORT, 
+    decode_responses=True,
+    encoding="utf-8",
+    )
+
+# redis_instance.flushall()
