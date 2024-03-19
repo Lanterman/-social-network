@@ -60,7 +60,6 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django.contrib.humanize',
     # 'corsheaders',
-    # 'django_filters',
 
     # OpenAPI
     # 'drf_yasg',
