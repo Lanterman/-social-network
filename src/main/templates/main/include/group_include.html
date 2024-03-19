@@ -1,6 +1,23 @@
-<div class="div1">
-    <a href="{{ p.get_absolute_url }}"><img src="{{ p.photo.url }}"></a>
-    <p class="group_margin"><a href="{{ p.get_absolute_url }}"><i>{{ p.name|capfirst }}</i></a></p>
-    <a class="del" id="leave_the_group" href="{% url 'group_quit_primary' p.slug %}"><i class="fas fa-backspace"></i></a>
-    <p class="group_us">Подписчиков: {{ p.users.count }}</p>
+<div class="block-include-group" id="groupBlock_{{group.id}}">
+    <a href="{{ group.get_absolute_url }}"><img src="{{ group.photo.url }}"></a>
+    
+    <p class="group_margin">
+        <a href="{{ group.get_absolute_url }}">
+            <i>{{ group.name|capfirst }}</i>
+        </a>
+    </p>
+
+    <a class="del" id="leave_the_group" onclick="leave_the_group('{{group.id}}')">
+        {% if request.user in group.followers.all %}
+            <i class="fas fa-backspace"></i>
+        {% endif %}
+    </a>
+
+    <p class="group_us">
+        <span>Followers: {{ group.followers.count }}</span>
+
+        {% if request.user.id == group.owner_id %}
+            <span class="block-my-group">My group</span>
+        {% endif %}
+    </p>
 </div>

@@ -1,6 +1,6 @@
-<p id="users_home">
+<p class="users_home">
     <a class="group" href="{{ group.get_absolute_url }}">
         <img src="{{ group.photo.url }}">
-        <span class="group_name">{{ group.name|truncatechars_html:14|title  }}</span>
+        <span class="group_name" title="{{group.name|title}}">{{ group.name|truncatechars_html:20|title}}</span>
     </a>
-<p id="group_count" class="group_name">Подписчиков {{ group.users.count }}</p>
+</p>

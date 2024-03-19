@@ -1,20 +1,23 @@
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Avg, Count, Prefetch
+from django.db.models.base import Model as Model
+from django.forms import BaseModelForm
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
 
 from src.main import tasks
-from src.main.form import *
-from src.main.models import *
+from src.main.form import AddGroupForm, AddPhotoForm, AddPublishedForm, RatingForm
+from src.main.models import Comment, Publication, Group, Rating
 from src.main.utils import *
-from src.users.models import *
+from src.users.models import User, Follower, Chat, Message
 
 
 class NewsView(ListView):
-    """Main page"""
+    """News page endpoint"""
 
     template_name = 'main/index.html'
     paginate_by = 5
@@ -22,73 +25,96 @@ class NewsView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['menu'] = menu
-        context['title'] = 'Новости'
+        context['title'] = 'News'
         context['object'] = self.object
-        context['name'] = 'Поиск записи'
-        context['act'] = 'search_published'
+        context['name'] = 'Search for publications'
         return context
 
     def get(self, request, *args, **kwargs):
+        # if a user is authenticated
         if request.user.is_authenticated:
-            self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
-            self.group = Groups.objects.filter(users__username=request.user.username)
-            self.published = Published.objects.filter(
+            # recommended groups
+            self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
+
+            # publications of groups I follow
+            self.group = Group.objects.filter(followers__username=request.user.username)
+            self.publications = Publication.objects.filter(
                 group_id__in=[gr.id for gr in self.group]).select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
+
+        # if a user isn't authenticated       
         else:
-            self.object = Groups.objects.all()[:3]
-            self.published = Published.objects.all().select_related('owner').annotate(
+            # recommended groups
+            self.object = Group.objects.all()[:4]
+
+            # all publications
+            self.publications = Publication.objects.all().select_related('owner').annotate(
                 rat=Avg('rating__star_id')).order_by('-date')
+        
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.published
+        return self.publications
 
 
-class HomeView(DataMixin, UpdateView):  # Оптимизировать
+class HomeView(DataMixin, UpdateView):
     """User page"""
 
-    model = Users
+    model = User
     form_class = AddPhotoForm
     template_name = 'main/home.html'
     pk_url_kwarg = 'user_pk'
     context_object_name = 'user'
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Users.objects.all().prefetch_related('friends'))
-        self.users = self.object.friends.all()
-        self.group = Groups.objects.filter(users=self.object).prefetch_related('users')
-        self.my_groups = Groups.objects.filter(owner_id=self.object.id).prefetch_related('users')
-        self.stop = PostSubscribers.objects.filter(owner=self.object.username).select_related('user')
-        if self.object.pk != request.user.pk:
-            self.subs = PostSubscribers.objects.filter(
-                Q(owner=request.user.username, user_id=self.object) |
-                Q(owner=self.object.username, user_id=request.user)
-            )
-        else:
-            self.subs = PostSubscribers.objects.filter(owner=self.object.username, escape=False).select_related('user')
-        self.published = Published.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
-            rat=Avg('rating__star_id'))
-        return super().get(request, *args, **kwargs)
+    @staticmethod
+    def check_if_i_am_follower(followers, user_id: int) -> bool | None:
+        """Checking if i'm a follower"""
+
+        for follower in followers:
+            if follower.follower_id.id == user_id:
+                return True
     
-    # def post(self, request, *args, **kwargs):
-    #     self.object = self.get_object()
-    #     print(self.object.photo)
-    #     return super().post(request, *args, **kwargs)
+    @staticmethod
+    def check_if_i_am_sub(subs, user_id: int) -> bool | None:
+        """Checking if i'm a sub"""
+
+        for sub in subs:
+            if sub.subscription_id.id == user_id:
+                return True
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=User.objects.all().prefetch_related(
+            'followers__follower_id', 'subscriptions__subscription_id', 'groups_followers', 'my_groups')
+        )
+
+        self.followers = self.object.followers.all()
+        self.subs = self.object.subscriptions.all()
+        self.groups = self.object.groups_followers.all()
+        self.my_groups = self.object.my_groups.all()
+
+        self.new_followers = [follower for follower in self.followers if not follower.is_checked]
+        self.old_followers = [follower for follower in self.followers if follower.is_checked]
+
+        self.publications = Publication.objects.filter(owner_id=self.object.id).select_related('owner').annotate(
+            rat=Avg('rating__star_id'))
+
+        return self.render_to_response(self.get_context_data())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Главная страница'
-        context['users'] = self.users
-        context['groups'] = self.group
-        context['users_init'] = 'друзей'
-        context['center_friends'] = 'Друзья'
-        context['page_obj'] = self.published
-        context['primary'] = 'home'
+        context['groups'] = self.groups
         context['my_groups'] = self.my_groups
-        context['owner'] = self.request.user
+        context['page_obj'] = self.publications
         context['subs'] = self.subs
-        context['stop'] = self.stop
+        context['followers'] = self.old_followers
+        context["new_followers"] = self.new_followers
+        context["count_old_followers"] = len(self.old_followers)
+        context["count_new_followers"] = len(self.new_followers)
+        
+        if self.object.id != self.request.user.id:
+            context["i_am_follower"] = self.check_if_i_am_follower(self.followers, self.request.user.id)
+            context["i_am_sub"] = self.check_if_i_am_sub(self.subs, self.request.user.id)
+
         return context | self.get_context()
 
 
@@ -99,48 +125,50 @@ class MessagesView(DataMixin, ListView):
     template_name = 'main/messages.html'
 
     def get(self, request, *args, **kwargs):
+        message = Message.objects.filter(chat_id__members=request.user.id).select_related('author_id')
+
         self.chats = Chat.objects.filter(members=request.user.id).prefetch_related(
             'members',
-            Prefetch(
-                'message_set',
-                queryset=Message.objects.filter(chat__members=request.user.id).order_by('-pub_date'),
-                to_attr='set_mes'
-            )
-        )  # Отсортировать
-        self.object = Groups.objects.exclude(users__username=request.user.username)[:3]
+            Prefetch('message_set', queryset= message, to_attr='set_mes')
+        ).annotate(count_mes=Count("message_set")).filter(count_mes__gt=0)
+
+        self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['object'] = self.object
-        context['title'] = 'Мои сообщения'
+        context['title'] = 'My messages'
         context['act'] = 'search_messages'
-        context['name'] = 'Поиск сообщений'
+        context['name'] = 'Search messages'
         return context | self.get_context()
 
     def get_queryset(self):
-        return self.chats
+        return sorted(self.chats, key=lambda x: x.set_mes[0].pub_date, reverse=True)
 
 
 class ChatDetailView(DataMixin, View):
     """Chat page"""
 
     def get(self, request, chat_id):
-        self.group = Groups.objects.exclude(users=request.user)[:3]
+        self.groups = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
         self.chat = Chat.objects.prefetch_related('members').get(id=chat_id)
+
         if request.user not in self.chat.members.all():
             raise PermissionDenied()
-        messages = Message.objects.filter(chat_id=chat_id).select_related('author')
-        messages.filter(is_readed=False).exclude(author_id=request.user.id).update(is_readed=True)
-        context = {'chat': self.chat, 'messages': messages, 'menu': menu, 'title': 'Мои сообщения',
-                   'object': self.group, "chat_id": chat_id, "user": request.user}
+        
+        messages = Message.objects.filter(chat_id=chat_id).select_related('author_id').order_by("pub_date")
+        messages.filter(is_readed=False).exclude(author_id__id=request.user.id).update(is_readed=True)
+
+        context = {'chat': self.chat, 'messages': messages, 'menu': menu, 'title': 'My message',
+                   'object': self.groups, "chat_id": chat_id}
         return render(request, 'main/chat.html', context)
 
     @staticmethod
     def post(request, chat_id):
         message = request.POST.get("message")
-        Message.objects.create(message=message, chat_id=chat_id, author_id=request.user.pk)
-        Message.objects.filter(chat_id=chat_id, is_readed=False).exclude(author_id=request.user.id).update(is_readed=True)
+        Message.objects.create(message=message, chat_id_id=chat_id, author_id_id=request.user.pk)
+        Message.objects.filter(chat_id_id=chat_id, is_readed=False).exclude(author_id_id=request.user.id).update(is_readed=True)
         return HttpResponse(status=200)
 
 
@@ -159,28 +187,61 @@ class CreateDialogView(View):
         return redirect(chat)
 
 
-class FriendsView(DataMixin, SingleObjectMixin, ListView):
+class FollowersView(DataMixin, SingleObjectMixin, ListView):
     """User friends page"""
 
-    template_name = 'main/friends.html'
+    template_name = 'main/my_users.html'
     pk_url_kwarg = 'user_pk'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Мои друзья'
-        context['act'] = 'search_friends'
-        context['name'] = 'Поиск друзей'
-        context['recommendation'] = 'друзья'
+        context['title'] = 'My followers'
+        context['name'] = 'Search followers'
         context['object'] = self.object
         return context | self.get_context()
 
     def get(self, request, *args, **kwargs):
-        self.users = Users.objects.filter(friends__pk=request.user.pk)
-        self.object = Users.objects.exclude(friends=request.user.pk).exclude(pk=request.user.pk)[:3]
+        # create a list of my followers
+        self.qs_main_followers = Follower.objects.filter(subscription_id__id=request.user.id).select_related("follower_id")
+        self.followers = [follower.follower_id for follower in self.qs_main_followers]
+
+        # create a QuerySet of recommended users
+        self.qs_main_subs = Follower.objects.filter(follower_id=request.user.id).select_related("subscription_id")
+        self.users_id = [user.subscription_id.id for user in self.qs_main_subs]
+        self.object = User.objects.exclude(id__in=self.users_id).exclude(id=request.user.id)[:4]
+
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.users
+        return self.followers
+
+
+class SubscriptionsView(DataMixin, SingleObjectMixin, ListView):
+    """User friends page"""
+
+    template_name = 'main/my_users.html'
+    pk_url_kwarg = 'user_pk'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'My subscriptions'
+        context['name'] = 'Search users'
+        context['object'] = self.object
+        return context | self.get_context()
+
+    def get(self, request, *args, **kwargs):
+        # create a list of my subscriptions
+        self.qs_main_subs = Follower.objects.filter(follower_id=request.user.id).select_related("subscription_id")
+        self.subs = [sub.subscription_id for sub in self.qs_main_subs]
+
+        # create a QuerySet of recommended users
+        self.users_id = [user.id for user in self.subs]
+        self.object = User.objects.exclude(id__in=self.users_id).exclude(id=request.user.id)[:4]
+
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.subs
 
 
 class GroupsView(DataMixin, ListView):
@@ -190,16 +251,18 @@ class GroupsView(DataMixin, ListView):
     context_object_name = 'groups'
 
     def get(self, request, *args, **kwargs):
-        self.group = Groups.objects.filter(users__pk=request.user.pk).prefetch_related('users')
-        self.object = Groups.objects.exclude(users__pk=request.user.pk)[:3]
+        self.group = Group.objects.filter(
+            Q(followers__pk=request.user.pk) | Q(owner__pk=request.user.pk)
+        ).prefetch_related('followers').distinct()
+
+        self.object = Group.objects.exclude(followers__pk=request.user.pk).exclude(owner__pk=request.user.pk)[:4]
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Мои группы'
+        context['title'] = 'My groups'
         context['object'] = self.object
-        context['name'] = 'Поиск группы'
-        context['act'] = 'search_group'
+        context['name'] = 'Search for groups'
         return context | self.get_context()
 
     def get_queryset(self):
@@ -214,18 +277,17 @@ class AddGroup(DataMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Создать группу'
+        context['title'] = 'Create group'
         return context | self.get_context()
+    
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        group = form.save(commit=False)
+        group.slug = group.name.replace(" ", "_")
+        group.owner_id=self.request.user.pk
+        group.save()
 
-    def post(self, request, *args, **kwargs):
-        form = AddGroupForm(request.POST, request.FILES)
-        if form.is_valid():
-            group = Groups.objects.create(**form.cleaned_data, owner_id=request.user.pk)
-            # tasks.send_message_about_group.delay(group.name, group.slug, user.email)
-            group.slug = group.name.replace(" ", "_")
-            group.save()
-            return redirect(group)
-        return super().post(request, *args, **kwargs)
+        tasks.send_message_about_group.delay(group.name, group.slug, self.request.user.email)
+        return redirect(group)
 
 
 class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
@@ -236,27 +298,24 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
     slug_url_kwarg = 'group_slug'
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Groups.objects.all().prefetch_related('users').select_related('owner'))
-        self.users = self.object.users.all()
-        self.published = Published.objects.filter(group_id=self.object.id).select_related('owner').annotate(
+        self.object = self.get_object(queryset=Group.objects.all().prefetch_related('followers').select_related('owner'))
+        self.followers = self.object.followers.all()
+        self.published = Publication.objects.filter(group_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group'] = self.object
-        context['user'] = self.object.owner
-        context['users'] = self.users
-        context['primary'] = 'home'
-        context['user1'] = self.request.user
+        context['followers'] = self.followers
         return context | self.get_context()
 
     def get_queryset(self):
         return self.published
 
 
-class AddPublished(DataMixin, CreateView):
-    """PAge for creating new publish"""
+class AddPublication(DataMixin, CreateView):
+    """Page for creating new publication"""
 
     form_class = AddPublishedForm
     template_name = 'main/add_pub_group.html'
@@ -264,61 +323,66 @@ class AddPublished(DataMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        return context | self.get_context(title='Создать запись')
+        return context | self.get_context(title='Create publication')
 
     def post(self, request, *args, **kwargs):
-        group = Groups.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
+        group = Group.objects.get(slug=self.kwargs.get(self.slug_url_kwarg))
         form = AddPublishedForm(request.POST, request.FILES)
         if form.is_valid():
-            published = Published.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
+            published = Publication.objects.create(**form.cleaned_data, group_id=group.pk, owner_id=request.user.pk)
             published.slug = published.name.replace(" ", "_")
             published.save()
-            # tasks.send_message_about_published.delay(published.name, published.slug, user.email)
+
+            tasks.send_message_about_published.delay(published.name, published.slug, request.user.email)
             return redirect(group)
         return super().post(request, *args, **kwargs)
 
 
-class DetailPublish(DetailView):
+class DetailPublication(DataMixin, DetailView):
     """Detail publish page"""
 
-    model = Published
+    model = Publication
     slug_url_kwarg = 'publish_slug'
     template_name = 'main/detail_publish.html'
-    queryset = Published.objects.all().select_related('group', 'owner').annotate(rat=Avg('rating__star_id'))
+    context_object_name = "publication"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(
+            Publication.objects.all().select_related('group', 'owner').annotate(rat=Avg('rating__star_id'))
+        )
+        self.rating = Rating.objects.filter(publication_id__name=self.object.name).select_related('star').filter(
+            ip=self.request.user.username)
+        
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
         context['star_form'] = RatingForm()
+
         if self.request.user.is_authenticated:
-            try:
-                context['user1'] = Rating.objects.filter(published_id__name=self.object.name).select_related(
-                    'star').get(
-                    ip=self.request.user)
-            except Exception:
-                pass
-        return context
+            context['rating'] = self.rating[0] if self.rating else None
+
+        return context | self.get_context()
 
 
-class PublishedCommentsView(SingleObjectMixin, ListView):
+class PublicationCommentsView(SingleObjectMixin, ListView):
     """Publication comments page"""
 
     template_name = 'main/comments.html'
     slug_url_kwarg = 'publish_slug'
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Published.objects.all())
-        self.comments = Comments.objects.filter(published_id=self.object.id).select_related('users').prefetch_related(
+        self.object = self.get_object(queryset=Publication.objects.all())
+        self.comments = Comment.objects.filter(publication_id=self.object.id).select_related('users').prefetch_related(
             'like')
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Комментарии'
+        context['title'] = 'Comments'
         context['menu'] = menu
-        context['published'] = self.object
-        if self.request.user.is_authenticated:
-            context['user1'] = self.request.user
+        context['publication'] = self.object
         return context
 
     def get_queryset(self):
@@ -326,27 +390,18 @@ class PublishedCommentsView(SingleObjectMixin, ListView):
 
 
 # Logic
-
 def del_group(request, group_slug):
-    """Delete group"""
+    """Delete group for owner"""
 
-    Groups.objects.get(slug=group_slug).delete()
+    Group.objects.get(slug=group_slug).delete()
     return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
 
 
-def del_pub_group(request, pub_slug, group_slug):
-    """Delete group for owner"""
+def delete_publication(request, pub_id: int) -> HttpResponse:
+    """Delete publication"""
 
-    group = Groups.objects.get(slug=group_slug)
-    Published.objects.get(slug=pub_slug).delete()
-    return redirect(group)
-
-
-def del_published(request, pub_slug):
-    """Delete published for owner group or owner publication"""
-
-    Published.objects.get(slug=pub_slug).delete()
-    return redirect(request.user)
+    Publication.objects.get(id=pub_id).delete()
+    return HttpResponse(status=204)
 
 
 class AbstractUpdate(DataMixin, UpdateView):
@@ -354,11 +409,11 @@ class AbstractUpdate(DataMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        return context | self.get_context(title='Редактирование', add='Ошибка изменения!')
+        return context | self.get_context(title='Change', add='Error!')
 
 
 class UpdateGroup(AbstractUpdate):
-    model = Groups
+    model = Group
     form_class = AddGroupForm
     slug_url_kwarg = 'group_slug'
 
@@ -374,7 +429,7 @@ class UpdateGroup(AbstractUpdate):
 
 
 class UpdatePublished(AbstractUpdate):
-    model = Published
+    model = Publication
     form_class = AddPublishedForm
     slug_url_kwarg = 'pub_slug'
 
@@ -385,73 +440,16 @@ class UpdatePublished(AbstractUpdate):
         return redirect(publish)
 
 
-def friend_activity(request, user_pk):
-    """Logic for adding friends"""
+def group_activity(request, group_id: int) -> HttpResponse:
+    """Join to the group or leave the group"""
 
-    q = Users.objects.get(pk=user_pk)
-    try:
-        subs = PostSubscribers.objects.select_related('user').get(
-            Q(owner=request.user.username, user_id=q.pk) |
-            Q(owner=q.username, user_id=request.user.pk)
-        )
-    except Exception:
-        subs = ''
-    if q in request.user.friends.all():
-        q.friends.remove(request.user)
-        PostSubscribers.objects.create(owner=request.user.username, user_id=q.id)
-    elif not subs:
-        PostSubscribers.objects.create(owner=q.username, user_id=request.user.id)
-    elif subs.owner != q.username:
-        request.user.friends.add(q)
-        PostSubscribers.objects.filter(owner=request.user.username, user_id=q.id).delete()
-    elif subs.owner == q.username:
-        PostSubscribers.objects.filter(owner=q.username, user_id=request.user.id).delete()
-    return redirect(q)
-
-
-def friend_hide(request, user_pk):
-    """Leave in subscribers"""
-
-    q = Users.objects.get(pk=user_pk)
-    PostSubscribers.objects.filter(owner=request.user.username, user_id=q.id).update(escape=True)
-    return redirect(request.user)
-
-
-def friend_accept(request, user_pk):
-    """Add in friends"""
-
-    q = Users.objects.get(pk=user_pk)
-    request.user.friends.add(q)
-    PostSubscribers.objects.filter(owner=request.user.username, user_id=q.id).delete()
-    return redirect(request.user)
-
-
-def friend_del_primary(request, user_pk):
-    """Delete from friends"""
-
-    q = Users.objects.get(pk=user_pk)
-    request.user.friends.remove(q)
-    PostSubscribers.objects.create(owner=request.user.username, user_id=q.id)
-    return redirect(reverse('friends', kwargs={'user_pk': request.user.pk}))
-
-
-def group_activity(request, group_slug):
-    """logic for group entry"""
-
-    q = Groups.objects.prefetch_related('users').get(slug=group_slug)
-    if request.user in q.users.all():
-        q.users.remove(request.user)
+    q = Group.objects.prefetch_related('followers').get(id=group_id)
+    if request.user in q.followers.all():
+        q.followers.remove(request.user)
     else:
-        q.users.add(request.user)
-    return redirect(q)
+        q.followers.add(request.user)
 
-
-def group_quit_primary(request, group_slug):
-    """Leave group"""
-
-    q = Groups.objects.get(slug=group_slug)
-    q.users.remove(request.user)
-    return redirect(reverse('groups', kwargs={'user_pk': request.user.pk}))
+    return HttpResponse(status=200)
 
 
 class AddStarRating(View):
@@ -462,77 +460,10 @@ class AddStarRating(View):
         form = RatingForm(request.POST)
         if form.is_valid():
             Rating.objects.update_or_create(
-                ip=request.user,
-                published_id=int(request.POST.get("published")),
+                ip=request.user.username,
+                publication_id_id=int(request.POST.get("publication")),
                 defaults={'star_id': int(request.POST.get("star"))}
             )
             return HttpResponse(status=201)
         else:
             return HttpResponse(status=400)
-
-
-class SearchPublished(NewsView):
-    """Search for publications by name or owner username"""
-
-    def get_queryset(self):
-        return Published.objects.filter(
-            Q(name__icontains=self.request.GET.get('search')) |
-            Q(owner__username__icontains=self.request.GET.get('search'))
-        ).select_related('owner').annotate(rat=Avg('rating__star_id')).order_by('-date')
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет записей соответствующих запросу!'
-        context['search'] = f'search={self.request.GET.get("search")}&'
-        return context
-
-
-class SearchGroups(GroupsView):
-    """Search for groups by name"""
-
-    def get_queryset(self):
-        return self.group.filter(name__icontains=self.request.GET.get('search'))
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет групп соответствующих запросу!'
-        context['global'] = Groups.objects.filter(name__icontains=self.request.GET.get('search')).prefetch_related(
-            'users')
-        return context
-
-
-class SearchFriends(FriendsView):
-    """Search for friends by username, first name or last name"""
-
-    def get_queryset(self):
-        queryset = self.users.filter(
-            Q(username__icontains=self.request.GET.get('search')) |
-            Q(first_name__icontains=self.request.GET.get('search')) |
-            Q(last_name__icontains=self.request.GET.get('search'))
-        )
-        return queryset
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет пользователей соответствующих запросу!'
-        context['global'] = Users.objects.filter(
-            Q(username__icontains=self.request.GET.get('search')) |
-            Q(first_name__icontains=self.request.GET.get('search')) |
-            Q(last_name__icontains=self.request.GET.get('search'))
-        ).exclude(pk=self.request.user.pk)
-        return context
-
-
-class SearchMessages(MessagesView):  # Убрать из members текущего пользователя(из запроса, а не базы данных)
-    """Search for messages by last name or first name of members"""
-
-    def get_queryset(self):
-        return self.chats.filter(
-            Q(members__first_name__icontains=self.request.GET.get('search')) |
-            Q(members__last_name__icontains=self.request.GET.get('search'))
-        ).distinct()
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['empty'] = 'Нет диалогов соответствующих запросу!'
-        return context

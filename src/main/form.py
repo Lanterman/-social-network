@@ -3,8 +3,8 @@ import re
 from django import forms
 from django.core.exceptions import ValidationError
 
-from src.main.models import *
-from src.users.models import Users
+from src.main.models import Publication, Group, Rating, RatingStar
+from src.users.models import User
 
 
 class AbstractForm(forms.ModelForm):
@@ -12,33 +12,33 @@ class AbstractForm(forms.ModelForm):
         name = self.cleaned_data['name']
         re_value = re.findall(r'[^\w ]', name)
         if re_value:
-            raise ValidationError(f"Имя не может содержать данные символ(-ы): {', '.join(re_value)}")
+            raise ValidationError(f"Name can not these characters: {', '.join(re_value)}")
         return name
 
 
 class AddGroupForm(AbstractForm):
-    name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
-    photo = forms.ImageField(label='Аватарка')
+    name = forms.CharField(label='Name', widget=forms.TextInput(attrs={'placeholder': 'Name'}))
+    photo = forms.ImageField(label='Photo')
 
     class Meta:
-        model = Groups
+        model = Group
         fields = ('name', 'photo')
 
 
 class AddPublishedForm(AbstractForm):
-    name = forms.CharField(label='Название', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
-    photo = forms.ImageField(label='Аватарка', required=False)
-    biography = forms.CharField(label='Биография',
-                                widget=forms.Textarea(attrs={'placeholder': 'Написать биографию', 'rows': 5, 'cols': 35}))
+    name = forms.CharField(label='Name', widget=forms.TextInput(attrs={'placeholder': 'Name'}))
+    photo = forms.ImageField(label='Photo', required=False, localize=True)
+    biography = forms.CharField(label='Biography',
+                                widget=forms.Textarea(attrs={'placeholder': 'Write biography', 'rows': 5, 'cols': 35}))
 
     class Meta:
-        model = Published
+        model = Publication
         fields = ('name', 'biography', 'photo')
 
 
 class AddPhotoForm(forms.ModelForm):
     class Meta:
-        model = Users
+        model = User
         fields = ('photo',)
 
 

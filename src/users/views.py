@@ -4,10 +4,10 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DetailView
 
-from src.main.utils import *
+from src.main.utils import DataMixin, menu
 from src.users import tasks
-from src.users.form import *
-from src.users.models import Users
+from src.users.form import LoginUserForm, PasswordChangeUserForm, RegisterUserForm, UpdateUserForm
+from src.users.models import User
 
 
 class RegisterUser(CreateView):
@@ -16,7 +16,7 @@ class RegisterUser(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Регистрация'
+        context['title'] = 'Sign-up'
         return context
 
     def form_valid(self, form):
@@ -24,18 +24,20 @@ class RegisterUser(CreateView):
         user.slug = user.username
         user.save()
         login(self.request, user)
-        # tasks.send_registration_message.delay(user.email)
+        
+        tasks.send_registration_message.delay(user.email)
         return redirect('news')
 
 
 class ProfileUser(DataMixin, DetailView):
-    model = Users
+    model = User
     template_name = 'users/profile.html'
     pk_url_kwarg = 'user_pk'
+    context_object_name = "my_profile"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        return context | self.get_context(title='Мой профиль')
+        return context | self.get_context(title='My profile')
 
 
 def logout_view(request):
@@ -49,31 +51,40 @@ class LoginUser(LoginView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Авторизация'
+        context['title'] = 'Sign-in'
         return context
 
 
 class PasswordChangeUser(PasswordChangeView, DetailView):
-    model = Users
+    model = User
     slug_url_kwarg = 'slug'
     template_name = 'users/edit_profile.html'
     form_class = PasswordChangeUserForm
     success_url = reverse_lazy('news')
+    context_object_name = "my_profile"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Изменить пароль'
+        context['title'] = 'Change password'
         context['menu'] = menu
-        context['button'] = 'Изменить'
+        context['button'] = 'Submit'
         return context
+    
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.get(self, request, *args, **kwargs)
 
 
 class UpdateUserView(DataMixin, UpdateView):
-    model = Users
+    model = User
     form_class = UpdateUserForm
     template_name = 'users/edit_profile.html'
     slug_url_kwarg = 'slug'
+    context_object_name = "my_profile"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        return context | self.get_context(title='Изменить профиль', button='Применить')
+        return context | self.get_context(title='Change profile', button='Submit')

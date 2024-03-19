@@ -3,17 +3,17 @@
 {% block title%}{{ title }}{% endblock title %}
 
 {% block content %}
-    {% if users.pk == user.pk %}
+    {% if my_profile.pk == user.pk %}
         <h3 class="title"><i class="fas fa-users-cog"></i> {{ title }}</h3>
         <div>
-            <p class="p2"><label>Имя: </label><i id="i1">{{ users.first_name }}</i></p>
-            <p class="p2"><label>Фамилия: </label><i id="i2">{{ users.last_name }}</i></p>
-            <p class="p2"><label>Email: </label><i id="i3">{{ users.email }}</i></p>
-            <p class="p2"><label>Номер телефона: </label><i id="i4">{{ users.num_tel }}</i></p>
+            <p class="p2"><label>First name: </label><i id="i1">{{ my_profile.first_name }}</i></p>
+            <p class="p2"><label>Last name: </label><i id="i2">{{ my_profile.last_name }}</i></p>
+            <p class="p2"><label>Email: </label><i id="i3">{{ my_profile.email }}</i></p>
+            <p class="p2"><label>Mobile number: </label><i id="i4">{{ my_profile.num_tel }}</i></p>
         </div>
         <div id="id2">
-            <a href="{% url 'edit_profile' users.slug %}" class="a3"><i>Редактировать профиль</i></a><br><br>
-            <a href="{% url 'password_change' users.slug %}" class="a3"><i>Изменить пароль</i></a>
+            <a href="{% url 'edit_profile' my_profile.slug %}" class="a3"><i>Change profile info</i></a><br><br>
+            <a href="{% url 'password_change' my_profile.slug %}" class="a3"><i>Change password</i></a>
         </div>
     {% endif %}
 {% endblock content %}

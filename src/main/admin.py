@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.main.models import *
+from src.main.models import Publication, Group, Comment, RatingStar, Rating
 
 
 class AbstractAdmin(admin.ModelAdmin):
@@ -13,33 +13,33 @@ class AbstractAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}  # Автозаполнение поля slug с помощью name
 
 
-@admin.register(Groups)
-class GroupsAdmin(AbstractAdmin):
+@admin.register(Group)
+class GroupAdmin(AbstractAdmin):
     ordering = ('-id',)
     list_display = ('id', 'name', 'slug', 'photo')
-    fields = ('name', 'slug', 'photo', 'users', 'owner')
-    raw_id_fields = ('users',)  # удобная вещь при связях
+    fields = ('name', 'slug', 'photo', 'followers', 'owner')
+    raw_id_fields = ('followers',)  # удобная вещь при связях
 
 
-@admin.register(Published)
-class PublishedAdmin(AbstractAdmin):
+@admin.register(Publication)
+class PublicationAdmin(AbstractAdmin):
     list_display = ('id', 'name', 'slug', 'photo', 'date', 'owner')
     fields = ('name', 'slug', 'biography', 'group', 'photo', 'date', 'owner')
     date_hierarchy = 'date'
     readonly_fields = ('date',)  # делает нередактиремым
 
 
-@admin.register(Comments)
-class CommentsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'published', 'users', 'date')
-    list_display_links = ('id', 'published', 'users')
-    fields = ('biography', 'published', 'users', 'date', 'like')
-    search_fields = ('published', 'date', 'users')
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'publication_id', 'users', 'date')
+    list_display_links = ('id', 'publication_id', 'users')
+    fields = ('biography', 'publication_id', 'users', 'date', 'like')
+    search_fields = ('publication_id', 'date', 'users')
     list_filter = ('date', 'users')
     list_max_show_all = 5
     list_per_page = 10
     ordering = ('-date',)
-    raw_id_fields = ('published', 'users', 'like')
+    raw_id_fields = ('publication_id', 'users', 'like')
     date_hierarchy = 'date'
     readonly_fields = ('date',)
 
@@ -51,4 +51,4 @@ class RatingStarAdmin(admin.ModelAdmin):
 
 @admin.register(Rating)
 class RatingAdmin(admin.ModelAdmin):
-    list_display = ('published', 'star', 'ip')
+    list_display = ('publication_id', 'star', 'ip')

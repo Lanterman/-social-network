@@ -7,27 +7,78 @@
         {% if group.photo %}
             <img src="{{ group.photo.url }}" alt="{{ group.photo }}">
         {% endif %}
+
         <p id="title_group">{{ group.name|capfirst }}
-            {% if user == user1 and primary %}
+            {% if user == group.owner %}
                 <a class="pub_menu" href="{% url 'update_group' group.slug %}"><i class="fas fa-pen"></i></a>
                 <a class="pub_menu" id="del" href="#conf"><i class="fas fa-backspace"></i></a>
             {% endif %}
         </p><br>
-        <p class="p1"><a href="#openModalSub">Подписчики: {{ users.count }}</a></p>
-        <p class="p1" id="p1">Всего записей: {{ page_obj.paginator.count }}</p>
-        <div id="div2">
-            {% if user1 in users %}
-                <p class="p1"><a href="{% url 'group_activity' group.slug %}">Отписаться</a></p>
-            {% else %}
-                <p class="p1"><a href="{% url 'group_activity' group.slug %}">Подписаться</a></p>
+
+        <p class="p1">
+            <a href="#openModalGroupFollowers">
+                Followers: 
+                <span id="followers_count">{{ followers.count }}</span>
+            </a>
+        </p>
+        <p class="p1" id="p1">Number of publications: {{ page_obj.paginator.count }}</p>
+
+        <div id="div2" class="groupButton">
+            {% if user.id != group.owner_id %}
+                {% if user in followers %}
+                    <p class="p1 group_activity">
+                        <a onclick="group_activity('{{group.id}}', 'Unsubscribe', '{{group.slug}}')">Unsubscribe</a>
+                    </p>
+                {% else %}
+                    <p class="p1 group_activity">
+                        <a onclick="group_activity('{{group.id}}', 'Subscribe', '{{group.slug}}')">Subscribe</a>
+                    </p>
+                {% endif %}
             {% endif %}
-            {% if user1 in users or user1.id == group.owner_id %}
-                <p id="p2"><a href="{% url 'add_published' group.slug %}"><i class="fas fa-plus"></i> Добавить записть</a></p>
+
+            {% if user in followers or user.id == group.owner_id %}
+                <p id="p2"><a href="{% url 'add_publication' group.slug %}"><i class="fas fa-plus"></i> Add publication</a></p>
             {% endif %}
         </div>
     </div>
+
     {% include 'main/include/average_value.html' %}
-    {% include 'main/include/modal_user.html' %}
     {% include 'main/include/modal-del.html' %}
     {{ block.super }}
+
+    <div id="openModalGroupFollowers" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content" id="followers-group">
+                <div class="modal-header">
+                    <h3 class="modal-title">Followers</h3>
+                    <a href="#close" title="Close" class="close">×</a>
+                </div>
+                    <p class="follower-title">Followers</p>
+                    {% for follower in followers %}
+                        <p class="users_subs">
+
+                            {% if follower.photo %}
+                                <img src="{{ follower.photo.url }}">
+                            {% else %}
+                                <span class="user_photo">
+                                    <span>No image</span>
+                                </span>
+                            {% endif %}
+    
+                            <a class="group_name" href="{{ follower.get_absolute_url }}">
+                                {{ follower.get_full_name|default:'Anonymous'|truncatechars_html:23|title }}
+                            </a><br><br><br>
+                            {% if follower.pk != request.user.pk %}
+                                <a class="button_home" href="{% url 'check' follower.pk %}">Send message</a>
+                            {% else %}
+                                <i>My profile</i>
+                            {% endif %}
+                        </p><br>
+                    {% empty %}
+                        <p id="no-users">No followers</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

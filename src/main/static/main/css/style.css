@@ -8,7 +8,7 @@ body {
 
 .p {
     padding: 10px;
-    margin: 50px 0 50px 400px;
+    margin: 50px 0 50px 28%;
     width: 640px;
     box-shadow: 0 0 9px #666;
 }
@@ -83,44 +83,82 @@ header {
     background-color: black;
 }
 
-#as {
+#aside-block {
     background-color: #13eb28;
     border-right: solid 4px gray;
     border-bottom: solid 4px gray;
     float: left;
-    padding: 20px 15px;
+    padding: 25px 20px;
+    width: 200px;
 }
 
-#as img {
-    width: 100px;
-    height: 100px;
+#aside-block h3 {
+    font-size: 20px;
+    text-align: center;
 }
 
-#as a {
+#aside-block .aside-group {
+    width: 170px;
+    height: 170px;
+    margin-left: 0px;
+    padding: 5px 0px;
+}
+
+#aside-block #aside-group-name {
+    font-size: 18px;
+    margin-left: 16px;
+    padding-bottom: 5px;
+}
+
+#aside-block #aside-group-name span {
+    margin-left: 5px;
+}
+
+#aside-block img {
+    width: 130px;
+    height: 130px;
+    margin-left: 19px;
+}
+
+#aside-block .recommend-url {
     text-decoration: None;
     font-size: 17px;
     color: blue;
 }
 
-#as p {
-    margin: 0 0 5px 5px;
-}
-
-#as a p:hover {
+#aside-block .recommend-url #aside-group-name:hover {
     color: red;
 }
 
-#as div {
+#aside-block div {
     margin: 0 0 20px 40px;
     width: 110px;
 }
 
-#as div:hover {
+#aside-block .aside-group:hover {
     border: solid 1px;
 }
 
-#as h3 {
+#aside-block h3 {
     margin-bottom: 20px;
+}
+
+.photo_frame_user {
+    height: 130px;
+}
+
+.photo_frame_user .user-no-photo {
+    font-size: 20px;
+    padding-top: 50px;
+    color: rgb(78, 72, 72);
+}
+
+.photo_frame_user:hover {
+    border: none;
+}
+
+.photo_frame_user .user-no-photo:hover {
+    color: rgb(78, 72, 72);
 }
 
 .p #ap {
@@ -131,33 +169,41 @@ header {
     margin: 70px 100px 60px 0;
 }
 
-#aps a, #aps1 a {
+#pub-bottom-info .pub-bottom-item a {
     text-decoration: None;
     font-size: 18px;
-    margin: 0 30px 0 88px;
     color: blue;
 }
 
-#aps .ia32 {
-    margin: 0 0 0 0px;
-}
-
-#aps .a32 {
-    margin: 0px;
-    float:right;
-    width: 180px;
-}
-
-#aps .a34 {
-    margin: 0 0 0 5px;
-}
-
-#aps a:hover, #aps1 a:hover {
+#pub-bottom-info a:hover {
     color: red;
+}
+
+#pub-bottom-info .rating-label {
+    margin-left: 20px;
+    width: 300px;
+}
+
+#pub-bottom-info .pub-comments {
+    margin-left: 15%
+}
+
+#pub-bottom-info #block-owner {
+    float: right;
+    margin-right: 20px;
+}
+
+#pub-bottom-info .pub-owner {
+    margin-left: 2px;
 }
 
 .div123 {
     margin: 30px 0 -15px 35px;
+}
+
+.div123 #my-rating, .div123 #user-rating {
+    font-size: 19px;
+    margin-right: 10px;
 }
 
 #p123 {
@@ -170,13 +216,13 @@ header {
     font-size: 23px;
 }
 
-#as #a {
+#aside-block #a {
     color: yellow;
     font-size: 20px;
     margin-left: 45px;
 }
 
-#as #a:hover {
+#aside-block #a:hover {
     color: red;
 }
 
@@ -205,7 +251,7 @@ color: blue;
     padding: 30px;
 }
 
-.p3 pre {
+.p3 .publish-date {
     text-align: center;
     margin-bottom: 10px;
 }
@@ -216,8 +262,18 @@ color: blue;
 }
 
 .aps {
-    margin-top 50px;
+    margin-top: 50px;
     text-align: center;
+}
+
+.pub-block-comments {
+    text-decoration: none;
+    color: blue;
+    font-size: 22px;
+}
+
+.pub-block-comments:hover {
+    color: red;
 }
 
 #comment_block #h1 {
@@ -349,12 +405,104 @@ color: blue;
 #com:hover {
     color: red;
 }
-
+/* мб тут настрйока отрисовки списка друзей */
 #div {
     padding: 30px 30px 40px 30px;
     margin: 10px 10px 0 10px;
     border: solid 2px green;
     box-shadow: 0 0 10px #666;
+}
+
+.followers-block {
+    margin-bottom: 100px;
+}
+
+.followers-block .global_search {
+    font-size: 24px;
+    padding: 0px 45%;
+    color: #2b5a3f;
+    border-bottom: 1px solid #2b5a3f;
+    margin: 40px 0px;
+}
+
+.followers-block #foo {
+    font-size: 24px;
+    margin: 0px 45%;
+}
+
+.followers-block #foo i {
+    margin-right: 3px;
+}
+
+.follower-block {
+    padding: 10px 30px 40px 30px;
+    margin: 10px 10px 0px 20%;
+    border: solid 2px green;
+    box-shadow: 0 0 10px #666;
+    height: 100px;
+    width: 50%;
+    background-color: #ADFF2F;
+}
+
+.follower-block:hover {
+    transform: scale(1.01);
+}
+
+.follower-block #follower-url img, .follower-block #follower-url #no-photo {
+    margin-left: 20px;
+    float: left;
+    border-radius: 200px;
+    border: solid 4px rgb(185, 61, 61);
+    box-shadow: 0 0 9px #666;
+    width: 120px;
+    height: 120px;
+}
+
+.follower-block #follower-url img:hover, .follower-block #follower-url #no-photo:hover {
+    transform: scale(1.05);
+}
+
+.follower-block #follower-url #no-photo p {
+    margin-top: 40%;
+    margin-left: 14%;
+    font-size: 24px;
+    color: rgb(34, 31, 31);
+}
+
+.follower-block .follower-name {
+    font-size: 25px;
+    margin-left: 180px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.follower-block .follower-name .follower-url {
+    text-decoration: none;
+    color: #0000CD;
+}
+
+.follower-block .follower-name .follower-url:hover {
+    color: rgb(146, 13, 13);
+}
+
+.follower-block a:hover {
+    color: rgb(146, 13, 13);
+}
+
+.follower-block .follower-send-message, .follower-block .follower-block-user, .follower-block #subscribe {
+    font-size: 20px;
+    text-decoration: none;
+    margin-left: 30px;
+    color: #0000CD;
+    cursor: pointer;
+}
+
+.follower-block .follower-block-user {
+    color: rgb(197, 55, 55)
+}
+
+.follower-block #subscribe:hover {
+    color: blue;
 }
 
 #div img {
@@ -401,16 +549,6 @@ color: blue;
 
 #div #p2 {
     margin-left: 460px;
-}
-
-#foo  {
-    font-size: 20px;
-    text-align: center;
-    margin: 100px 0 100px 0;
-}
-
-#foo i {
-    font-size: 30px;
 }
 
 #as3 {
@@ -642,18 +780,23 @@ color: blue;
 .rating > label:hover:before,  .rating > label:hover ~ label:before,  .rating:not(:hover) > :checked ~ label:before { opacity: 1; }
 
 .search {
-    margin: 20px 650px 0px 600px;
-    padding: 10px 0px 0px 23px;
+    width: 400px;
+    height: 120px;
+    margin: 30px 35%;
     border: solid 4px gray;
+    
 }
 
 .search .Content {
-    font-size: 19px;
-    margin-bottom: 10px;
+    font-size: 22px;
+    margin: 15px 0px;
+    text-align: center;
 }
 
 .form .input {
     padding: 4px;
+    margin-left: 11%;
+    font-size: 19px;
 }
 
 .form .input:hover {
@@ -664,6 +807,7 @@ color: blue;
     margin-left: 10px;
     padding: 6px 8px 6px 8px;
     border-radius: 30px;
+    font-size: 17px;
 }
 
 .form .buttonForm:hover {
@@ -685,4 +829,37 @@ color: blue;
 
 #search {
     margin-top: -20px;
+}
+
+#publicationsBlock #no-publications {
+    font-size: 24px;
+    text-align: center;
+    margin-top: 10%;
+}
+
+#no-instances {
+    font-size: 24px;
+    margin: 10% 25%;
+}
+
+.followers-block #no-users {
+    font-size: 24px;
+    margin: 5% 43%;
+}
+
+.user-title{
+    margin: 30px 20% 50px 0px;
+    text-align: center;
+    font-size: 28px;
+}
+
+#no-messages {
+    font-size: 24px;
+    margin: 5% 38%;
+}
+
+#comments #no-comments {
+    font-size: 24px;
+    text-align: center;
+    margin-top: 10%;
 }

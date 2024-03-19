@@ -1,33 +1,28 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-    <h6 class="title" id="groups"><i class="fas fa-user-friends"></i> {{ title }} |</h6>
-    <p id="aps" class="pa">
-        <div class="ss">
+    <div class="block-group-title">
+        <span class="group-title"><i class="fas fa-user-friends"></i> {{ title }} |</span>
+
+        <span class="group-block-add">
             <a href="{% url 'add_group' %}"> <i class="fas fa-plus"></i></a>
-        </div>
+        </span>
+    </div>
+
     <br><br>
-    <div class="block" id="search">
-        <div class="search">
-            {% include 'main/include/search.html' %}
-        </div>
-    </div>
-    <div class="mar">
+
+    {% include 'main/include/search.html' %}
+
+    <div class="block-group-list" id="blockGroupList">
         {% if groups %}
-            {% for p in groups %}
+            {% for group in groups %}
                 {% include 'main/include/group_include.html' %}
             {% endfor %}
-        {% endif %}
-        {% if global %}
-            <p class="global_search">Глобальный поиск</p>
-            {% for p in global %}
-                {% include 'main/include/group_include.html' %}
-            {% endfor %}
-        {% elif not global and not groups %}
-            <p id="foo" class="foo"><i class="fas fa-ban"></i> {{ empty|default:"Вы не вступали в группы!" }}</p>
+        {% else %}
+            <p id="no-instances"><i class="fas fa-ban"></i> "You do not have your own groups or groups that you are subscribed to!"</p>
         {% endif %}
     </div>
-    {{ groups.count|json_script:"groups" }}
+
 {% endblock content %}
 
 {% block groups %}
@@ -35,13 +30,5 @@
 {% endblock groups %}
 
 {% block script %}
-<script>
-    if (groups.value) {
-        leave_the_group.onclick = function() {
-            if (!confirm('Выйти из группы?')) {
-                this.href = '';
-            };
-        };
-    };
-</script>
+    <script src="/static/main/js/groups_page.js"></script>
 {% endblock script %}

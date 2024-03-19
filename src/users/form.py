@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 
-from src.users.models import Users
+from src.users.models import User
 
 
 class AbstractForm(forms.Form):
@@ -64,41 +64,41 @@ class AbstractForm(forms.Form):
 
 
 class RegisterUserForm(AbstractForm, UserCreationForm):
-    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'placeholder': 'Логин'}))
-    password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
-    password2 = forms.CharField(label='Повтор пароля', widget=forms.PasswordInput(attrs={'placeholder': 'Повтор пароль'}))
-    first_name = forms.CharField(label='Имя', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
-    last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
+    password2 = forms.CharField(label='Confirm passrod', widget=forms.PasswordInput(attrs={'placeholder': 'Confirm passrod'}))
+    first_name = forms.CharField(label='First name', widget=forms.TextInput(attrs={'placeholder': 'First name'}))
+    last_name = forms.CharField(label='Last name', widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
     email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Электронная почта'}))
-    num_tel = forms.CharField(label='Номер телефона', widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
-    photo = forms.ImageField(label='Фото', required=False)
+    num_tel = forms.CharField(label='Mobile number', widget=forms.TextInput(attrs={'placeholder': 'Mobile number'}))
+    photo = forms.ImageField(label='Photo', required=False)
 
     class Meta:
-        model = Users
+        model = User
         fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'email', 'num_tel', 'photo')
 
 
 class LoginUserForm(AuthenticationForm):
-    username = forms.CharField(label='Имя пользователя', widget=forms.TextInput(attrs={'placeholder': 'Логин'}))
-    password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
 
 
 class PasswordChangeUserForm(PasswordChangeForm):
-    old_password = forms.CharField(label='Старый пароль',
-                                   widget=forms.PasswordInput(attrs={'placeholder': 'Старый пароль'}))
-    new_password1 = forms.CharField(label='Новый пароль',
-                                    widget=forms.PasswordInput(attrs={'placeholder': 'Новый пароль'}))
-    new_password2 = forms.CharField(label='Подтвердить пароль',
-                                    widget=forms.PasswordInput(attrs={'placeholder': 'Подтвердить пароль'}))
+    old_password = forms.CharField(label='Old password',
+                                   widget=forms.PasswordInput(attrs={'placeholder': 'Old password'}))
+    new_password1 = forms.CharField(label='New password',
+                                    widget=forms.PasswordInput(attrs={'placeholder': 'New password'}))
+    new_password2 = forms.CharField(label='Confrim password',
+                                    widget=forms.PasswordInput(attrs={'placeholder': 'Confrim password'}))
 
 
 class UpdateUserForm(AbstractForm, forms.ModelForm):
-    first_name = forms.CharField(label='Имя', widget=forms.TextInput(attrs={'placeholder': 'Имя'}))
-    last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'placeholder': 'Фамилия'}))
+    first_name = forms.CharField(label='First name', widget=forms.TextInput(attrs={'placeholder': 'First name'}))
+    last_name = forms.CharField(label='Last name', widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
     email = forms.EmailField(label='Email', widget=forms.TextInput(attrs={'placeholder': 'Email'}))
-    num_tel = forms.CharField(max_length=20, label='Номер телефона',
-                              widget=forms.TextInput(attrs={'placeholder': 'Номер телефона'}))
+    num_tel = forms.CharField(max_length=20, label='Mobile number', 
+                              widget=forms.TextInput(attrs={'placeholder': 'Mobile number'}))
 
     class Meta:
-        model = Users
+        model = User
         fields = ('first_name', 'last_name', 'num_tel', 'email')

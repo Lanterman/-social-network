@@ -2,51 +2,76 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">{{ center_friends|default:"Подписчики" }}</h3>
+                <h3 class="modal-title">Followers</h3>
                 <a href="#close" title="Close" class="close">×</a>
             </div>
             <div class="modal-body">
-                {% if user.pk == request.user.pk and subs %}
-                    <p class="groups_home">Заявки на добавления в друзья</p>
-                    {% for us in subs %}
-                        <p class="users_subs" >
-                            {% if us.user.photo %}
-                                <img src="{{ us.user.photo.url }}">
-                            {% else %}
-                                <img src="/media/users/slen/slen.png/">
-                            {% endif %}
-                            <a class="group_name" href="{{ us.user.get_absolute_url }}">
-                                {{ us.user.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
-                            </a><br><br><br>
-                            <a class="primary" href="{% url 'friend_accept' us.user.pk %}">
-                                <i class="fas fa-user-check"> Принять</i></a>
-                            <a id="primary" class="primary" href="{% url 'friend_hide' us.user.pk %}">
-                                <i class="fas fa-user-times"> Скрыть</i>
-                            </a>
-                        </p><br>
-                    {% endfor %}
-                    <hr>
-                    <p class="groups_home">Друзья</p>
+                {% if user.pk == request.user.pk and new_followers %}
+                    <div id="announcements">
+                        <p class="groups_home">Announcements</p>
+                        {% for follower in new_followers %}
+                            <p class="users_subs" id="follower_{{follower.follower_id.id}}">
+                                {% if follower.follower_id.photo %}
+                                    <img src="{{ follower.follower_id.photo.url }}">
+                                {% else %}
+                                    <span class="user_photo">
+                                        <span>No image</span>
+                                    </span>
+                                {% endif %}
+
+                                <a class="group_name" href="{{ follower.follower_id.get_absolute_url }}">
+                                    {{ follower.follower_id.get_full_name|default:'Anonymous'|truncatechars_html:20|title }}
+                                </a><br><br><br>
+
+                                {% if follower.follower_id.pk == request.user.pk %}
+                                    <i>My profile</i>
+                                {% endif %}
+
+                                <span class="check plus" onclick="confirm_follower('{{follower.follower_id.id}}')">
+                                    <i class="fas fa-user-check"> Ok</i>
+                                </span>
+
+                                <span class="check minus" onclick="cancel_follower('{{follower.follower_id.id}}')">
+                                    <i class="fas fa-user-check"> Cancel</i>
+                                </span>
+                            </p>
+                        {% endfor %}
+                        <br/><hr><br/>
+                    </div>
                 {% endif %}
-                {% for us in users %}
-                    <p class="users_subs">
-                        {% if us.photo %}
-                            <img src="{{ us.photo.url }}">
-                        {% else %}
-                            <img src="/media/users/slen/slen.png/">
-                        {% endif %}
-                        <a class="group_name" href="{{ us.get_absolute_url }}">
-                            {{ us.get_full_name|default:'Аноним'|truncatechars_html:23|title }}
-                        </a><br><br><br>
-                        {% if us.pk != request.user.pk %}
-                            <a class="button_home" href="{% url 'check' us.pk %}">Отправить сообщение</a>
-                        {% else %}
-                            <i>Моя страница</i>
-                        {% endif %}
-                    </p><br>
-                {% empty %}
-                    <h4>Нет {{ users_init|default:"подписчиков" }}</h4>
-                {% endfor %}
+                
+                <p class="groups_home">Followers</p>
+                <div id="old_followers">
+                    {% for follower in followers %}
+                        <p class="users_subs" id="oldFollower_{{follower.follower_id.id}}">
+                            {% if follower.follower_id.photo %}
+                                <img src="{{ follower.follower_id.photo.url }}">
+                            {% else %}
+                                <span class="user_photo">
+                                    <span>No image</span>
+                                </span>
+                            {% endif %}
+
+                            <a class="group_name" href="{{ follower.follower_id.get_absolute_url }}">
+                                {{ follower.follower_id.get_full_name|default:'Anonymous'|truncatechars_html:20|title }}
+                            </a><br><br><br>
+                            {% if follower.follower_id.pk != request.user.pk %}
+                                <a class="button_home" href="{% url 'check' follower.follower_id.id %}">Send message</a>
+
+                                {% if user.pk == request.user.pk %}
+                                    <span class="check minus" onclick="remove_follower('{{follower.follower_id.id}}')">
+                                        <i class="fas fa-user-check"> Block</i>
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <i>My profile</i>
+                            {% endif %}
+                            <br>
+                        </p>
+                    {% empty %}
+                        <h4 id="no_followers">No followers</h4>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

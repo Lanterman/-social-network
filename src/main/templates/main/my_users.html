@@ -1,0 +1,29 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+    <p class="user-title"><i class="fas fa-user-friends"></i> {{ title }}</p>
+
+    {% include 'main/include/search.html' %}
+    
+    <div class="followers-block">
+        {% if object_list %}
+            {% for obj_user in object_list %}
+                {% include 'main/include/my_users.html' %}
+            {% endfor %}
+        {% else %}
+            <p id="no-users"><i class="fas fa-ban"></i> No users!</p>
+        {% endif %}
+    </div>
+{% endblock content %}
+
+{% block groups %}
+    {% include 'main/include/aside_my_users.html' %}
+{% endblock groups %}
+
+{% block script %}
+    {% if title == 'My subscriptions' %}
+        <script src="/static/main/js/subscriptions_page.js"></script>
+    {% elif title == 'My followers' %}
+        <script src="/static/main/js/followers_page.js"></script>
+    {% endif %}
+{% endblock script %}

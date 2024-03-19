@@ -8,17 +8,17 @@
     {% csrf_token %}
 
     {% if form.errors %}
-    <p class="errors">Такого пользователя не существует!</p>
+    <p class="errors">This user doesn't exists!</p>
     {% endif %}
 
     {% for f in form %}
     <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>
     <div class="errors">{{ f.errors }}</div>
     {% endfor %}
-    <button class="button" type="submit">Войти</button>
+    <button class="button" type="submit">Sign-in</button>
 
 </form>
 
-<a class="a" href="{% url 'register' %}"><i>Зарегистрироваться</i></a>
+<a class="a" href="{% url 'register' %}"><i>Sign-up</i></a>
 
 {% endblock content %}

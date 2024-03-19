@@ -1,24 +1,26 @@
-<aside id="as">
-    <h3>Рекомендуемые {{ recommendation|default:"группы" }}</h3>
-    {% for g in object %}
-        <div>
-            <a href="{{ g.get_absolute_url }}">
-                <p id="pc">
-                    {% if recommendation %}
-                        <i class="fas fa-user"></i> <span>{{ g.get_full_name|title|truncatechars_html:7|default:"Аноним" }}</span>
-                    {% else %}
-                        <i class="fas fa-users"></i> <span>{{ g.name|title|truncatechars_html:7 }} </span>
-                {% endif %}
+<aside id="aside-block">
+    <h3>Recommended group</h3>
+    {% for group in object %}
+        <div class="aside-group">
+            <a class="recommend-url" href="{{ group.get_absolute_url }}">
+                <p id="aside-group-name">
+                    <i class="fas fa-user"></i>
+                    <span>{{ group.name|title|truncatechars_html:10 }}</span>
                 </p>
-                {% if g.photo %}
-                    <img src="{{ g.photo.url }}">
-                {% else %}
-                    <img src="/media/users/slen/slen.png/">
-                {% endif %}
+
+                <p class="aside-block-image">
+                    {% if group.photo %}
+                        <img src="{{ group.photo.url }}">
+                    {% else %}
+                        <div class="photo_frame" id="no-photo">
+                            <p>No image</p>
+                        </div>
+                    {% endif %}
+                </p>
             </a>
         </div>
     {% empty %}
-        <p>Нет групп!</p>
+        <p>No groups!</p>
     {% endfor %}
     {% block admin %}
     <h2><a id="a" href="/admin/"><i class="fas fa-user-shield"></i> Admin</a></h2>

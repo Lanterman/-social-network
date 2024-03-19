@@ -16,6 +16,26 @@
     box-shadow: 0 0 10px #666;
 }
 
+.panel #chat-message-input {
+    border-radius: 10px;
+}
+
+.panel #chat-message-input:hover {
+    background-color: #dddbdb;
+}
+
+.panel #chat-message-submit {
+    padding: 5px 10px;
+    margin: 50px 30px 0px 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+.panel #chat-message-submit:hover {
+    background-color: #dddbdb;
+}
+
 .messages_us, .unreaded  {
     margin: 15px 10px 20px 40px;
     padding: 10px 0px 10px 10px;
@@ -29,7 +49,7 @@
     height: 25px;
 }
 
-.avatar {
+.dialogue .avatar, .dialogue .photo_frame_mes_user {
     width: 60px;
     height: 60px;
     float: left;
@@ -97,25 +117,28 @@
     resize: none;
 }
 
-#mar_can {
+#block-chats {
     margin-top: 100px;
 }
 
 .chat {
-    text-decoration: None;
     border: solid 1px gray;
+    border-radius: 25px;
     box-shadow: 0 0 10px #666;
-    float: right;
     height: 100px;
-    width: 900px;
-    margin: -60px 250px 80px 0px;
-    background-color: #7FFF00;
+    width: 1000px;
+    margin: -60px 250px 80px 20%;
+    background-color: #ADFF2F;
     padding: 6px 6px 8px 6px;
     color: black;
 }
 
 .chat:hover {
-    background-color: #F8F8FF;
+    background-color: #aeaec4;
+}
+
+.chat .chat-url {
+    text-decoration: None;
 }
 
 .chat #pub_date {
@@ -125,8 +148,7 @@
     margin: 12px 25px 0 0;
 }
 
-.chat img {
-    margin: -70;
+.chat img, .chat .photo_frame_mes_user, .chat img {
     width: 100px;
     height: 100px;
     float: left;
@@ -134,7 +156,25 @@
     border: solid 1px black;
 }
 
-.chat #us_name {
+.chat img {
+    margin-top: -10px;
+}
+
+.chat .photo_frame_mes_user .user-no-photo {
+    margin-top: 40%;
+    margin-left: 12%;
+    font-size: 20px;
+    color: rgb(34, 31, 31);
+}
+
+.dialogue .photo_frame_mes_user .user-no-photo {
+    margin-top: 37%;
+    margin-left: 8%;
+    font-size: 13px;
+    color: rgb(34, 31, 31);
+}
+
+.chat .user_name {
     margin: 10px 0 10px 130px;
     font-size: 25px;
 }
@@ -144,5 +184,14 @@
     margin: 16px 50px 0 130px;
     font-size: 20px;
     color: blue;
-    padding: 4px 0;
+    padding: 4px 10px;
+    border-radius: 10px;
+}
+
+.chat .last_messages .my-message {
+    color: #030303;
+}
+
+.chat .block-last_messages {
+    background-color: #a3f32b;
 }

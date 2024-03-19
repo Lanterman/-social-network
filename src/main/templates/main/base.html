@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="{% static 'users/css/style.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'main/css/add_pub_group.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'main/css/groups.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'main/css/home.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'main/css/messages.css' %}">
@@ -13,7 +14,7 @@
 </head>
 <body>
     <header>
-        <a class="menu" href="{% url 'news' %}"><i class="fas fa-align-justify"></i> Новости</a>
+        <a class="menu" href="{% url 'news' %}"><i class="fas fa-align-justify"></i> News</a>
         {% if request.user.is_authenticated %}
             {% for m in menu %}
                 <a class="menu" href="{% url m.url request.user.pk %}"><i class="fas fa-align-justify"></i> {{ m.name }}</a>
@@ -24,10 +25,10 @@
                 <a href="{% url 'profile' request.user.pk %}">
                     <i class="fas fa-user-circle"></i> {{ request.user.username|truncatechars_html:10 }}
                 </a> |
-                <a href="{% url 'logout' %}"> <i class="fas fa-sign-out-alt"></i> Выйти</a>
+                <a href="{% url 'logout' %}"> <i class="fas fa-sign-out-alt"></i> Sign out</a>
             {% else %}
-                <a href="{% url 'register' %}"><i class="fas fa-fingerprint"></i> Регистрация</a> |
-                <a href="{% url 'login' %}"><i class="fas fa-address-card"></i> Войти</a>
+                <a href="{% url 'register' %}"><i class="fas fa-fingerprint"></i> Sign up</a> |
+                <a href="{% url 'login' %}"><i class="fas fa-address-card"></i> Sign in</a>
             {% endif %}
         </div>
     </header>
@@ -53,5 +54,7 @@
     {% endblock content %}
 
     {% block script %}{% endblock script %}
+
+    <script src="/static/main/js/base_scripts.js"></script>
 </body>
 </html>

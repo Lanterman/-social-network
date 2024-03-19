@@ -37,23 +37,23 @@
 }
 
 #users1 .users #i2 {
-    margin-left: 93px;
+    margin-left: 137px;
 }
 
 #users1 .users #i3 {
-    margin-left: 120px;
+    margin-left: 169px;
 }
 
 #users1 .users #i4 {
-    margin-left: 30px;
+    margin-left: 95px;
 }
 
 #users1 .users #i5 {
-    margin-left: 125px;
+    margin-left: 174px;
 }
 
 #users1 .users #i6 {
-    margin-left: 43px;
+    margin-left: 143px;
 }
 
 .model, .model_user {
@@ -75,7 +75,7 @@
 }
 
 #button_home {
-    margin-top: 25px;
+    margin-top: 10px;
 }
 
 .button_home {
@@ -87,8 +87,33 @@
     text-decoration: None;
 }
 
-.button_home:hover {
+.button_home:hover, #button_home .act_button:hover {
     background-color: yellow;
+}
+
+#button_home .act_button {
+    padding: 5px;
+    margin-bottom: 4px;
+    font-size: 18px;
+    border: solid 2px gray;
+    color: black;
+    background-color: white;
+    color: rgb(22, 22, 214);
+    width: 102px;
+    cursor: pointer;
+}
+
+#button_home #sub_user #sub_user_icon {
+    font-size: 17px;
+    color: rgb(22, 22, 214);
+}
+
+#button_home #unsub_user {
+    color: rgb(212, 65, 65);
+}
+
+#button_home #block_user {
+    color: red;
 }
 
 .modal-body #photo {
@@ -97,7 +122,8 @@
 }
 
 .modal-body button {
-    margin-left: 125px;
+    float: right;
+    margin-right: 25px;
     font-size: 15px;
 }
 
@@ -108,7 +134,7 @@
     margin: 30px 0 -15px 0;
 }
 
-#users_home, .users_subs {
+.users_home, .users_subs {
     width: 350px;
     height: 102px;
     padding: 10px;
@@ -116,16 +142,22 @@
     margin: 0px 0 10px 30px;
 }
 
-#users_home img, .users_subs img {
+.users_home img, .users_subs img, .users_subs .user_photo {
     float: left;
     width: 100px;
     height: 100px;
     border-radius: 50px;
     border: solid 1px black;
-    margin: 0px 30px -5px 10px;
+    margin: 0px 25px -5px 0px;
 }
 
-#users_home img:hover, .group_name:hover, .users_subs img:hover{
+.users_subs .user_photo span {
+    margin-right: 13px;
+    float: right;
+    margin-top: 37px;
+}
+
+.users_home img:hover, .group_name:hover, .users_subs img:hover{
     transform: scale(1.05);
     color: red;
 }
@@ -177,7 +209,7 @@
     font-size: 20px;
     color: blue;
     float: left;
-    margin: 20px 0px 0px 0px;
+    margin: 30px 0px 0px 0px;
 }
 
 #group_count {
@@ -196,6 +228,7 @@
     color: black;
     font-size: 17px;
     margin-left: 5px;
+    cursor: pointer;
 }
 
 #del {
@@ -213,4 +246,34 @@
 .groups_home {
     text-align: center;
     margin: 10px 0 15px 0;
+}
+
+.users_subs .check {
+    color: blue;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.users_subs .check:hover {
+    color: red;
+}
+
+.users_subs .minus {
+    margin-left: 20px;
+    color: rgb(189, 45, 45);
+}
+
+.users_subs .del-sub {
+    color: rgb(189, 45, 45);
+    margin-left: 20px;
+}
+
+.users_subs .del-sub:hover {
+    color: red;
+}
+
+#subs_user .model #count-new-fol {
+    background-color: #a09797;
+    border-radius: 50%;
+    padding: 0px 5px;
 }
