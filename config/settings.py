@@ -36,14 +36,14 @@ SECRET_KEY = os.getenv("DOC_SECRET_KEY", os.environ["SECRET_KEY"])
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv("DOC_DEBUG", os.environ["DEBUG"])) 
 
-ALLOWED_HOSTS = ['*']
-# ALLOWED_HOSTS = json.loads(os.getenv("DOC_ALLOWED_HOSTS", os.environ["ALLOWED_HOSTS"]))
+# allowed hosts
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = json.loads(os.getenv("DOC_ALLOWED_HOSTS", os.environ["ALLOWED_HOSTS"]))
 
-# CORS_ALLOWED_ORIGINS = json.loads(os.getenv("DOC_CORS_ALLOWED_ORIGINS", os.environ["CORS_ALLOWED_ORIGINS"]))
+CORS_ALLOWED_ORIGINS = json.loads(os.getenv("DOC_CORS_ALLOWED_ORIGINS", os.environ["CORS_ALLOWED_ORIGINS"]))
 # CORS_ORIGIN_ALLOW_ALL = bool(os.getenv("DOC_CORS_ORIGIN_ALLOW_ALL", os.environ["CORS_ORIGIN_ALLOW_ALL"]))
 
 # Application definition
-
 INSTALLED_APPS = [
     'daphne',
     'channels',
@@ -54,20 +54,23 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'debug_toolbar',
+    'django.contrib.humanize',
+    'corsheaders',
+
+    # OpenAPI
+    'drf_yasg', # It's working with DRF API
+
+    # apps
     'src.main.apps.MainConfig',
     'src.users.apps.UsersConfig',
 
-    'debug_toolbar',
-    'django.contrib.humanize',
-    # 'corsheaders',
-
-    # OpenAPI
-    # 'drf_yasg',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -101,7 +104,6 @@ ASGI_APPLICATION = "config.asgi.application"
 
 
 # Channels settings
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -114,7 +116,6 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DOC_ENGINE', os.environ['ENGINE_DB']),
@@ -132,7 +133,6 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -151,7 +151,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -167,7 +166,6 @@ DATETIME_INPUT_FORMATS = ["d.m.Y G:i:s"]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = []
@@ -184,6 +182,9 @@ LOGIN_REDIRECT_URL = '/'  # Перенаправление при успешно
 
 AUTH_USER_MODEL = 'users.User'
 
+#Project version
+DEFAULT_VERSION = "2.1.0"
+
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
@@ -193,7 +194,6 @@ PASSWORD_HASHERS = [
 
 
 # Swagger settings
-
 # SWAGGER_SETTINGS = {
 #     'USE_SESSION_AUTH': False,
 #     'SECURITY_DEFINITIONS': {
@@ -207,18 +207,17 @@ PASSWORD_HASHERS = [
 
 
 # JWTToken settings
+JWT_SETTINGS = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=90),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=60),
+    'ALGORITHM': 'HS256',
 
-# JWT_SETTINGS = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=90),
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=60),
-#     'ALGORITHM': 'HS256',
+    'AUTH_HEADER_TYPES': 'Bearer',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 
-#     'AUTH_HEADER_TYPES': 'Bearer',
-#     'USER_ID_FIELD': 'id',
-#     'USER_ID_CLAIM': 'user_id',
-
-#     'AUTH_TOKEN_CLASSES': ('src.user.auth.models.JWTToken',), 
-# }
+    'AUTH_TOKEN_CLASSES': ('src.user.auth.models.JWTToken',), 
+}
 
 
 # Celery settings

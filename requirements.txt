@@ -27,7 +27,6 @@ cryptography==41.0.1
 daphne==4.0.0
 Django==4.2
 django-cors-headers==3.14.0
-django-filter==23.2
 django_debug_toolbar==3.8.1
 djangorestframework==3.14.0
 drf-social-oauth2==2.1.3
