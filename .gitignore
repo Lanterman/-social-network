@@ -11,3 +11,6 @@ __pycache__
 !/src/users/migrations/__init__.py
 
 dump.rdb
+
+.env
+.env.dev
