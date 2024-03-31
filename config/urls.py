@@ -17,7 +17,7 @@ urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
 
     # Oauth2 
-    # re_path(r'^auth/', include('drf_social_oauth2.urls', namespace='drf')),
+    re_path(r'^oauth/', include('social_django.urls')),
 
     #Apps
     path('', include('src.urls')),

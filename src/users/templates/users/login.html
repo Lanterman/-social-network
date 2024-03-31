@@ -20,5 +20,22 @@
 </form>
 
 <a class="a" href="{% url 'register' %}"><i>Sign-up</i></a>
+</br>
+
+<div class="social-api">
+    <p class="google">
+        <a id="google-link" href='{% url "social:begin" "google-oauth2" %}'>
+            <i id="google-icon" class="fa-brands fa-google-plus"></i>
+            <i id="google-name">Google+</i>
+        </a>
+    </p>
+
+    <p class="github">
+        <a id="github-link" href='{% url "social:begin" "github" %}'>
+            <i id="github-icon" class="fa-brands fa-github"></i>
+            <i id="github-name">GitHub+</i>
+        </a>
+    </p>
+</div>
 
 {% endblock content %}

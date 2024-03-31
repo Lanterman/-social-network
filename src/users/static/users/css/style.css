@@ -90,3 +90,43 @@ body {
 .a3 {
     text-decoration: None;
 }
+
+.social-api {
+    margin-top: 130px;
+    margin-left: 610px;
+}
+
+.social-api .google, .social-api .github {
+    background-color: rgb(245, 245, 245);
+    width: 300px;
+    height: 70px;
+}
+
+.social-api .google:hover, .social-api .github:hover {
+    transform: scale(1.05);
+}
+
+.social-api .google #google-link, .social-api .github #github-link {
+    display: block;
+    text-decoration: none;
+}
+
+.social-api #google-icon, .social-api #github-icon {
+    font-size: 50px;
+    padding: 10px;
+    border-right: 2px solid rgb(156, 151, 151);
+}
+
+.social-api #google-name, .social-api #github-name {
+    font-size: 24px;
+    margin: 22px 35% 0 0;
+    float: right;
+}
+
+.social-api #google-icon, .social-api #google-name {
+    color: rgb(42, 112, 218);
+}
+
+.social-api #github-icon, .social-api #github-name {
+    color: rgb(89, 91, 95);
+}
