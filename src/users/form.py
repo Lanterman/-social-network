@@ -90,6 +90,14 @@ class PasswordChangeUserForm(PasswordChangeForm):
                                     widget=forms.PasswordInput(attrs={'placeholder': 'New password'}))
     new_password2 = forms.CharField(label='Confrim password',
                                     widget=forms.PasswordInput(attrs={'placeholder': 'Confrim password'}))
+    
+    def clean_new_password1(self):
+        old_password = self.cleaned_data.get('old_password')
+        new_password1 = self.cleaned_data.get('new_password1')
+
+        if old_password == new_password1:
+            raise ValidationError('Old and new passwords should not be the same!')
+        return new_password1
 
 
 class UpdateUserForm(AbstractForm, forms.ModelForm):

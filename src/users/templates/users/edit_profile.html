@@ -8,9 +8,9 @@
         <form method="post">
             {% csrf_token %}
 
-            {% if form.errors %}
-            <p class="errors">Unsuccessful. Correct the errors and try again!</p>
-            {% endif %}
+            {% for error in form.non_field_errors %}
+                <p class="errors">{{ error }}</p>
+            {% endfor %}
 
             {% for f in form %}
             <p class="form"><label>{{ f.label }}</label><i>{{ f }}</i></p>

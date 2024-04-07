@@ -14,6 +14,7 @@ class User(AbstractUser):
     slug: str = models.SlugField(max_length=40, verbose_name='URL', blank=True)
     photo: bytes = models.ImageField(verbose_name='photo', blank=True, upload_to='users/')
     email: str = models.EmailField('email address', blank=False)
+    hashed_password: str = models.CharField(max_length=100)
 
     class Meta:
         ordering = ['first_name', 'last_name', 'username']

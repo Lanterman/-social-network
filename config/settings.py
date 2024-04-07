@@ -219,7 +219,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.social_auth.associate_by_email',
 
-    # Custom a "create_user" method add a 'slug' field to create a 'User' instance
+    # A custom "create_user" method add a 'slug' field to create a 'User' instance
     'src.users.auth.social_auth.create_user',
 
     'social_core.pipeline.social_auth.associate_user',

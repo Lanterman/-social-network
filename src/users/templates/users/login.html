@@ -7,13 +7,13 @@
 <form method="post">
     {% csrf_token %}
 
-    {% if form.errors %}
-    <p class="errors">This user doesn't exists!</p>
-    {% endif %}
+    {% for error in form.non_field_errors %}
+        <p class="errors">{{ error }}</p>
+    {% endfor %}
 
     {% for f in form %}
-    <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>
-    <div class="errors">{{ f.errors }}</div>
+        <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>
+        <div class="errors">{{ f.errors }}</div>
     {% endfor %}
     <button class="button" type="submit">Sign-in</button>
 

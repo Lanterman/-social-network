@@ -8,7 +8,7 @@
     {% csrf_token %}
 
     {% if form.errors %}
-    <p class="errors">Registration error! Try again.</p>
+        <p class="errors">Registration error! Try again.</p>
     {% endif %}
 
     {% for f in form %}
