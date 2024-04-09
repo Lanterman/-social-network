@@ -1,3 +1,6 @@
+from social_core.pipeline.user import get_username
+
+
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if user:
         return {"is_new": False}
@@ -10,7 +13,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not fields:
         return
     
-    fields["slug"] = fields["username"]
+    fields["slug"] = "oauth_" + fields.get("username")
     user1 = strategy.create_user(**fields)
     return {"is_new": True, "user": user1}
 

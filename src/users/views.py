@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DetailView
 from django.core.exceptions import PermissionDenied
 
+from config import settings
 from src.main.utils import DataMixin, menu
 from . import tasks, services, db_queries
 from .form import LoginUserForm, PasswordChangeUserForm, RegisterUserForm, UpdateUserForm
@@ -27,7 +28,7 @@ class RegisterUser(CreateView):
         user.hashed_password = services.create_hashed_password(form.data["password1"])
         user.save()
 
-        login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
+        login(self.request, user, backend='django.contrib.auth.backends.CustomAuthBackend')
         
         tasks.send_registration_message.delay(user.email)
         return redirect('news')
@@ -50,6 +51,7 @@ class ProfileUser(DataMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["social_prefix"] = settings.SOCIAL_PREFIX
         return context | self.get_context(title='My profile')
 
 
@@ -100,7 +102,7 @@ class PasswordChangeUser(PasswordChangeView, DetailView):
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         self.object = self.get_object()
 
-        if self.object.id != request.user.id:
+        if self.object.id != request.user.id or settings.SOCIAL_PREFIX in self.object.slug:
             raise PermissionDenied()
                 
         context = self.get_context_data(object=self.object)
@@ -137,7 +139,7 @@ class UpdateUserView(DataMixin, UpdateView):
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         self.object = self.get_object()
 
-        if self.object.id != request.user.id:
+        if self.object.id != request.user.id or settings.SOCIAL_PREFIX in self.object.slug:
             raise PermissionDenied()
                 
         context = self.get_context_data(object=self.object)

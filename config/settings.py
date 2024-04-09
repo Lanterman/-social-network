@@ -208,8 +208,11 @@ AUTHENTICATION_BACKENDS = (
     # Google
     'social_core.backends.google.GoogleOAuth2',
 
+    # Custom JWT auth
+    'src.users.auth.backends.CustomAuthBackend',
+
     # Django
-    'django.contrib.auth.backends.ModelBackend',
+    # 'django.contrib.auth.backends.ModelBackend',
 )
 
 SOCIAL_AUTH_PIPELINE = (
@@ -219,7 +222,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.social_auth.associate_by_email',
 
-    # A custom "create_user" method add a 'slug' field to create a 'User' instance
+    # A custom "create_user" function add a 'slug' field to create a 'User' instance
     'src.users.auth.social_auth.create_user',
 
     'social_core.pipeline.social_auth.associate_user',
@@ -229,6 +232,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
+SOCIAL_PREFIX = "oauth"
 
 # GitHub params
 SOCIAL_AUTH_GITHUB_KEY = os.environ.get('DSA_GITHUB_KEY', os.environ['SA_GITHUB_KEY'])
