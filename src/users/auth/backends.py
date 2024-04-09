@@ -17,7 +17,6 @@ class CustomAuthBackend(ModelBackend):
     keyword = settings.JWT_SETTINGS["AUTH_HEADER_TYPES"]
 
     def authenticate(self, request, username=None, password=None, **kwargs):
-        print("----", username, password)
         if username is None:
             username = kwargs.get(UserModel.USERNAME_FIELD)
 

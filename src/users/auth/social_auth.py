@@ -1,6 +1,3 @@
-from social_core.pipeline.user import get_username
-
-
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if user:
         return {"is_new": False}

@@ -208,7 +208,7 @@ AUTHENTICATION_BACKENDS = (
     # Google
     'social_core.backends.google.GoogleOAuth2',
 
-    # Custom JWT auth
+    # Custom auth
     'src.users.auth.backends.CustomAuthBackend',
 
     # Django
