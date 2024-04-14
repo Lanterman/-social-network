@@ -10,13 +10,13 @@ from .models import User
 
 # User password
 # to password hashing
-def create_salt(length: int = 12) -> hex:
+def create_salt(length: int = 12) -> str:
     """Create a random string"""
 
     return "".join(choice(string.ascii_letters) for _ in range(length))
 
 
-def password_hashing(password: str, salt: str | None = None) -> hex:
+def password_hashing(password: str, salt: str | None = None) -> str:
     """Hashing a user password"""
 
     if not salt:
@@ -49,7 +49,6 @@ class ValidateCustomPassword:
         """Check if the password matches the hashed password from database"""
 
         salt, hashed = hashed_password.split("$")
-        print(password_hashing(password, salt), hashed)
         return password_hashing(password, salt) == hashed
     
     def check_custom_password(self, field_key: str, user: User, form) -> None:

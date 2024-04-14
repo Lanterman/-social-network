@@ -7,7 +7,7 @@ from django.views.generic import CreateView, UpdateView, DetailView
 from django.core.exceptions import PermissionDenied
 
 from config import settings
-from src.main.utils import DataMixin, menu
+from src.main.utils import DataMixin
 from . import tasks, services, db_queries
 from .form import LoginUserForm, PasswordChangeUserForm, RegisterUserForm, UpdateUserForm
 from .models import User
@@ -84,7 +84,7 @@ class LoginUser(LoginView):
         return context
 
 
-class PasswordChangeUser(PasswordChangeView, DetailView):
+class PasswordChangeUser(DataMixin, PasswordChangeView, DetailView):
     model = User
     slug_url_kwarg = 'slug'
     template_name = 'users/edit_profile.html'
@@ -95,7 +95,6 @@ class PasswordChangeUser(PasswordChangeView, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Change password'
-        context['menu'] = menu
         context['button'] = 'Submit'
         return context
     

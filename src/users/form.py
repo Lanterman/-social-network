@@ -66,10 +66,10 @@ class AbstractForm(forms.Form):
 class RegisterUserForm(AbstractForm, UserCreationForm):
     username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
-    password2 = forms.CharField(label='Confirm passrod', widget=forms.PasswordInput(attrs={'placeholder': 'Confirm passrod'}))
+    password2 = forms.CharField(label='Confirm password', widget=forms.PasswordInput(attrs={'placeholder': 'Confirm password'}))
     first_name = forms.CharField(label='First name', widget=forms.TextInput(attrs={'placeholder': 'First name'}))
     last_name = forms.CharField(label='Last name', widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
-    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Электронная почта'}))
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Email'}))
     num_tel = forms.CharField(label='Mobile number', widget=forms.TextInput(attrs={'placeholder': 'Mobile number'}))
     photo = forms.ImageField(label='Photo', required=False)
 
