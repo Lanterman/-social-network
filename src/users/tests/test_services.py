@@ -1,6 +1,9 @@
 import pytest
 
-from src.users import services
+from django.test import RequestFactory, TestCase
+from django.urls import reverse
+
+from src.users import services, models, form as user_forms
 
 
 class TestCreateSalt:
@@ -43,7 +46,7 @@ class TestCreateHashedPassword:
         assert len(response[:response.index("$")]), len(response[:response.index("$")])
 
 
-class TestValidateCustomPassword:
+class TestValidateCustomPasswordByPytest:
     """Testing the ValidateCustomPassword class"""
 
     @pytest.fixture(autouse=True)
@@ -51,7 +54,6 @@ class TestValidateCustomPassword:
         _instance = services.ValidateCustomPassword()
         return _instance
     
-    # validate_password fucntion
     @pytest.mark.parametrize(
             "input_data, output_data", 
             [
@@ -73,3 +75,46 @@ class TestValidateCustomPassword:
     def test_validate_password__valid(self, input_data: str, output_data: str, instance: services.ValidateCustomPassword):
         response = instance.validate_password(*input_data)
         assert response == output_data, response
+
+
+class TestValidateCustomPasswordByUnittest(TestCase):
+    """Testing the ValidateCustomPassword class"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.user = models.User.objects.get(id=3)
+        cls.request_obj = RequestFactory()
+        cls.url = reverse("login")
+
+        cls.valid_user_data = {"username": "lanterman", "password": "karmavdele"}
+        cls.invalid_user_data_1 = {"username": "lanerman", "password": "karmavdele"}
+        cls.invalid_user_data_2 = {"username": "lanterman", "password": "karmavdel"}
+
+    def test_valid_check_custom_password(self):
+        """Testing the valid check_custom_password method"""
+
+        request = self.request_obj.post(self.url, data=self.valid_user_data)
+        form = user_forms.LoginUserForm(request, request.POST)
+        services.ValidateCustomPassword().check_custom_password("password", self.user, form)
+        self.assertFalse(form.errors, form.errors)
+    
+    def test_invalid_check_custom_password_by_incorrect_username(self):
+        """Testing the invalid check_custom_password method by incorrect username"""
+
+        request = self.request_obj.post(self.url, data=self.invalid_user_data_1)
+        form = user_forms.LoginUserForm(request, request.POST)
+        services.ValidateCustomPassword().check_custom_password("password", self.user, form)
+        assert form.errors, form.errors
+        assert len(form.errors) == 1, form.errors
+    
+    def test_invalid_check_custom_password_by_incorrect_password(self):
+        """Testing the invalid check_custom_password method by incorrect password"""
+
+        request = self.request_obj.post(self.url, data=self.invalid_user_data_2)
+        form = user_forms.LoginUserForm(request, request.POST)
+        services.ValidateCustomPassword().check_custom_password("password", self.user, form)
+        assert form.errors, form.errors
+        assert len(form.errors) == 1, form.errors
