@@ -1,7 +1,7 @@
+from django.urls import reverse
 from django.test import TestCase
 
 from src.users.models import User
-from django.urls import reverse
 
 
 class RegisterUserTest(TestCase):
@@ -73,7 +73,7 @@ class ProfileUserTest(TestCase):
 
 
 class LogoutViewTest(TestCase):
-    """Testing RegisterUser endpoint"""
+    """Testing the LogoutView endpoint"""
 
     fixtures = ["./config/tests/test_data.json"]
 
@@ -88,7 +88,7 @@ class LogoutViewTest(TestCase):
 
 
 class LoginUserTest(TestCase):
-    """Testing RegisterUser endpoint"""
+    """Testing the LoginUser endpoint"""
 
     fixtures = ["./config/tests/test_data.json"]
 
@@ -109,7 +109,7 @@ class LoginUserTest(TestCase):
 
 
 class PasswordChangeUserTest(TestCase):
-    """Testing RegisterUser endpoint"""
+    """Testing the PasswordChangeUser endpoint"""
 
     fixtures = ["./config/tests/test_data.json"]
 
@@ -149,7 +149,7 @@ class PasswordChangeUserTest(TestCase):
 
 
 class UpdateUserViewTest(TestCase):
-    """Testing RegisterUser endpoint"""
+    """Testing the UpdateUserView endpoint"""
 
     fixtures = ["./config/tests/test_data.json"]
 

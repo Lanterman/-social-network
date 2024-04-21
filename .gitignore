@@ -4,6 +4,7 @@ media
 htmlcov
 
 __pycache__
+.pytest_cache
 
 /src/main/migrations/*
 !/src/main/migrations/__init__.py
