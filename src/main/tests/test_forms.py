@@ -6,16 +6,16 @@ from src.main.form import *
 class AddGroupFormTest(TestCase):
     def test_fields_label(self):
         form = AddGroupForm()
-        self.assertTrue(form.fields['name'].label == 'Название')
-        self.assertTrue(form.fields['photo'].label == 'Аватарка')
+        assert form.fields['name'].label == 'Name', form.fields['name']
+        assert form.fields['photo'].label == 'Photo', form.fields['photo']
 
 
 class AddPublishedFormTest(TestCase):
     def test_fields_label(self):
         form = AddPublishedForm()
-        self.assertTrue(form.fields['name'].label == 'Название')
-        self.assertTrue(form.fields['photo'].label == 'Аватарка')
-        self.assertTrue(form.fields['biography'].label == 'Биография')
+        assert form.fields['name'].label == 'Name', form.fields['name']
+        assert form.fields['photo'].label == 'Photo', form.fields['photo']
+        assert form.fields['biography'].label == 'Biography', form.fields['biography']
 
 
 class RatingFormTest(TestCase):

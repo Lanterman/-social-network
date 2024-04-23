@@ -163,8 +163,8 @@
         "model": "users.follower",
         "pk": 1,
         "fields": {
-            "follower_id": 1,
-            "subscription_id": 2,
+            "follower_id": 3,
+            "subscription_id": 1,
             "date": "2024-04-14T09:26:54.778Z",
             "is_checked": false
         }
@@ -183,10 +183,10 @@
         "model": "users.follower",
         "pk": 3,
         "fields": {
-            "follower_id": 2,
-            "subscription_id": 1,
+            "follower_id": 1,
+            "subscription_id": 3,
             "date": "2024-04-14T09:27:13.703Z",
-            "is_checked": false
+            "is_checked": true
         }
     },
     {
