@@ -40,7 +40,7 @@ services:
 
   celery:
     build: .
-    command: "celery -A Sendji_004 worker -l INFO"
+    command: "celery -A config worker -l INFO"
     volumes:
       - celery_data:/home/user
     depends_on:

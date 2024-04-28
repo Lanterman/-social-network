@@ -13,3 +13,13 @@ user_2 = {
     "slug": "lanterman", 
     "hashed_password": "JBaLpBqMzIda$bd0d35ed587d7b86f943a82efe559c94264009177c831be7afb7286de4eff373"
 }
+
+user_for_create = {
+    "username": "lanterman1", 
+    "password1": "karmavdele",
+    "password2": "karmavdele",
+    "first_name": "fistname",
+    "last_name": "lastname",
+    "email": "qweqweqwe@mail.ru", 
+    "num_tel": 375331231312, 
+}

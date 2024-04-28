@@ -1,8 +1,6 @@
 from django.db.models import Avg
 from django.urls import reverse
 from django.test import TestCase
-from django.core.exceptions import PermissionDenied
-
 
 from src.main.models import Publication, Group, Comment, Rating, RatingStar
 
@@ -10,18 +8,9 @@ from src.users.models import User, Follower, Chat, Message
 
 
 class NewsViewTest(TestCase):
-    """Testing the NewsView class methods"""
+    """Testing theendpoint"""
 
     fixtures = ["./config/tests/test_data.json"]
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.publication_1 = Publication.objects.get(pk=1)
-        cls.publication_2 = Publication.objects.get(pk=2)
-
-        cls.pub_1_rating = cls.publication_1.rating_set.all()
-        cls.pub_2_rating = cls.publication_2.rating_set.all()
 
     def test_view_url(self):
         request = self.client.get('')
@@ -49,108 +38,100 @@ class NewsViewTest(TestCase):
 
     def test_publication_rating(self):
         request = self.client.get(reverse('news'))
+        page_obj = request.context["page_obj"]
         assert request.status_code == 200, request.status_code
-        assert len(self.pub_1_rating) == 0, self.pub_1_rating
-        assert len(self.pub_2_rating) == 0, self.pub_2_rating
-
+        assert len(page_obj) == 2, page_obj
+        assert page_obj[0].__str__() == "Second publication", page_obj[0].__str__()
+        assert page_obj[1].__str__() == "publication", page_obj[1].__str__()
+        assert page_obj[0].rat == None, page_obj[0].rat
+        assert page_obj[1].rat == None, page_obj[1].rat
 
 class HomeViewTest(TestCase):
-    """Testing the HomeView class methods"""
+    """Testing the Homeendpoint"""
 
     fixtures = ["./config/tests/test_data.json"]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_1 = User.objects.get(id=1)
-        cls.user_2 = User.objects.get(id=2)
-        cls.user_3 = User.objects.get(id=3)
-
-        cls.follower_1 = Follower.objects.get(id=1)
-        cls.follower_2 = Follower.objects.get(id=2)
-        cls.follower_3 = Follower.objects.get(id=3)
-        
-        cls.publication_1 = Publication.objects.get(id=1)
-        cls.publication_2 = Publication.objects.get(id=2)
-
-        cls.pub_1_rating = cls.publication_1.rating_set.all()
-        cls.pub_2_rating = cls.publication_2.rating_set.all()
+        cls.user = User.objects.get(id=3)
     
     def test_view_url(self):
-        request = self.client.get(reverse('home', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('home', kwargs={'user_pk': self.user.pk}))
         assert request.status_code == 302, request.status_code
 
-        request = self.client.get(reverse('home', kwargs={'user_pk': self.user_3.pk}), follow=True)
+        request = self.client.get(reverse('home', kwargs={'user_pk': self.user.pk}), follow=True)
         assert request.status_code == 200, request.status_code
         self.assertTemplateUsed(request, 'users/login.html')
 
         self.client.login(username='lanterman', password='karmavdele')
-        request = self.client.get(reverse('home', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('home', kwargs={'user_pk': self.user.pk}))
         assert request.status_code == 200, request.status_code
-        assert len(request.templates) == 6, request.templates
+        assert len(request.templates) == 7, request.templates
 
     def test_user_followers(self):
         self.client.login(username='lanterman', password='karmavdele')
-        request = self.client.get(reverse('home', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('home', kwargs={'user_pk': self.user.pk}))
         assert request.status_code == 200, request.status_code
         assert len(request.context["subs"]) == 1, len(request.context["subs"])
         assert len(request.context["followers"]) == 1, len(request.context["followers"])
         assert len(request.context["new_followers"]) == 1, len(request.context["new_followers"])
 
     def test_publication_rating(self):
-        self.client.login(username='lanterman', password='karmavdele')
-        request = self.client.get(reverse('home', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('news'))
+        page_obj = request.context["page_obj"]
         assert request.status_code == 200, request.status_code
-        assert len(self.pub_1_rating) == 0, self.pub_1_rating
-        assert len(self.pub_2_rating) == 0, self.pub_2_rating
+        assert len(page_obj) == 2, page_obj
+        assert page_obj[0].__str__() == "Second publication", page_obj[0].__str__()
+        assert page_obj[1].__str__() == "publication", page_obj[1].__str__()
+        assert page_obj[0].rat == None, page_obj[0].rat
+        assert page_obj[1].rat == None, page_obj[1].rat
 
     def test_context_if_logged_in(self):
         self.client.login(username='lanterman', password='karmavdele')
-        request = self.client.get(reverse('home', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('home', kwargs={'user_pk': self.user.pk}))
         assert "user" in request.context, request.context
         assert request.context["user"].__str__() == "lanterman", request.context["user"]
 
     def test_context_if_not_logged_in(self):
-        request = self.client.get(reverse('home', kwargs={'user_pk': self.user_3.pk}))
-        self.assertRedirects(request, f'/users/login/?next=/home/{self.user_3.id}/')
+        request = self.client.get(reverse('home', kwargs={'user_pk': self.user.pk}))
+        self.assertRedirects(request, f'/users/login/?next=/home/{self.user.id}/')
         self.assertFalse(request.context)
 
     def test_redirect(self):
-        resp = self.client.get(reverse('home', kwargs={'user_pk': self.user_3.id}))
-        self.assertRedirects(resp, f'/users/login/?next=/home/{self.user_3.id}/')
+        resp = self.client.get(reverse('home', kwargs={'user_pk': self.user.id}))
+        self.assertRedirects(resp, f'/users/login/?next=/home/{self.user.id}/')
 
 
 class MessagesViewTest(TestCase):
-    """Testing the MessagesView class methods"""
+    """Testing the Messagesendpoint"""
 
     fixtures = ["./config/tests/test_data.json"]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_1 = User.objects.get(id=1)
-        cls.user_2 = User.objects.get(id=2)
-        cls.user_3 = User.objects.get(id=3)
+        cls.user = User.objects.get(id=3)
 
         cls.chat_1 = Chat.objects.get(id=1)
         cls.chat_2 = Chat.objects.get(id=2)
 
     def test_view_url(self):
-        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user.pk}))
         assert request.status_code == 302, request.status_code
 
-        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user_3.pk}), follow=True)
+        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user.pk}), follow=True)
         assert request.status_code == 200, request.status_code
         self.assertTemplateUsed(request, 'users/login.html')
 
         self.client.login(username='lanterman', password='karmavdele')
-        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user.pk}))
         assert request.status_code == 200, request.status_code
         assert len(request.templates) == 4, request.templates
 
     def test_chat_members(self):
         self.client.login(username='lanterman', password='karmavdele')
-        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user.pk}))
         assert request.status_code == 200, request.status_code
         assert len(request.context["chats"]) == 1, request.context["chats"]
         assert self.chat_1 not in request.context["chats"], request.context["chats"]
@@ -158,33 +139,29 @@ class MessagesViewTest(TestCase):
 
     def test_context_if_logged_in(self):
         self.client.login(username='lanterman', password='karmavdele')
-        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user_3.pk}))
+        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user.pk}))
         assert request.context["title"] == "My messages", request.context["title"]
         assert "user" in request.context, request.context
         assert request.context["user"].__str__() == "lanterman", request.context["user"]
 
     def test_context_if_not_logged_in(self):
-        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user_3.pk}))
-        self.assertRedirects(request, f'/users/login/?next=/messages/{self.user_3.id}/')
+        request = self.client.get(reverse('messages', kwargs={'user_pk': self.user.pk}))
+        self.assertRedirects(request, f'/users/login/?next=/messages/{self.user.id}/')
         self.assertFalse(request.context)
 
     def test_redirect(self):
-        resp = self.client.get(reverse('messages', kwargs={'user_pk': self.user_3.id}))
-        self.assertRedirects(resp, f'/users/login/?next=/messages/{self.user_3.id}/')
+        resp = self.client.get(reverse('messages', kwargs={'user_pk': self.user.id}))
+        self.assertRedirects(resp, f'/users/login/?next=/messages/{self.user.id}/')
 
 
 class ChatDetailViewTest(TestCase):
-    """Testing the ChatDetailView class methods"""
+    """Testing the ChatDetailView endpoint"""
 
     fixtures = ["./config/tests/test_data.json"]
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_1 = User.objects.get(id=1)
-        cls.user_2 = User.objects.get(id=2)
-        cls.user_3 = User.objects.get(id=3)
-
         cls.chat_1 = Chat.objects.get(id=1)
         cls.chat_2 = Chat.objects.get(id=2)
 
@@ -234,544 +211,554 @@ class ChatDetailViewTest(TestCase):
         self.assertRedirects(request, f'/users/login/?next=/chat/{self.chat_2.id}/')
 
 
-# class CreateDialogViewTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         for user_num in range(3):
-#             Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-#                                  last_name='user_%s' % user_num, num_tel=12345678910,
-#                                  email='user_%s@mail.ru' % user_num)
-#         chat = [Chat.objects.create() for n in range(2)]
-#         users = Users.objects.all()
-#         chat[0].members.add(users[0], users[1])
-#         chat[1].members.add(users[1], users[2])
-
-#     def test_chat(self):
-#         chat = Chat.objects.all()
-#         users = Users.objects.all()
-#         self.assertTrue(users[2] in chat[1].members.all())
-#         self.assertFalse(users[2] in chat[0].members.all())
-#         self.assertEqual(users[1] in chat[0].members.all(), users[0] in chat[0].members.all())
-
-
-# class FriendsViewTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         for user_num in range(3):
-#             Users.objects.create_user(username='user_%s' % user_num, password='12345', num_tel=12345678910,
-#                                       email='user_%s@mail.ru' % user_num)
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='user_1')
-#         resp = self.client.get(reverse('friends', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_view_template(self):
-#         self.client.login(username='user_1', password='12345')
-#         user = Users.objects.get(username='user_1')
-#         resp = self.client.get(f'/friends/{user.pk}/')
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTemplateUsed(resp, 'main/friends.html')
-
-#     def test_context_if_logged_in(self):
-#         self.client.login(username='user_1', password='12345')
-#         user = Users.objects.get(username='user_1')
-#         resp = self.client.get(f'/friends/{user.pk}/')
-#         self.assertEqual(str(resp.context['user']), 'user_1')
-#         self.assertTrue('title' in resp.context)
-#         self.assertEqual(resp.context['title'], 'Мои друзья')
-
-#     def test_context_if_not_logged_in(self):
-#         user = Users.objects.get(username='user_1')
-#         resp = self.client.get(f'/friends/{user.pk}/')
-#         self.assertRedirects(resp, f'/users/login/?next=/friends/{user.pk}/')
-#         self.assertFalse(resp.context)
-
-#     def test_redirect(self):
-#         user = Users.objects.get(username='user_1')
-#         resp = self.client.get(f'/friends/{user.pk}/')
-#         self.assertRedirects(resp, f'/users/login/?next=/friends/{user.pk}/')
-
-
-# class GroupsViewTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         Groups.objects.create(name='group', slug='group')
-#         Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
-#                                   num_tel=12345678910, email='test1@mail.ru', slug='user1')
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='testuser1')
-#         resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_view_template(self):
-#         self.client.login(username='testuser1', password='12345')
-#         user = Users.objects.get(username='testuser1')
-#         resp = self.client.get(f'/groups/{user.pk}/')
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTemplateUsed(resp, 'main/groups.html')
-
-#     def test_context_if_logged_in(self):
-#         self.client.login(username='testuser1', password='12345')
-#         user = Users.objects.get(username='testuser1')
-#         resp = self.client.get(f'/groups/{user.pk}/')
-#         self.assertEqual(str(resp.context['user']), 'testuser1')
-#         self.assertTrue('title' in resp.context)
-#         self.assertEqual(resp.context['title'], 'Мои группы')
-
-#     def test_context_if_not_logged_in(self):
-#         user = Users.objects.get(username='testuser1')
-#         resp = self.client.get(f'/groups/{user.pk}/')
-#         self.assertRedirects(resp, f'/users/login/?next=/groups/{user.pk}/')
-#         self.assertFalse(resp.context)
-
-#     def test_redirect(self):
-#         user = Users.objects.get(username='testuser1')
-#         resp = self.client.get(f'/groups/{user.pk}/')
-#         self.assertRedirects(resp, f'/users/login/?next=/groups/{user.pk}/')
-
-
-# class AddGroupTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         Groups.objects.create(name='group', slug='group')
-#         Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
-#                                   num_tel=12345678910, email='test1@mail.ru', slug='user1')
-
-#     def test_view_url(self):
-#         resp = self.client.get(reverse('add_group'), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_view_template(self):
-#         self.client.login(username='testuser1', password='12345')
-#         resp = self.client.get('/groups/add_group/')
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTemplateUsed(resp, 'main/add_pub_group.html')
-
-#     def test_context_if_logged_in(self):
-#         self.client.login(username='testuser1', password='12345')
-#         resp = self.client.get('/groups/add_group/')
-#         self.assertEqual(str(resp.context['user']), 'testuser1')
-#         self.assertTrue('title' in resp.context)
-#         self.assertEqual(resp.context['title'], 'Создать группу')
-
-#     def test_context_if_not_logged_in(self):
-#         resp = self.client.get('/groups/add_group/')
-#         self.assertRedirects(resp, f'/users/login/?next=/groups/add_group/')
-#         self.assertFalse(resp.context)
-
-#     def test_redirect(self):
-#         resp = self.client.get('/groups/add_group/')
-#         self.assertRedirects(resp, f'/users/login/?next=/groups/add_group/')
-
-
-# class DetailGroupViewTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         group = Groups.objects.create(name='group_1', slug='group_1')
-#         Groups.objects.create(name='group_2', slug='group_2')
-#         for user_num in range(2):
-#             Users.objects.create_user(username='user_%s' % user_num, password='12345', num_tel=12345678910,
-#                                       email='user_%s@mail.ru' % user_num)
-#         user = Users.objects.get(username='user_1')
-#         group.users.add(user)
-#         Published.objects.create(name='pub_1', slug='pub_1', group=group)
-
-#     def test_view_url(self):
-#         group = Groups.objects.get(name='group_1')
-#         resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_group_and_user(self):
-#         group = Groups.objects.all()
-#         users = Users.objects.all()
-#         self.assertEqual(group[0].users.count() == 1, group[1].users.count() == 0)
-#         self.assertEqual(users[0].groups_users.count() == 1, users[1].groups_users.count() == 0)
-
-#     def test_published_rating(self):
-#         published = Published.objects.annotate(rat=Avg('rating__star_id')).order_by('-date').get(name='pub_1')
-#         self.assertEqual(published.rat, None)
-
-#     def test_view_template(self):
-#         self.client.login(username='user_1', password='12345')
-#         group = Groups.objects.get(name='group_1')
-#         resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}))
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTemplateUsed(resp, 'main/detail_group.html')
-
-#     def test_context_if_not_logged_in(self):
-#         group = Groups.objects.get(name='group_1')
-#         resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}))
-#         self.assertRedirects(resp, f'/users/login/?next=/groups/{group.slug}/')
-#         self.assertFalse(resp.context)
-
-#     def test_redirect(self):
-#         group = Groups.objects.get(name='group_1')
-#         resp = self.client.get(f'/groups/{group.slug}/')
-#         self.assertRedirects(resp, f'/users/login/?next=/groups/{group.slug}/')
-
-
-# class AddPublishedTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         group = Groups.objects.create(name='group', slug='group')
-#         Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
-#                                   num_tel=12345678910, email='test1@mail.ru', slug='user1')
-#         Published.objects.create(name='pub', slug='pub', group=group)
-
-#     def test_view_url(self):
-#         group = Groups.objects.get(name='group')
-#         resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_view_template(self):
-#         self.client.login(username='testuser1', password='12345')
-#         group = Groups.objects.get(name='group')
-#         resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}))
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTemplateUsed(resp, 'main/add_pub_group.html')
-
-#     def test_context_if_logged_in(self):
-#         self.client.login(username='testuser1', password='12345')
-#         group = Groups.objects.get(name='group')
-#         resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}))
-#         self.assertEqual(str(resp.context['user']), 'testuser1')
-#         self.assertTrue('title' in resp.context)
-#         self.assertEqual(resp.context['title'], 'Создать запись')
-
-#     def test_context_if_not_logged_in(self):
-#         group = Groups.objects.get(name='group')
-#         resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}))
-#         self.assertRedirects(resp, f'/users/login/?next=/groups/{group.slug}/add_published/')
-#         self.assertFalse(resp.context)
-
-#     def test_redirect(self):
-#         group = Groups.objects.get(name='group')
-#         resp = self.client.get(reverse('add_published', kwargs={'group_slug': group.slug}))
-#         self.assertRedirects(resp, f'/users/login/?next=/groups/{group.slug}/add_published/')
-
-
-# class DetailPublishTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
-#                                   num_tel=12345678910, email='test1@mail.ru', slug='user1')
-#         group = Groups.objects.create(name='group_1', slug='group_1')
-#         Published.objects.create(name='pub_1', slug='pub_1', group=group)
-
-#     def test_view_url(self):
-#         pub = Published.objects.get(name='pub_1')
-#         resp = self.client.get(reverse('detail_publish', kwargs={'publish_slug': pub.slug}))
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_published_rating(self):
-#         published = Published.objects.annotate(rat=Avg('rating__star_id')).order_by('-date').get(name='pub_1')
-#         self.assertEqual(published.rat, None)
-
-#     def test_view_template(self):
-#         pub = Published.objects.get(name='pub_1')
-#         resp = self.client.get(f'/publish/{pub.slug}/')
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTemplateUsed(resp, 'main/detail_publish.html')
-
-#     def test_if_logged_in(self):
-#         self.client.login(username='testuser1', password='12345')
-#         pub = Published.objects.get(name='pub_1')
-#         resp = self.client.get(f'/publish/{pub.slug}/')
-#         self.assertEqual(str(resp.context['user']), 'testuser1')
-
-
-# class PublishedCommentsViewTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         user = Users.objects.create_user(username='testuser1', password='12345', first_name='user1', last_name='user1',
-#                                          num_tel=12345678910, email='test1@mail.ru', slug='user1')
-#         group = Groups.objects.create(name='group_1', slug='group_1')
-#         pub = Published.objects.create(name='pub_1', slug='pub_1', group=group)
-#         for com_num in range(7):
-#             Comments.objects.create(published=pub, users=user, biography='why_%s???' % com_num)
-
-#     def test_view_url(self):
-#         publish = Published.objects.get(name='pub_1')
-#         resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_view_template(self):
-#         publish = Published.objects.get(name='pub_1')
-#         resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTemplateUsed(resp, 'main/comments.html')
-
-#     def test_context_if_logged_in(self):
-#         self.client.login(username='testuser1', password='12345')
-#         publish = Published.objects.get(name='pub_1')
-#         resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
-#         self.assertEqual(str(resp.context['user']), 'testuser1')
-#         self.assertTrue('title' in resp.context)
-#         self.assertEqual(resp.context['title'], 'Комментарии')
-
-
-# class DelGroupTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         Groups.objects.create(name='group', slug='group')
-#         Users.objects.create(username='user', first_name='user', last_name='user', num_tel=12345678910,
-#                              email='user@mail.ru')
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='user')
-#         resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_del_group(self):
-#         group = Groups.objects.filter(name='group')
-#         self.assertEqual(group.count(), 1)
-#         Groups.objects.get(slug='group').delete()
-#         self.assertEqual(group.count(), 0)
-
-
-# class DelPubGroupTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         group = Groups.objects.create(name='group', slug='group')
-#         Published.objects.create(name='pub_1', slug='pub_1', group=group)
-
-#     def test_view_url(self):
-#         group = Groups.objects.get(name='group')
-#         resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_del_pub_group(self):
-#         pub = Published.objects.filter(name='pub_1')
-#         self.assertTrue(pub.count() == 1)
-#         pub.delete()
-#         self.assertTrue(pub.count() == 0)
-
-
-# class DelPublishedTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         group = Groups.objects.create(name='group', slug='group')
-#         Published.objects.create(name='pub_1', slug='pub_1', group=group)
-#         Users.objects.create(username='user', first_name='user', last_name='user', num_tel=12345678910,
-#                              email='user@mail.ru')
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='user')
-#         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_del_pub_group(self):
-#         pub = Published.objects.filter(name='pub_1')
-#         self.assertTrue(pub.count() == 1)
-#         pub.delete()
-#         self.assertTrue(pub.count() == 0)
-
-
-# class FriendActivityTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         for user_num in range(1, 4):
-#             Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-#                                  last_name='user_%s' % user_num, num_tel=12345678910,
-#                                  email='user_%s@mail.ru' % user_num)
-#         users = Users.objects.all()
-#         users[0].friends.add(users[1])
-#         PostSubscribers.objects.create(owner='user_2', user=users[0])
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='user_1')
-#         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_del_friend(self):
-#         users = Users.objects.all()
-#         post = PostSubscribers.objects.filter(owner=users[0].username)
-#         self.assertEqual(users[0].friends.count() == 1, post.count() == 0)
-#         users[0].friends.remove(users[1])
-#         post.create(owner=users[0].username, user_id=users[1].id)
-#         self.assertEqual(users[0].friends.count() == 0, post.count() == 1)
-
-#     def test_create_subs(self):
-#         users = Users.objects.all()
-#         post = PostSubscribers.objects.filter(owner=users[0].username)
-#         self.assertEqual(post.count(), 0)
-#         post.create(owner=users[0].username, user_id=users[1].id)
-#         self.assertEqual(post.count(), 1)
-
-#     def test_add_friend(self):
-#         users = Users.objects.all()
-#         post = PostSubscribers.objects.all()
-#         self.assertEqual(post.count() == 1, users[2].friends.count() == 0)
-#         users[2].friends.add(users[0])
-#         post.delete()
-#         self.assertEqual(post.count() == 0, users[2].friends.count() == 1)
-
-#     def test_del_post(self):
-#         post = PostSubscribers.objects.all()
-#         self.assertEqual(post.count(), 1)
-#         post.delete()
-#         self.assertEqual(post.count(), 0)
-
-
-# class FriendHideTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         user = Users.objects.create(username='user', first_name='user', last_name='user', num_tel=12345678910)
-#         PostSubscribers.objects.create(owner='user_2', user=user)
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='user')
-#         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_del_post(self):
-#         post = PostSubscribers.objects.filter(owner='user_2')
-#         self.assertFalse(post[0].escape)
-#         post.update(escape=True)
-#         self.assertTrue(post[0].escape)
-
-
-# class FriendAcceptTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         for user_num in range(1, 3):
-#             Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-#                                  last_name='user_%s' % user_num, num_tel=12345678910,
-#                                  email='user_%s@mail.ru' % user_num)
-#         users = Users.objects.all()
-#         PostSubscribers.objects.create(owner=users[1].username, user=users[0])
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='user_1')
-#         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_add_friend(self):
-#         users = Users.objects.all()
-#         post = PostSubscribers.objects.all()
-#         self.assertEqual(post.count() == 1, users[1].friends.count() == 0)
-#         users[1].friends.add(users[0])
-#         post.delete()
-#         self.assertEqual(post.count() == 0, users[1].friends.count() == 1)
-
-
-# class FriendDelPrimaryTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         for user_num in range(1, 3):
-#             Users.objects.create(username='user_%s' % user_num, first_name='user_%s' % user_num,
-#                                  last_name='user_%s' % user_num, num_tel=12345678910,
-#                                  email='user_%s@mail.ru' % user_num)
-#         users = Users.objects.all()
-#         users[0].friends.add(users[1])
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='user_1')
-#         resp = self.client.get(reverse('home', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_del_friend(self):
-#         users = Users.objects.all()
-#         post = PostSubscribers.objects.all()
-#         self.assertEqual(users[0].friends.count() == 1, post.count() == 0)
-#         users[0].friends.remove(users[1])
-#         post.create(owner=users[0].username, user_id=users[1].id)
-#         self.assertEqual(users[0].friends.count() == 0, post.count() == 1)
-
-
-# class GroupActivityTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         Users.objects.create(username='user', first_name='user', last_name='user', num_tel=123456789, email='s@mail.ru')
-#         user = Users.objects.create(username='user2', first_name='user2', last_name='user2', num_tel=12345678910)
-#         group = Groups.objects.create(name='group', slug='group')
-#         group.users.add(user)
-
-#     def test_view_url(self):
-#         group = Groups.objects.get(name='group')
-#         resp = self.client.get(reverse('detail_group', kwargs={'group_slug': group.slug}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_remove_user(self):
-#         user = Users.objects.get(username='user2')
-#         group = Groups.objects.get(name='group')
-#         self.assertEqual(group.users.count(), 1)
-#         group.users.remove(user)
-#         self.assertEqual(group.users.count(), 0)
-
-#     def test_add_user(self):
-#         user = Users.objects.get(username='user')
-#         group = Groups.objects.get(name='group')
-#         self.assertEqual(group.users.count(), 1)
-#         group.users.add(user)
-#         self.assertEqual(group.users.count(), 2)
-
-
-# class GroupQuitPrimaryTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         user = Users.objects.create(username='user', first_name='user', last_name='user', num_tel=12345678910)
-#         group = Groups.objects.create(name='group', slug='group')
-#         group.users.add(user)
-
-#     def test_view_url(self):
-#         user = Users.objects.get(username='user')
-#         resp = self.client.get(reverse('groups', kwargs={'user_pk': user.pk}), follow=True)
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_remove_user(self):
-#         user = Users.objects.get(username='user')
-#         group = Groups.objects.get(name='group')
-#         self.assertEqual(group.users.count(), 1)
-#         group.users.remove(user)
-#         self.assertEqual(group.users.count(), 0)
-
-
-# class LikeViewTest(TestCase):
-
-#     @classmethod
-#     def setUpTestData(cls):
-#         Users.objects.create(username='user', first_name='user', last_name='user', num_tel=123456789, email='s@mail.ru')
-#         user = Users.objects.create(username='user2', first_name='user2', last_name='user2', num_tel=12345678910)
-#         group = Groups.objects.create(name='group', slug='group')
-#         pub = Published.objects.create(name='pub', slug='pub', group=group)
-#         comment = Comments.objects.create(published=pub, users=user, biography='why???')
-#         comment.like.add(user)
-
-#     def test_view_url(self):
-#         publish = Published.objects.get(name='pub')
-#         resp = self.client.get(reverse('comments', kwargs={'publish_slug': publish.slug}))
-#         self.assertEqual(resp.status_code, 200)
-
-#     def test_remove_user(self):
-#         user = Users.objects.get(username='user2')
-#         comment = Comments.objects.get(biography='why???')
-#         self.assertEqual(comment.like.count(), 1)
-#         comment.like.remove(user)
-#         self.assertEqual(comment.like.count(), 0)
-
-#     def test_add_user(self):
-#         user = Users.objects.get(username='user')
-#         comment = Comments.objects.get(biography='why???')
-#         self.assertEqual(comment.like.count(), 1)
-#         comment.like.add(user)
-#         self.assertEqual(comment.like.count(), 2)
+class CreateDialogViewTest(TestCase):
+    """Testing the CreateDialogView endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.get(id=3)
+
+    def test_chat_exists(self):
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.get(reverse('check', kwargs={'user_id': 1}))
+        assert request.status_code == 302, request.status_code
+        assert request.context == None, request.context
+
+        request = self.client.get(reverse('check', kwargs={'user_id': 1}), follow=True)
+        count_chats = Chat.objects.count()
+        assert request.status_code == 200, request.status_code
+        assert request.context["title"] == "My message", request.context["title"]
+        assert len(request.templates) == 4, len(request.templates)
+        assert count_chats == 2, count_chats
+    
+    def test_chat_does_not_exist(self):
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.get(reverse('check', kwargs={'user_id': 2}))
+        assert request.status_code == 302, request.status_code
+        assert request.context == None, request.context
+
+        request = self.client.get(reverse('check', kwargs={'user_id': 2}), follow=True)
+        count_chats = Chat.objects.count()
+        assert request.status_code == 200, request.status_code
+        assert request.context["title"] == "My message", request.context["title"]
+        assert len(request.templates) == 3, len(request.templates)
+        assert count_chats == 3, count_chats
+
+
+class FollowersViewTest(TestCase):
+    """Testing the FollowersView endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.get(id=3)
+
+    def test_view_url(self):
+        request = self.client.get(reverse('followers', kwargs={'user_pk': self.user.pk}))
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.get(reverse('followers', kwargs={'user_pk': self.user.pk}), follow=True)
+        assert request.status_code == 200, request.status_code
+        self.assertTemplateUsed(request, 'users/login.html')
+
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('followers', kwargs={'user_pk': self.user.pk}))
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 6, request.templates
+    
+    def test_context_if_logged_in(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('followers', kwargs={'user_pk': self.user.pk}))
+        assert request.context["title"] == "My followers", request.context["title"]
+        assert request.context["name"] == "Search followers", request.context["name"]
+        assert len(request.context["object_list"]) == 2, request.context["object_list"]
+        assert request.context["object_list"][0].__str__() == "user", request.context["object_list"]
+        assert request.context["object_list"][1].__str__() == "admin", request.context["object_list"]
+
+    def test_context_if_not_logged_in(self):
+        request = self.client.get(reverse('followers', kwargs={'user_pk': self.user.pk}))
+        self.assertRedirects(request, f'/users/login/?next=/followers/{self.user.id}/')
+        self.assertFalse(request.context)
+
+    def test_redirect(self):
+        request = self.client.get(reverse('followers', kwargs={'user_pk': self.user.pk}))
+        self.assertRedirects(request, f'/users/login/?next=/followers/{self.user.id}/')
+
+
+class SubscriptionsViewTest(TestCase):
+    """Testing the SubscriptionsView endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.get(id=3)
+
+    def test_view_url(self):
+        request = self.client.get(reverse('subscriptions', kwargs={'user_pk': self.user.pk}))
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.get(reverse('subscriptions', kwargs={'user_pk': self.user.pk}), follow=True)
+        assert request.status_code == 200, request.status_code
+        self.assertTemplateUsed(request, 'users/login.html')
+
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('subscriptions', kwargs={'user_pk': self.user.pk}))
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 5, request.templates
+    
+    def test_context_if_logged_in(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('subscriptions', kwargs={'user_pk': self.user.pk}))
+        assert request.context["title"] == "My subscriptions", request.context["title"]
+        assert request.context["name"] == "Search users", request.context["name"]
+        assert len(request.context["object_list"]) == 1, request.context["object_list"]
+        assert request.context["object_list"][0].__str__() == "admin", request.context["object_list"]
+
+    def test_context_if_not_logged_in(self):
+        request = self.client.get(reverse('subscriptions', kwargs={'user_pk': self.user.pk}))
+        self.assertRedirects(request, f'/users/login/?next=/subscriptions/{self.user.id}/')
+        self.assertFalse(request.context)
+
+    def test_redirect(self):
+        request = self.client.get(reverse('subscriptions', kwargs={'user_pk': self.user.pk}))
+        self.assertRedirects(request, f'/users/login/?next=/subscriptions/{self.user.id}/')
+
+
+class GroupsViewTest(TestCase):
+    """Testing the GroupsView endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.get(id=3)
+    
+    def test_view_url(self):
+        request = self.client.get(reverse('groups', kwargs={'user_pk': self.user.pk}))
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.get(reverse('groups', kwargs={'user_pk': self.user.pk}), follow=True)
+        assert request.status_code == 200, request.status_code
+        self.assertTemplateUsed(request, 'users/login.html')
+
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('groups', kwargs={'user_pk': self.user.pk}))
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 5, request.templates
+    
+    def test_context_if_logged_in(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('groups', kwargs={'user_pk': self.user.pk}))
+        assert request.context["title"] == "My groups", request.context["title"]
+        assert request.context["name"] == "Search for groups", request.context["name"]
+        assert len(request.context["groups"]) == 1, request.context["groups"]
+
+    def test_context_if_not_logged_in(self):
+        request = self.client.get(reverse('groups', kwargs={'user_pk': self.user.pk}))
+        self.assertRedirects(request, f'/users/login/?next=/groups/{self.user.id}/')
+        self.assertFalse(request.context)
+
+    def test_redirect(self):
+        request = self.client.get(reverse('groups', kwargs={'user_pk': self.user.pk}))
+        self.assertRedirects(request, f'/users/login/?next=/groups/{self.user.id}/')
+
+
+class AddGroupTest(TestCase):
+    """Testing the AddGroup endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+    
+    def test_view_url(self):
+        request = self.client.get(reverse('add_group'))
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.get(reverse('add_group'), follow=True)
+        assert request.status_code == 200, request.status_code
+        self.assertTemplateUsed(request, 'users/login.html')
+
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('add_group'))
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 15, request.templates
+    
+    def test_context_if_logged_in(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('add_group'))
+        assert request.context["title"] == "Create group", request.context["title"]
+
+    def test_context_if_not_logged_in(self):
+        request = self.client.get(reverse('add_group'))
+        self.assertRedirects(request, f'/users/login/?next=/groups/add_group/')
+        self.assertFalse(request.context)
+
+    def test_redirect(self):
+        request = self.client.get(reverse('add_group'))
+        self.assertRedirects(request, f'/users/login/?next=/groups/add_group/')
+
+
+class DetailGroupViewTest(TestCase):
+    """Testing the DetailGroupView endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.group = Group.objects.get(id=1)
+    
+    def test_view_url(self):
+        request = self.client.get(reverse('detail_group', kwargs={'group_slug': self.group.slug}))
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.get(reverse('detail_group', kwargs={'group_slug': self.group.slug}), follow=True)
+        assert request.status_code == 200, request.status_code
+        self.assertTemplateUsed(request, 'users/login.html')
+
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('detail_group', kwargs={'group_slug': self.group.slug}))
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 4, request.templates
+    
+    def test_context_if_logged_in(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('detail_group', kwargs={'group_slug': self.group.slug}))
+        assert request.context["group"].__str__() == "my group", request.context["group"]
+
+    def test_context_if_not_logged_in(self):
+        request = self.client.get(reverse('detail_group', kwargs={'group_slug': self.group.slug}))
+        self.assertRedirects(request, f'/users/login/?next=/groups/{self.group.slug}/')
+        self.assertFalse(request.context)
+
+    def test_redirect(self):
+        request = self.client.get(reverse('detail_group', kwargs={'group_slug': self.group.slug}))
+        self.assertRedirects(request, f'/users/login/?next=/groups/{self.group.slug}/')
+
+    def test_group_followers(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('detail_group', kwargs={'group_slug': self.group.slug}))
+        assert len(request.context["followers"]) == 0, request.context["followers"]
+    
+    def test_publication_rating(self):
+        request = self.client.get(reverse('news'))
+        page_obj = request.context["page_obj"]
+        assert request.status_code == 200, request.status_code
+        assert len(page_obj) == 2, page_obj
+        assert page_obj[0].__str__() == "Second publication", page_obj[0].__str__()
+        assert page_obj[1].__str__() == "publication", page_obj[1].__str__()
+        assert page_obj[0].rat == None, page_obj[0].rat
+        assert page_obj[1].rat == None, page_obj[1].rat
+
+
+class AddPublicationTest(TestCase):
+    """Testing the AddPublication endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.group = Group.objects.get(id=1)
+    
+    def test_view_url(self):
+        request = self.client.get(reverse('add_publication', kwargs={'group_slug': self.group.slug}))
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.get(reverse('add_publication', kwargs={'group_slug': self.group.slug}), follow=True)
+        assert request.status_code == 200, request.status_code
+        self.assertTemplateUsed(request, 'users/login.html')
+
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('add_publication', kwargs={'group_slug': self.group.slug}))
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 21, request.templates
+    
+    def test_context_if_logged_in(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('add_publication', kwargs={'group_slug': self.group.slug}))
+        assert request.context["title"].__str__() == "Create publication", request.context["title"]
+
+    def test_context_if_not_logged_in(self):
+        request = self.client.get(reverse('add_publication', kwargs={'group_slug': self.group.slug}))
+        self.assertRedirects(request, f'/users/login/?next=/groups/{self.group.slug}/add_publication/')
+        self.assertFalse(request.context)
+
+    def test_redirect(self):
+        request = self.client.get(reverse('add_publication', kwargs={'group_slug': self.group.slug}))
+        self.assertRedirects(request, f'/users/login/?next=/groups/{self.group.slug}/add_publication/')
+
+
+class DetailPublicationTest(TestCase):
+    """Testing the DetailPublication endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.publication = Publication.objects.get(id=1)
+    
+    def test_view_url(self):
+        request = self.client.get(reverse('detail_publish', kwargs={'publish_slug': self.publication.slug}))
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.get(reverse('detail_publish', kwargs={'publish_slug': self.publication.slug}), follow=True)
+        assert request.status_code == 200, request.status_code
+        self.assertTemplateUsed(request, 'users/login.html')
+
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('detail_publish', kwargs={'publish_slug': self.publication.slug}))
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 2, request.templates
+    
+    def test_context_if_logged_in(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('detail_publish', kwargs={'publish_slug': self.publication.slug}))
+        assert request.status_code == 200, request.status_code
+        assert request.context["publication"].__str__() == "publication", request.context["publication"]
+        assert request.context["publication"].group.__str__() == "my group", request.context["publication"]
+
+    def test_context_if_not_logged_in(self):
+        request = self.client.get(reverse('detail_publish', kwargs={'publish_slug': self.publication.slug}))
+        self.assertRedirects(request, f'/users/login/?next=/publish/{self.publication.slug}/')
+        self.assertFalse(request.context)
+
+    def test_redirect(self):
+        request = self.client.get(reverse('detail_publish', kwargs={'publish_slug': self.publication.slug}))
+        self.assertRedirects(request, f'/users/login/?next=/publish/{self.publication.slug}/')
+
+    def test_publication_rating(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('detail_publish', kwargs={'publish_slug': self.publication.slug}))
+        assert request.status_code == 200, request.status_code
+        assert request.context["rating"] == None, request.context["rating"]
+
+
+class PublicationCommentsViewTest(TestCase):
+    """Testing the PublicationCommentsView endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.publication = Publication.objects.get(id=1)
+    
+    def test_view_url(self):
+        request = self.client.get(reverse('comments', kwargs={'publish_slug': self.publication.slug}))
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 2, request.templates
+    
+    def test_context(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.get(reverse('comments', kwargs={'publish_slug': self.publication.slug}))
+        assert request.status_code == 200, request.status_code
+        assert request.context["title"] == "Comments", request.context["title"]
+        assert request.context["publication"].__str__() == "publication", request.context["publication"]
+
+
+class DelGroupTest(TestCase):
+    """Testing the del_group endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.group_1 = Group.objects.get(id=1)
+        cls.group_2 = Group.objects.get(id=2)
+    
+    def test_view_url(self):
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.get(reverse('del_group', kwargs={'group_slug': self.group_1.slug}))
+        assert request.status_code == 302, request.status_code
+        assert request.templates == [], request.templates
+
+        request = self.client.get(reverse('del_group', kwargs={'group_slug': self.group_2.slug}), follow=True)
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 4, request.templates
+
+    def test_del_group(self):
+        self.client.login(username="lanterman", password="karmavdele")
+        self.client.get(reverse('del_group', kwargs={'group_slug': self.group_1.slug}), follow=True)
+        count_groups = Group.objects.count()
+        assert count_groups == 1, count_groups
+
+        self.client.get(reverse('del_group', kwargs={'group_slug': self.group_2.slug}), follow=True)
+        count_groups = Group.objects.count()
+        assert count_groups == 0, count_groups
+    
+    def test_context(self):
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.get(reverse('del_group', kwargs={'group_slug': self.group_1.slug}))
+        assert request.status_code == 302, request.status_code
+        assert request.context == None, request.context
+
+        request = self.client.get(reverse('del_group', kwargs={'group_slug': self.group_2.slug}), follow=True)
+        assert request.status_code == 200, request.status_code
+        assert len(request.context["groups"]) == 0, request.context["groups"]
+        assert request.context["title"] == "My groups", request.context["title"]
+        assert request.context["name"] == "Search for groups", request.context["name"]
+
+
+class DelPublicationTest(TestCase):
+    """Testing the delete_publication endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.publication_1 = Publication.objects.get(id=1)
+        cls.publication_2 = Publication.objects.get(id=2)
+
+    def test_view_url(self):
+        request = self.client.get(reverse('delete_publication', kwargs={'pub_id': self.publication_1.id}))
+        assert request.status_code == 204, request.status_code
+        assert request.templates == [], request.templates
+
+    def test_del_publication(self):
+        self.client.get(reverse('delete_publication', kwargs={'pub_id': self.publication_1.id}))
+        count_publication = Publication.objects.count()
+        assert count_publication == 1, count_publication
+
+        self.client.get(reverse('delete_publication', kwargs={'pub_id': self.publication_2.id}))
+        count_publication = Publication.objects.count()
+        assert count_publication == 0, count_publication
+    
+    def test_context(self):
+        request = self.client.get(reverse('delete_publication', kwargs={'pub_id': self.publication_1.id}))
+        assert request.status_code == 204, request.status_code
+        assert request.context == None, request.context
+
+
+class UpdateGroupTest(TestCase):
+    """Testing the UpdateGroup endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.group = Group.objects.get(id=1)
+        cls.data = {"name": "my new name"}
+
+    def test_view_url(self):
+        request = self.client.post(reverse('update_group', kwargs={'group_slug': self.group.slug}), data=self.data)
+        assert request.status_code == 302, request.status_code
+        assert request.templates == [], request.templates
+
+        request = self.client.post(reverse('update_group', kwargs={'group_slug': self.group.slug}), data=self.data, follow=True)
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 12, request.templates
+    
+    def test_context(self):
+        request = self.client.post(reverse('update_group', kwargs={'group_slug': self.group.slug}), data=self.data)
+        assert request.context == None, request.context
+
+
+class UpdatePublishedTest(TestCase):
+    """Testing the UpdatePublished endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.pub = Publication.objects.get(id=1)
+        cls.data = {"name": "my new name"}
+
+    def test_view_url(self):
+        request = self.client.post(reverse('update_pub', kwargs={'pub_slug': self.pub.slug}), data=self.data)
+        assert request.status_code == 302, request.status_code
+        assert request.templates == [], request.templates
+
+        request = self.client.post(reverse('update_pub', kwargs={'pub_slug': self.pub.slug}), data=self.data, follow=True)
+        assert request.status_code == 200, request.status_code
+        assert len(request.templates) == 12, request.templates
+    
+    def test_context(self):
+        request = self.client.post(reverse('update_pub', kwargs={'pub_slug': self.pub.slug}), data=self.data)
+        assert request.context == None, request.context
+
+
+class GroupActivityTest(TestCase):
+    """Testing the group_activaity endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.user = User.objects.get(id=3)
+        cls.group = Group.objects.get(id=1)
+
+    def test_view_url(self):
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.get(reverse('group_activity', kwargs={'group_id': self.group.id}))
+        assert request.status_code == 200, request.status_code
+
+    def test_remove_user(self):
+        self.group.followers.add(self.user)
+        count_followers = self.group.followers.count()
+        assert count_followers == 1, count_followers
+
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.get(reverse('group_activity', kwargs={'group_id': self.group.id}))
+        count_followers = self.group.followers.count()
+        assert request.status_code == 200, request.status_code
+        assert count_followers == 0, count_followers
+
+    def test_add_user(self):
+        count_followers = self.group.followers.count()
+        assert count_followers == 0, count_followers
+
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.get(reverse('group_activity', kwargs={'group_id': self.group.id}))
+        count_followers = self.group.followers.count()
+        assert request.status_code == 200, request.status_code
+        assert count_followers == 1, count_followers
+
+
+class AddStarRatingTest(TestCase):
+    """Testing the AddStarRating endpoint"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.data = {"star": 5, "publication": 1}
+
+    def test_view_url(self):
+        self.client.login(username="lanterman", password="karmavdele")
+        resp = self.client.post(reverse('add_rating'), data=self.data)
+        assert resp.status_code == 201, resp.status_code
+
+    def test_create_rating_star(self):
+        count_rating_star = Rating.objects.filter(ip="lanterman", publication_id=1).count()
+        assert count_rating_star == 0, count_rating_star
+
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.post(reverse('add_rating'), data=self.data)
+        rating_star = Rating.objects.get(ip="lanterman", publication_id=1)
+        assert request.status_code == 201, request.status_code
+        assert rating_star.star.value == 5, rating_star.star
+
+    def test_update_rating_star(self):
+        Rating.objects.create(ip="lanterman", publication_id_id=1, star_id=1)
+        rating_star = Rating.objects.get(ip="lanterman", publication_id=1)
+        assert rating_star.star.value == 1, rating_star.star
+
+        self.client.login(username="lanterman", password="karmavdele")
+        request = self.client.post(reverse('add_rating'), data=self.data)
+        rating_star = Rating.objects.get(ip="lanterman", publication_id=1)
+        assert request.status_code == 201, request.status_code
+        assert rating_star.star.value == 5, rating_star.star

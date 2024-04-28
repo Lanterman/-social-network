@@ -1,6 +1,7 @@
 from django.urls import reverse
 from django.test import TestCase
 
+from config.tests.test_data import user_for_create
 from src.users.models import User
 
 
@@ -10,18 +11,27 @@ class RegisterUserTest(TestCase):
     fixtures = ["./config/tests/test_data.json"]
 
     def test_view_url(self):
-        request = self.client.get(reverse('register'))
+        request = self.client.post(reverse('register'), data=user_for_create)
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.post(reverse('register'), data=user_for_create, follow=True)
         assert request.status_code == 200, request.status_code
 
-    def test_view_template(self):
-        request = self.client.get(reverse('register'))
+    def test_create_user(self):
+        count_users = User.objects.count()
+        assert count_users == 3, count_users
+
+        request = self.client.post(reverse('register'), data=user_for_create, follow=True)
         assert request.status_code == 200, request.status_code
-        self.assertTemplateUsed(request, 'users/register.html')
+        count_users = User.objects.count()
+        created_user = User.objects.get(id=4)
+        assert count_users == 4, count_users
+        assert created_user.slug == "lanterman1", created_user.slug
+        assert created_user.hashed_password is not None, created_user.hashed_password
 
     def test_view_context(self):
-        request = self.client.get(reverse('register'))
-        assert request.status_code == 200, request.status_code
-        assert request.context['title'] == 'Sign-up', request.context['title']
+        request = self.client.post(reverse('register'), data=user_for_create, follow=True)
+        assert request.context['title'] == 'News', request.context['title']
         self.assertTrue('title' in request.context)
 
 
@@ -92,19 +102,25 @@ class LoginUserTest(TestCase):
 
     fixtures = ["./config/tests/test_data.json"]
 
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.correct_user_data = {"username": "lanterman", "password": "karmavdele"}
+        cls.incorrect_user_data = {"username": "la1nterman", "password": "karmavdele"}
+
     def test_view_url(self):
-        request = self.client.get(reverse('login'))
+        request = self.client.post(reverse('login'), data=self.correct_user_data)
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.post(reverse('login'), data=self.incorrect_user_data)
         assert request.status_code == 200, request.status_code
 
-    def test_view_template(self):
-        request = self.client.get(reverse('login'))
+        request = self.client.post(reverse('login'), data=self.correct_user_data, follow=True)
         assert request.status_code == 200, request.status_code
-        self.assertTemplateUsed(request, 'users/login.html')
 
     def test_view_context(self):
-        request = self.client.get(reverse('login'))
-        assert request.status_code == 200, request.status_code
-        assert request.context['title'] == 'Sign-in', request.context['title']
+        request = self.client.post(reverse('login'), data=self.correct_user_data, follow=True)
+        assert request.context['title'] == 'News', request.context['title']
         self.assertTrue('title' in request.context)
 
 
@@ -119,7 +135,12 @@ class PasswordChangeUserTest(TestCase):
         cls.user_1 = User.objects.get(username='admin')
         cls.user_2 = User.objects.get(username='lanterman')
 
-    def test_view_url(self):
+        cls.correct_user_data = {"old_password": "karmavdele", "new_password1": "karmavdele1", 
+                                 "new_password2": "karmavdele1"}
+        cls.incorrect_user_data = {"old_password": "karmavdele", "new_password1": "karmavdele1", 
+                                   "new_password2": "karmav1dele"}
+
+    def test_view_url_by_get_method(self):
         request = self.client.get(reverse('password_change', kwargs={'slug': self.user_2.slug}))
         assert request.status_code == 302, request.status_code
 
@@ -135,17 +156,39 @@ class PasswordChangeUserTest(TestCase):
         assert request.status_code == 200, request.status_code
         self.assertTemplateUsed(request, 'users/edit_profile.html')
 
-    def test_view_template(self):
+    def test_view_template_by_get_method(self):
         self.client.login(username='lanterman', password='karmavdele')
         request = self.client.get(reverse('password_change', kwargs={'slug': self.user_2.slug}))
         assert request.status_code == 200, request.status_code
         self.assertTemplateUsed(request, 'users/edit_profile.html')
 
-    def test_view_context(self):
+    def test_view_context_by_get_method(self):
         self.client.login(username='lanterman', password='karmavdele')
         request = self.client.get(reverse('password_change', kwargs={'slug': self.user_2.slug}))
         self.assertTrue('title' in request.context)
         assert request.context['title'] == 'Change password', request.context['title']
+    
+
+    def test_view_url_by_post(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.post(reverse('password_change', kwargs={'slug': self.user_2.slug}), 
+                                   data=self.correct_user_data)
+        assert request.status_code == 302, request.status_code
+
+        request = self.client.post(reverse('password_change', kwargs={'slug': self.user_2.slug}), 
+                                   data=self.correct_user_data, follow=True)
+        assert request.status_code == 200, request.status_code
+
+        request = self.client.post(reverse('password_change', kwargs={'slug': self.user_2.slug}), 
+                                   data=self.incorrect_user_data)
+        assert request.status_code == 200, request.status_code
+
+    def test_view_context_by_post(self):
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.post(reverse('password_change', kwargs={'slug': self.user_2.slug}), 
+                                   data=self.correct_user_data, follow=True)
+        assert request.context['title'] == 'News', request.context['title']
+        self.assertTrue('title' in request.context)
 
 
 class UpdateUserViewTest(TestCase):

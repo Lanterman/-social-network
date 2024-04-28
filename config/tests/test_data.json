@@ -37,6 +37,19 @@
         }
     },
     {
+        "model": "main.group",
+        "pk": 2,
+        "fields": {
+            "name": "second group",
+            "slug": "second_group",
+            "photo": "groups/Снимок_экрана_от_2023-12-16_15-37-45.png",
+            "owner": 3,
+            "followers": [
+                1
+            ]
+        }
+    },
+    {
         "model": "main.comment",
         "pk": 1,
         "fields": {

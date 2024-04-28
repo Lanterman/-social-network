@@ -300,7 +300,7 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Group.objects.all().prefetch_related('followers').select_related('owner'))
         self.followers = self.object.followers.all()
-        self.published = Publication.objects.filter(group_id=self.object.id).select_related('owner').annotate(
+        self.publication = Publication.objects.filter(group_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
 
@@ -311,7 +311,7 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
         return context | self.get_context()
 
     def get_queryset(self):
-        return self.published
+        return self.publication
 
 
 class AddPublication(DataMixin, CreateView):

@@ -1,132 +1,145 @@
+from django.urls import reverse
 from django.test import TestCase
 
-from src.main.models import *
-from src.users.models import Users
+from src.main.models import Publication, Group, Comment, RatingStar, Rating
 
 
-class PublishedTest(TestCase):
+class PublicationTest(TestCase):
+    """Testing the Publication model"""
+
+    fixtures = ["./config/tests/test_data.json"]
 
     @classmethod
-    def setUpTestData(cls):
-        # Объекты, которые используют все методы класса
-        group = Groups.objects.create(name='group', slug='group')
-        Published.objects.create(name='publish', slug='publish', group_id=group.id, biography='qwe')
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.publication = Publication.objects.get(id=1)
 
     def test_name_label(self):
-        published = Published.objects.get(slug='publish')
-        field_label = published._meta.get_field('name').verbose_name
-        self.assertEquals(field_label, 'Название')
-
-    def test_pub_fields(self):
-        published = Published.objects.get(slug='publish')
-        self.assertEquals(published.group.name, 'group')
-        self.assertNotEquals(published.date, 0)
-
-    def test_pub_owner(self):
-        published = Published.objects.get(slug='publish')
-        self.assertEquals(published.owner_id, None)
+        field_label = self.publication._meta.get_field('name').verbose_name
+        assert field_label == 'name', field_label
 
     def test_name_max_length(self):
-        published = Published.objects.get(slug='publish')
-        max_length = published._meta.get_field('name').max_length
-        self.assertEquals(max_length, 40)
+        max_length = self.publication._meta.get_field('name').max_length
+        assert max_length == 40, max_length
 
-    def test_name_str(self):
-        published = Published.objects.get(slug='publish')
-        string = f'{published.name}'
-        self.assertEquals(string, str(published))
+    def test_photo_label(self):
+        field_label = self.publication._meta.get_field('photo').upload_to
+        assert field_label == 'publication/', field_label
+
+    def test_slug_max_length(self):
+        max_length = self.publication._meta.get_field('slug').max_length
+        assert max_length == 40, max_length
+
+    def test_str(self):
+        assert self.publication.__str__() == self.publication.name, self.publication.__str__()
 
     def test_get_absolute_url(self):
-        published = Published.objects.get(slug='publish')
-        self.assertEquals(published.get_absolute_url(), '/publish/publish/')
+        publication_URL = f'/publish/{self.publication.slug}/'
+        assert publication_URL == self.publication.get_absolute_url(), publication_URL
 
 
-class GroupsTest(TestCase):
+class GroupTest(TestCase):
+    """Testing the Group model"""
+
+    fixtures = ["./config/tests/test_data.json"]
 
     @classmethod
-    def setUpTestData(cls):
-        # Объекты, которые используют все методы класса
-        user = Users.objects.create(num_tel=123456789101, slug='users')
-        Groups.objects.create(name='group_1', slug='group_1', owner_id=user.id)
-        Groups.objects.create(name='group_2', slug='group_2')
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.group = Group.objects.get(id=1)
 
-    def test_owner(self):
-        group_1 = Groups.objects.get(slug='group_1')
-        group_2 = Groups.objects.get(slug='group_2')
-        self.assertTrue(group_1.owner)
-        self.assertFalse(group_2.owner)
-        self.assertNotEquals(group_1.owner, group_2.owner)
+    def test_name_label(self):
+        field_label = self.group._meta.get_field('name').verbose_name
+        assert field_label == 'name', field_label
+
+    def test_name_max_length(self):
+        max_length = self.group._meta.get_field('name').max_length
+        assert max_length == 40, max_length
+
+    def test_photo_label(self):
+        field_label = self.group._meta.get_field('photo').upload_to
+        assert field_label == 'groups/', field_label
+
+    def test_slug_max_length(self):
+        max_length = self.group._meta.get_field('slug').max_length
+        assert max_length == 40, max_length
+
+    def test_str(self):
+        assert self.group.__str__() == self.group.name, self.group.__str__()
 
     def test_get_absolute_url(self):
-        group = Groups.objects.get(slug='group_1')
-        self.assertEquals(group.get_absolute_url(), '/groups/group_1/')
+        group_URL = f'/groups/{self.group.slug}/'
+        assert group_URL == self.group.get_absolute_url(), group_URL
 
 
-class CommentsTest(TestCase):
+class CommentTest(TestCase):
+    """Testing the Comment model"""
+
+    fixtures = ["./config/tests/test_data.json"]
 
     @classmethod
-    def setUpTestData(cls):
-        # Объекты, которые используют все методы класса
-        group = Groups.objects.create(name='group', slug='group')
-        user = Users.objects.create(num_tel='123456789101', slug='users')
-        published = Published.objects.create(name='publish', slug='publish', group_id=group.id)
-        Comments.objects.create(published=published, users=user)
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.publication = Publication.objects.get(id=1)
+        cls.comment = Comment.objects.get(id=1)
 
-    def test_users_label(self):
-        comment = Comments.objects.get(id=1)
-        field_label = comment._meta.get_field('users').verbose_name
-        self.assertEquals(field_label, 'Пользователь')
+    def test_date_label(self):
+        field_label = self.comment._meta.get_field('date').verbose_name
+        assert field_label == 'date', field_label
 
-    def test_pub_group(self):
-        comment = Comments.objects.get(id=1)
-        self.assertEquals(comment.users.num_tel, '123456789101')
+    def test_biography_label(self):
+        field_label = self.comment._meta.get_field('biography').verbose_name
+        assert field_label == 'biography', field_label
 
-    def test_name_str(self):
-        comment = Comments.objects.get(id=1)
-        string = f'{comment.published.name}'
-        self.assertEquals(string, str(comment))
+    def test_str(self):
+        assert self.comment.__str__() == self.publication.name, self.comment.__str__()
 
     def test_get_absolute_url(self):
-        comment = Comments.objects.get(id=1)
-        self.assertEquals(comment.get_absolute_url(), '/publish/publish/comments/')
+        group_URL = f'/publish/{self.publication.slug}/comments/'
+        assert group_URL == self.comment.get_absolute_url(), group_URL
 
 
 class RatingStarTest(TestCase):
+    """Testing the RatingStar model"""
+
+    fixtures = ["./config/tests/test_data.json"]
 
     @classmethod
-    def setUpTestData(cls):
-        # Объекты, которые используют все методы класса
-        RatingStar.objects.create(value=5)
-        RatingStar.objects.create()
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.rating_star = RatingStar.objects.get(id=3)
 
-    def test_value(self):
-        rating_1 = RatingStar.objects.get(value=5)
-        field = rating_1._meta.get_field('value').default
-        self.assertEquals(rating_1.value, 5)
-        self.assertEquals(field, 0)
+    def test_value_label(self):
+        field_label = self.rating_star._meta.get_field('value').verbose_name
+        assert field_label == 'rating', field_label
+    
+    def test_default_value_of_value_label(self):
+        default_value = self.rating_star._meta.get_field('value').default
+        assert default_value == 0, default_value        
 
-    def test_name_str(self):
-        rating = RatingStar.objects.get(value=5)
-        string = f'{rating.value}'
-        self.assertEquals(string, str(rating))
-
+    def test_str(self):
+        assert self.rating_star.__str__() == f"{self.rating_star.value}", self.rating_star.__str__()
 
 class RatingTest(TestCase):
+    """Testing the Rating model"""
+
+    fixtures = ["./config/tests/test_data.json"]
 
     @classmethod
-    def setUpTestData(cls):
-        # Объекты, которые используют все методы класса
-        group = Groups.objects.create(name='group', slug='group')
-        rating = RatingStar.objects.create(value=5)
-        published = Published.objects.create(name='publish', slug='publish', group_id=group.id)
-        Rating.objects.create(ip='user', published=published, star=rating)
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.publication = Publication.objects.get(id=1)
+        cls.rating = Rating.objects.create(ip="lanterman", publication_id_id=1, star_id=1)
 
-    def test_fields(self):
-        rating = Rating.objects.get(id=1)
-        self.assertEquals(rating.star.value, 5)
-        self.assertEquals(rating.published.name, 'publish')
+    def test_ip_label(self):
+        field_label = self.rating._meta.get_field('ip').verbose_name
+        assert field_label == 'IP', field_label
+    
+    def test_ip_max_length(self):
+        max_length = self.rating._meta.get_field('ip').max_length
+        assert max_length == 150, max_length
 
-    def test_name_str(self):
-        rating = Rating.objects.get(id=1)
-        string = f'{rating.star} - {rating.published}: {rating.ip}'
-        self.assertEquals(string, str(rating))
+    def test_str(self):
+        string = f'{self.rating.star} - {self.publication.name}: {self.rating.ip}'
+        assert self.rating.__str__() == string, self.rating.__str__()
+
