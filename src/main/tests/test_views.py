@@ -1,10 +1,9 @@
-from django.db.models import Avg
 from django.urls import reverse
 from django.test import TestCase
 
-from src.main.models import Publication, Group, Comment, Rating, RatingStar
+from src.main.models import Publication, Group, Rating
 
-from src.users.models import User, Follower, Chat, Message
+from src.users.models import User, Chat, Message
 
 
 class NewsViewTest(TestCase):
@@ -13,6 +12,10 @@ class NewsViewTest(TestCase):
     fixtures = ["./config/tests/test_data.json"]
 
     def test_view_url(self):
+        request = self.client.get('')
+        assert request.status_code == 200, request.status_code
+
+        self.client.login(username='lanterman', password='karmavdele')
         request = self.client.get('')
         assert request.status_code == 200, request.status_code
 
@@ -76,6 +79,15 @@ class HomeViewTest(TestCase):
         assert len(request.context["subs"]) == 1, len(request.context["subs"])
         assert len(request.context["followers"]) == 1, len(request.context["followers"])
         assert len(request.context["new_followers"]) == 1, len(request.context["new_followers"])
+    
+    def test_profile_of_other_user(self):
+        self.client.login(username='admin', password='admin')
+        request = self.client.get(reverse('home', kwargs={'user_pk': self.user.pk}))
+        assert request.status_code == 200, request.status_code
+        assert len(request.context["subs"]) == 1, len(request.context["subs"])
+        assert request.context["user"].__str__() == "lanterman", request.context["user"]
+        assert request.context["i_am_follower"] == True, request.context["i_am_follower"]
+        assert request.context["i_am_sub"] == True, request.context["i_am_sub"]
 
     def test_publication_rating(self):
         request = self.client.get(reverse('news'))
@@ -193,6 +205,16 @@ class ChatDetailViewTest(TestCase):
         assert len(request.context["messages"]) == 1, request.context["messages"]
         assert self.message_1 not in request.context["messages"], request.context["messages"]
         assert self.message_2 in request.context["messages"], request.context["messages"]
+    
+    def test_send_message(self):
+        count_messages = Message.objects.count()
+        assert count_messages == 2, count_messages
+
+        self.client.login(username='lanterman', password='karmavdele')
+        request = self.client.post(reverse('chat', kwargs={'chat_id': self.chat_2.pk}), data={"message": "hello"})
+        count_messages = Message.objects.count()
+        assert request.status_code == 200, request.status_code
+        assert count_messages == 3, count_messages
         
     def test_context_if_logged_in(self):
         self.client.login(username='lanterman', password='karmavdele')
@@ -389,6 +411,18 @@ class AddGroupTest(TestCase):
         assert request.status_code == 200, request.status_code
         assert len(request.templates) == 15, request.templates
     
+    def test_invalid_add_group(self):
+        group_info = {"name": "test group@", "photo": "groups/Снимок_экрана_от_2023-12-16_15-37-45.png"}
+        self.client.login(username='lanterman', password='karmavdele')
+
+        count_groups = Publication.objects.count()
+        assert count_groups == 2, count_groups
+
+        request = self.client.post(reverse('add_group'), data=group_info, follow=True)
+        count_groups = Publication.objects.count()
+        assert request.status_code == 200, request.status_code
+        assert count_groups == 2, count_groups
+    
     def test_context_if_logged_in(self):
         self.client.login(username='lanterman', password='karmavdele')
         request = self.client.get(reverse('add_group'))
@@ -479,6 +513,30 @@ class AddPublicationTest(TestCase):
         request = self.client.get(reverse('add_publication', kwargs={'group_slug': self.group.slug}))
         assert request.status_code == 200, request.status_code
         assert len(request.templates) == 21, request.templates
+    
+    def test_valid_add_publication(self):
+        data = {"name": "test pub", "photo": "groups/Снимок_экрана_от_2023-12-16_15-37-45.png", "biography": "biography"}
+        self.client.login(username='lanterman', password='karmavdele')
+
+        count_publications = Publication.objects.count()
+        assert count_publications == 2, count_publications
+
+        request = self.client.post(reverse('add_publication', kwargs={'group_slug': self.group.slug}), data=data, follow=True)
+        count_publications = Publication.objects.count()
+        assert request.status_code == 200, request.status_code
+        assert count_publications == 3, count_publications
+    
+    def test_invalid_add_publication(self):
+        data = {"name": "test pub@", "photo": "groups/Снимок_экрана_от_2023-12-16_15-37-45.png", "biography": "biography"}
+        self.client.login(username='lanterman', password='karmavdele')
+
+        count_publications = Publication.objects.count()
+        assert count_publications == 2, count_publications
+
+        request = self.client.post(reverse('add_publication', kwargs={'group_slug': self.group.slug}), data=data, follow=True)
+        count_publications = Publication.objects.count()
+        assert request.status_code == 200, request.status_code
+        assert count_publications == 2, count_publications
     
     def test_context_if_logged_in(self):
         self.client.login(username='lanterman', password='karmavdele')
@@ -655,13 +713,17 @@ class UpdateGroupTest(TestCase):
         assert request.status_code == 302, request.status_code
         assert request.templates == [], request.templates
 
+        self.client.login(username="admin", password="admin")
         request = self.client.post(reverse('update_group', kwargs={'group_slug': self.group.slug}), data=self.data, follow=True)
         assert request.status_code == 200, request.status_code
-        assert len(request.templates) == 12, request.templates
+        assert len(request.templates) == 4, len(request.templates)
     
     def test_context(self):
-        request = self.client.post(reverse('update_group', kwargs={'group_slug': self.group.slug}), data=self.data)
-        assert request.context == None, request.context
+        self.client.login(username="admin", password="admin")
+        request = self.client.get(reverse('update_group', kwargs={'group_slug': self.group.slug}))
+        assert request.status_code == 200, request.status_code
+        assert request.context["title"] == "Change", request.context["title"]
+        assert request.context["delete"] == "No", request.context["delete"]
 
 
 class UpdatePublishedTest(TestCase):
@@ -680,13 +742,21 @@ class UpdatePublishedTest(TestCase):
         assert request.status_code == 302, request.status_code
         assert request.templates == [], request.templates
 
+        self.client.login(username="admin", password="admin")
         request = self.client.post(reverse('update_pub', kwargs={'pub_slug': self.pub.slug}), data=self.data, follow=True)
         assert request.status_code == 200, request.status_code
-        assert len(request.templates) == 12, request.templates
+        assert len(request.templates) == 21, len(request.templates)
     
     def test_context(self):
+        self.client.login(username="admin", password="admin")
         request = self.client.post(reverse('update_pub', kwargs={'pub_slug': self.pub.slug}), data=self.data)
-        assert request.context == None, request.context
+        assert request.context["title"] == "Change", request.context["title"]
+        assert request.context["add"] == "Error!", request.context["add"]
+
+        request = self.client.get(reverse('update_pub', kwargs={'pub_slug': self.pub.slug}))
+        assert request.status_code == 200, request.status_code
+        assert request.context["title"] == "Change", request.context["title"]
+        assert request.context["add"] == "Error!", request.context["add"]
 
 
 class GroupActivityTest(TestCase):

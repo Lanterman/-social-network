@@ -94,9 +94,7 @@ class PasswordChangeUser(DataMixin, PasswordChangeView, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Change password'
-        context['button'] = 'Submit'
-        return context
+        return context | self.get_context(title="Change password", button="Submit")
     
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         self.object = self.get_object()
