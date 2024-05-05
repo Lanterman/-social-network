@@ -2,7 +2,7 @@ from datetime import datetime
 from django.test import TestCase
 
 from src.main.models import Publication, Group, Comment
-from src.users.models import User, Chat, Message
+from src.users.models import User, Chat, Message, Follower
 from src.main.consumers import serializers
 
 
@@ -299,7 +299,7 @@ class TestPublicationSearchSerialazer(TestCase):
         assert response["publication_url"] == "/publish/slugpiub/", response["publication_url"]
 
 
-class TestChatSearchSerialazer(TestCase):
+class TestChatSearchSerialaizer(TestCase):
     """Testing the ChatSearchSerialazer class methods"""
 
     fixtures = ["./config/tests/test_data.json"]
@@ -307,12 +307,28 @@ class TestChatSearchSerialazer(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.chat = Chat.objects.prefetch_related("members", "message_set").get(id=1)
+        cls.instance = serializers.ChatSearchSerialazer
     
     def test_get_formatted_last_message(self):
-        pass
+        message_dict = {"message": "my message"}
+        response = self.instance.get_formatted_last_message(message_dict)
+        assert response == {"message": "my message"}, response
+
+        response = self.instance.get_formatted_last_message(message_dict, 6)
+        assert response == {"message": "my mes..."}, response
+
+        message_dict = {"message": "my <i>message</i>"}
+        response = self.instance.get_formatted_last_message(message_dict.copy())
+        assert response == {"message": "my < i>message< /i>"}, response
+
+        response = self.instance.get_formatted_last_message(message_dict.copy(), 10)
+        assert response == {"message": "my < i>mes..."}, response
 
     def test_to_representation(self):
-        pass
+        response = self.instance(self.chat).data
+        assert response["chat_url"] == "/chat/1/", response["chat_url"]
+        assert response["last_message"]["message"] == "Hi man", response["last_message"]["message"]
 
 
 class TestUserSearchSerialazer(TestCase):
@@ -323,9 +339,13 @@ class TestUserSearchSerialazer(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.user = User.objects.get(id=3)
+        cls.instance = serializers.UserSearchSerialazer
     
     def test_to_representation(self):
-        pass
+        response = self.instance(self.user).data
+        assert response["user_full_name"] == "qweqweqwe qweqweqe", response["user_full_name"]
+        assert response["user_url"] == "/home/3/", response["user_url"]
 
 
 class TestFollowerSearchSerialazer(TestCase):
@@ -336,9 +356,13 @@ class TestFollowerSearchSerialazer(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.user = Follower.objects.prefetch_related("follower_id").get(id=2)
+        cls.instance = serializers.FollowerSearchSerialazer
     
     def test_to_representation(self):
-        pass
+        response = self.instance(self.user).data
+        assert response["user_full_name"] == "qweqweqwe qweqweqwe", response["user_full_name"]
+        assert response["user_url"] == "/home/2/", response["user_url"]
 
 
 class TestSubscriptionsSearchSerialazer(TestCase):
@@ -349,9 +373,13 @@ class TestSubscriptionsSearchSerialazer(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.user = Follower.objects.prefetch_related("subscription_id").get(id=2)
+        cls.instance = serializers.SubscriptionsSearchSerialazer
     
     def test_to_representation(self):
-        pass
+        response = self.instance(self.user).data
+        assert response["user_full_name"] == "qweqweqwe qweqweqe", response["user_full_name"]
+        assert response["user_url"] == "/home/3/", response["user_url"]
 
 
 class TestGroupsSearchSerialazer(TestCase):
@@ -362,6 +390,15 @@ class TestGroupsSearchSerialazer(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        cls.group = Group.objects.get(id=1)
+        cls.instance = serializers.GroupsSearchSerialazer
     
     def test_to_representation(self):
-        pass
+        response = self.instance(self.group).data
+        assert response["owner"] == 1, response["owner"]
+        assert response["group_url"] == "/groups/my_group/", response["group_url"]
+
+        self.group.slug = "slug_group"
+        response = self.instance(self.group).data
+        assert response["owner"] == 1, response["owner"]
+        assert response["group_url"] == "/groups/slug_group/", response["group_url"]
