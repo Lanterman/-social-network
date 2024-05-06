@@ -23,7 +23,7 @@ class ChatMessageMixin:
         """Get a sent chat message"""
 
         return {
-            "message": message.replace("\n", "<br>"),
+            "message": message.replace("\n", "</br>"),
             "author": serializers.AuthorForChatMessageSerialazer(author).data    
         }
 
@@ -36,7 +36,7 @@ class PublicationCommentMixin:
     """
 
     @database_sync_to_async
-    def get_comment_likes_dict(self, comment, is_my_like: int) -> dict:
+    def get_comment_likes_dict(self, comment, is_my_like: dict) -> dict:
         """Create and pass comment likes dictionary"""
 
         return is_my_like | {'comment_id': comment.id, 'likes_count': comment.like.count()}

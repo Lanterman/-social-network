@@ -1,193 +1,240 @@
-from django.test import TestCase
+from django.test import TransactionTestCase
+from channels.db import database_sync_to_async
+
+from src.main import models as main_models
+from src.users import models as user_models
+from src.main.consumers import db_queries
 
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_user_by_id class methods"""
-
-    fixtures = ["./config/tests/test_data.json"]
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-    
-    def test_conf_follower(self):
-        pass
-
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the confirm_follower class methods"""
+class TestGetUserByID(TransactionTestCase):
+    """Testing the get_user_by_id function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_user_by_id
     
-    def test_conf_follower(self):
-        pass
+    async def test_get_user_by_id(self):
+        response = await self.instance(1)
+        assert response.username == "admin", response.username
 
-
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the create_follower_instance_by_sub_id class methods"""
+class TestConfirmFollower(TransactionTestCase):
+    """Testing the confirm_follower function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.confirm_follower
     
-    def test_conf_follower(self):
-        pass
+    @database_sync_to_async
+    def check_instance(self, bool_value: bool) -> None:
+        query = user_models.Follower.objects.get(id=2)
+        assert query.is_checked == bool_value, query.is_checked
+
+    async def test_confirm_follower(self):
+        await self.check_instance(False)
+        await self.instance(2, 3)
+        await self.check_instance(True)
 
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the remove_follower_instances class methods"""
+class TestCreateFollowerInstanceBySubID(TransactionTestCase):
+    """Testing the create_follower_instance_by_sub_id function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.create_follower_instance_by_sub_id
     
-    def test_conf_follower(self):
-        pass
+    @database_sync_to_async
+    def check_count_instances(self, int_value: int) -> None:
+        query = user_models.Follower.objects.count()
+        assert query == int_value, query
+    
+    async def test_create_follower_instance_by_sub_id(self):
+        await self.check_count_instances(3)
+        await self.instance(2, 1)
+        await self.check_count_instances(4)
 
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the remove_follower_instance_by_follower_id class methods"""
+class TestRemoveFollwoerInstances(TransactionTestCase):
+    """Testing the remove_follower_instances function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.remove_follower_instances
     
-    def test_conf_follower(self):
-        pass
+    @database_sync_to_async
+    def check_count_instances(self, int_value: int) -> None:
+        query = user_models.Follower.objects.count()
+        assert query == int_value, query
+    
+    async def test_remove_follower_instances(self):
+        await self.check_count_instances(3)
+        await self.instance(2, 3)
+        await self.check_count_instances(2)
+
+        await self.check_count_instances(2)
+        await self.instance(1, 3)
+        await self.check_count_instances(0)
 
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the remove_follower_instance_by_sub_id class methods"""
+class TestRemoveFollowerInstanceByFollowerID(TransactionTestCase):
+    """Testing the remove_follower_instance_by_follower_id function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.remove_follower_instance_by_follower_id
     
-    def test_conf_follower(self):
-        pass
+    @database_sync_to_async
+    def check_count_instances(self, int_value: int) -> None:
+        query = user_models.Follower.objects.count()
+        assert query == int_value, query
+    
+    async def test_remove_follower_instance_by_follower_id(self):
+        await self.check_count_instances(3)
+        await self.instance(1, 3)
+        await self.check_count_instances(2)
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_publications_using_search class methods"""
+
+class TestRemoveFollowerInstanceBySubID(TransactionTestCase):
+    """Testing the remove_follower_instance_by_sub_id function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.remove_follower_instance_by_sub_id
     
-    def test_conf_follower(self):
-        pass
+    @database_sync_to_async
+    def check_count_instances(self, int_value: int) -> None:
+        query = user_models.Follower.objects.count()
+        assert query == int_value, query
+    
+    async def test_remove_follower_instance_by_sub_id(self):
+        await self.check_count_instances(3)
+        await self.instance(1, 3)
+        await self.check_count_instances(2)
 
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_chats_using_search class methods"""
+class TestGetPublicationUsingSearch(TransactionTestCase):
+    """Testing the get_publications_using_search function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_publications_using_search
     
-    def test_conf_follower(self):
-        pass
-
-
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_followers_using_search class methods"""
-
-    fixtures = ["./config/tests/test_data.json"]
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-    
-    def test_conf_follower(self):
-        pass
-
-
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_subs_using_search class methods"""
-
-    fixtures = ["./config/tests/test_data.json"]
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-    
-    def test_conf_follower(self):
-        pass
-
-
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_users_using_search class methods"""
-
-    fixtures = ["./config/tests/test_data.json"]
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-    
-    def test_conf_follower(self):
-        pass
-
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_groups_using_search class methods"""
-
-    fixtures = ["./config/tests/test_data.json"]
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-    
-    def test_conf_follower(self):
+    async def test_get_publications_using_search(self):
         pass
 
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_global_groups_using_search class methods"""
+class TestGetChatsUsingSearch(TransactionTestCase):
+    """Testing the get_chats_using_search function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_chats_using_search
     
-    def test_conf_follower(self):
+    async def test_get_chats_using_search(self):
         pass
 
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the create_pub_comment class methods"""
+class TestGetFollowersUsingSearch(TransactionTestCase):
+    """Testing the get_followers_using_search function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_followers_using_search
     
-    def test_conf_follower(self):
+    async def test_get_followers_using_search(self):
         pass
 
 
-class TestConfirmFollowerMixin(TestCase):
-    """Testing the get_pub_comment_with_likes class methods"""
+class TestGetSubsUsingSearch(TransactionTestCase):
+    """Testing the get_subs_using_search function"""
 
     fixtures = ["./config/tests/test_data.json"]
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_subs_using_search
     
-    def test_conf_follower(self):
+    async def test_get_subs_using_search(self):
+        pass
+
+
+class TestGetUsersUsingSearch(TransactionTestCase):
+    """Testing the get_users_using_search function"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_users_using_search
+    
+    async def test_get_users_using_search(self):
+        pass
+
+
+class TestGetGroupsUsingSearch(TransactionTestCase):
+    """Testing the get_groups_using_search function"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_groups_using_search
+    
+    async def test_get_groups_using_search(self):
+        pass
+
+
+class TestGetGlobalGroupsUsingSearch(TransactionTestCase):
+    """Testing the get_global_groups_using_search function"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_global_groups_using_search
+    
+    async def test_get_global_groups_using_search(self):
+        pass
+
+
+class TestCreatePubComment(TransactionTestCase):
+    """Testing the create_pub_comment function"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.create_pub_comment
+    
+    async def test_create_pub_comment(self):
+        pass
+
+
+class TestGetPubCommentWithLikes(TransactionTestCase):
+    """Testing the get_pub_comment_with_likes function"""
+
+    fixtures = ["./config/tests/test_data.json"]
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.instance = db_queries.get_pub_comment_with_likes
+    
+    async def test_get_pub_comment_with_likes(self):
         pass
