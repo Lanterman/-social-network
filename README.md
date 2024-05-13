@@ -25,9 +25,3 @@ docker-compose up --build
 ```
 http://127.0.0.1:8000/
 ```
-
-
-P.S.
-Work for the future
-
-1. Tests
