@@ -7,18 +7,35 @@
 <form method="post">
     {% csrf_token %}
 
-    {% if form.errors %}
-    <p class="errors">This user doesn't exists!</p>
-    {% endif %}
+    {% for error in form.non_field_errors %}
+        <p class="errors">{{ error }}</p>
+    {% endfor %}
 
     {% for f in form %}
-    <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>
-    <div class="errors">{{ f.errors }}</div>
+        <p class="form"><label for="">{{ f.label }}</label><i>{{ f }}</i></p>
+        <div class="errors">{{ f.errors }}</div>
     {% endfor %}
     <button class="button" type="submit">Sign-in</button>
 
 </form>
 
 <a class="a" href="{% url 'register' %}"><i>Sign-up</i></a>
+</br>
+
+<div class="social-api">
+    <p class="google">
+        <a id="google-link" href='{% url "social:begin" "google-oauth2" %}'>
+            <i id="google-icon" class="fa-brands fa-google-plus"></i>
+            <i id="google-name">Google+</i>
+        </a>
+    </p>
+
+    <p class="github">
+        <a id="github-link" href='{% url "social:begin" "github" %}'>
+            <i id="github-icon" class="fa-brands fa-github"></i>
+            <i id="github-name">GitHub+</i>
+        </a>
+    </p>
+</div>
 
 {% endblock content %}

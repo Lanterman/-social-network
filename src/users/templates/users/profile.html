@@ -11,9 +11,12 @@
             <p class="p2"><label>Email: </label><i id="i3">{{ my_profile.email }}</i></p>
             <p class="p2"><label>Mobile number: </label><i id="i4">{{ my_profile.num_tel }}</i></p>
         </div>
-        <div id="id2">
-            <a href="{% url 'edit_profile' my_profile.slug %}" class="a3"><i>Change profile info</i></a><br><br>
-            <a href="{% url 'password_change' my_profile.slug %}" class="a3"><i>Change password</i></a>
-        </div>
+
+        {% if social_prefix not in my_profile.slug %}
+            <div id="id2">
+                <a href="{% url 'edit_profile' my_profile.slug %}" class="a3"><i>Change profile info</i></a><br><br>
+                <a href="{% url 'password_change' my_profile.slug %}" class="a3"><i>Change password</i></a>
+            </div>
+        {% endif %}
     {% endif %}
 {% endblock content %}

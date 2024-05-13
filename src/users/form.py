@@ -13,13 +13,13 @@ class AbstractForm(forms.Form):
         re_value = re.findall(r'\d|\W', first_name)
         invalid_list = []
         if len(first_name) > 20:
-            invalid_list.append(ValidationError('Максимальное число символов 20, у вас %(value)s',
+            invalid_list.append(ValidationError('The maximum number of characters is 20, you have %(value)s',
                                                 params={'value': len(first_name)}))
         if len(first_name) < 3 and first_name:
-            invalid_list.append(ValidationError('Минимальное число символов 3, у вас %(value)s',
+            invalid_list.append(ValidationError('The minimum number of characters is 3, you have %(value)s',
                                                 params={'value': len(first_name)}))
         if re_value:
-            invalid_list.append(ValidationError('Имя должно содержать только буквы'))
+            invalid_list.append(ValidationError('The first name must contain only letters!'))
         if invalid_list:
             raise ValidationError(invalid_list)
         return first_name
@@ -29,13 +29,13 @@ class AbstractForm(forms.Form):
         re_value = re.findall(r'\d|\W', last_name)
         invalid_list = []
         if len(last_name) > 25:
-            invalid_list.append(ValidationError('Максимальное число символов 25, у вас %(value)s',
+            invalid_list.append(ValidationError('The maximum number of characters is 25, you have %(value)s',
                                                 params={'value': len(last_name)}))
         if len(last_name) < 3 and last_name:
-            invalid_list.append(ValidationError('Минимальное число символов 3, у вас %(value)s',
+            invalid_list.append(ValidationError('The minimum number of characters is 3, you have %(value)s',
                                                 params={'value': len(last_name)}))
         if re_value:
-            invalid_list.append(ValidationError('Имя должно содержать только буквы'))
+            invalid_list.append(ValidationError('The last name must contain only letters!'))
         if invalid_list:
             raise ValidationError(invalid_list)
         return last_name
@@ -45,13 +45,13 @@ class AbstractForm(forms.Form):
         re_value = re.findall(r'\D', num_tel)
         invalid_list = []
         if len(num_tel) < 12 and num_tel:
-            invalid_list.append(ValidationError('Минимальное число символов 12, у вас %(value)s',
+            invalid_list.append(ValidationError('The minimum number of characters is 12, you have %(value)s',
                                                 params={'value': len(num_tel)}))
         if len(num_tel) > 20 and num_tel:
-            invalid_list.append(ValidationError('Максимальное число символов 20, у вас %(value)s',
+            invalid_list.append(ValidationError('The maximum number of characters is 20, you have %(value)s',
                                                 params={'value': len(num_tel)}))
         if re_value:
-            invalid_list.append(ValidationError('Номер должен содержать только цифры!'))
+            invalid_list.append(ValidationError('The number must contain only numbers!'))
         if invalid_list:
             raise ValidationError(invalid_list)
         return num_tel
@@ -59,17 +59,17 @@ class AbstractForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data['email']
         if len(email) <= 11:
-            raise ValidationError('Email должен содержать более 3 символов перед @!')
+            raise ValidationError('Email must contain more than 3 characters before @!')
         return email
 
 
 class RegisterUserForm(AbstractForm, UserCreationForm):
     username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
-    password2 = forms.CharField(label='Confirm passrod', widget=forms.PasswordInput(attrs={'placeholder': 'Confirm passrod'}))
+    password2 = forms.CharField(label='Confirm password', widget=forms.PasswordInput(attrs={'placeholder': 'Confirm password'}))
     first_name = forms.CharField(label='First name', widget=forms.TextInput(attrs={'placeholder': 'First name'}))
     last_name = forms.CharField(label='Last name', widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
-    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Электронная почта'}))
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Email'}))
     num_tel = forms.CharField(label='Mobile number', widget=forms.TextInput(attrs={'placeholder': 'Mobile number'}))
     photo = forms.ImageField(label='Photo', required=False)
 
@@ -90,6 +90,14 @@ class PasswordChangeUserForm(PasswordChangeForm):
                                     widget=forms.PasswordInput(attrs={'placeholder': 'New password'}))
     new_password2 = forms.CharField(label='Confrim password',
                                     widget=forms.PasswordInput(attrs={'placeholder': 'Confrim password'}))
+    
+    def clean_new_password1(self):
+        old_password = self.cleaned_data.get('old_password')
+        new_password1 = self.cleaned_data.get('new_password1')
+
+        if old_password == new_password1:
+            raise ValidationError('Old and new passwords should not be the same!')
+        return new_password1
 
 
 class UpdateUserForm(AbstractForm, forms.ModelForm):

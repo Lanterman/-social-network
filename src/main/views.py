@@ -67,7 +67,7 @@ class HomeView(DataMixin, UpdateView):
     context_object_name = 'user'
 
     @staticmethod
-    def check_if_i_am_follower(followers, user_id: int) -> bool | None:
+    def check_if_i_am_follower(followers, user_id: int) -> bool or None: # type: ignore
         """Checking if i'm a follower"""
 
         for follower in followers:
@@ -75,7 +75,7 @@ class HomeView(DataMixin, UpdateView):
                 return True
     
     @staticmethod
-    def check_if_i_am_sub(subs, user_id: int) -> bool | None:
+    def check_if_i_am_sub(subs, user_id: int) -> bool or None: # type: ignore
         """Checking if i'm a sub"""
 
         for sub in subs:
@@ -300,7 +300,7 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Group.objects.all().prefetch_related('followers').select_related('owner'))
         self.followers = self.object.followers.all()
-        self.published = Publication.objects.filter(group_id=self.object.id).select_related('owner').annotate(
+        self.publication = Publication.objects.filter(group_id=self.object.id).select_related('owner').annotate(
             rat=Avg('rating__star_id')).order_by('-date')
         return super().get(request, *args, **kwargs)
 
@@ -311,7 +311,7 @@ class DetailGroupView(DataMixin, SingleObjectMixin, ListView):
         return context | self.get_context()
 
     def get_queryset(self):
-        return self.published
+        return self.publication
 
 
 class AddPublication(DataMixin, CreateView):

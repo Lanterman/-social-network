@@ -1,8 +1,10 @@
 .idea
 venv
 media
+htmlcov
 
 __pycache__
+.pytest_cache
 
 /src/main/migrations/*
 !/src/main/migrations/__init__.py
@@ -11,3 +13,6 @@ __pycache__
 !/src/users/migrations/__init__.py
 
 dump.rdb
+
+.env
+.env.dev

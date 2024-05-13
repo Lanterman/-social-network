@@ -11,7 +11,7 @@ class MessageInline(admin.TabularInline):
 class UsersAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'first_name', 'last_name', 'slug', 'email', 'num_tel')
     list_display_links = ('id', 'username', 'first_name', 'last_name',)
-    fields = ('username', 'first_name', 'last_name', 'slug', 'email', 'num_tel', 'photo',)
+    fields = ('username', 'first_name', 'last_name', 'slug', 'email', 'num_tel', 'photo', 'hashed_password')
     search_fields = ('username', 'first_name', 'last_name', 'slug', 'email')
     list_filter = ('first_name', 'last_name', 'slug', 'email')
     list_max_show_all = 5

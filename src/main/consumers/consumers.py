@@ -4,7 +4,6 @@ import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from . import db_queries, mixins, serializers
-from src.main.models import Comment
 
 
 class NewsPageConsumer(AsyncWebsocketConsumer, mixins.AllTypesOfSearchMixin):

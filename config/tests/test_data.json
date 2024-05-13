@@ -1,0 +1,247 @@
+[
+    {
+        "model": "main.publication",
+        "pk": 1,
+        "fields": {
+            "name": "publication",
+            "slug": "publication",
+            "biography": "It's my first publication. Nothing intresting. Just the publication.",
+            "photo": "",
+            "date": "2024-04-14T09:26:22.890Z",
+            "owner": 1,
+            "group": 1
+        }
+    },
+    {
+        "model": "main.publication",
+        "pk": 2,
+        "fields": {
+            "name": "Second publication",
+            "slug": "Second_publication",
+            "biography": "Bla-bla-bla",
+            "photo": "",
+            "date": "2024-04-14T09:26:42.119Z",
+            "owner": 2,
+            "group": 1
+        }
+    },
+    {
+        "model": "main.group",
+        "pk": 1,
+        "fields": {
+            "name": "my group",
+            "slug": "my_group",
+            "photo": "groups/Снимок_экрана_от_2023-12-16_15-37-45.png",
+            "owner": 1,
+            "followers": []
+        }
+    },
+    {
+        "model": "main.group",
+        "pk": 2,
+        "fields": {
+            "name": "second group",
+            "slug": "second_group",
+            "photo": "groups/Снимок_экрана_от_2023-12-16_15-37-45.png",
+            "owner": 3,
+            "followers": [
+                1
+            ]
+        }
+    },
+    {
+        "model": "main.comment",
+        "pk": 1,
+        "fields": {
+            "biography": "Good Question!",
+            "date": "2024-04-14T09:27:55.358Z",
+            "publication_id": 1,
+            "users": 1,
+            "like": []
+        }
+    },
+    {
+        "model": "main.comment",
+        "pk": 2,
+        "fields": {
+            "biography": "Bla-bla-bla",
+            "date": "2024-04-14T09:28:02.139Z",
+            "publication_id": 2,
+            "users": 2,
+            "like": []
+        }
+    },
+    {
+        "model": "main.ratingstar",
+        "pk": 1,
+        "fields": {
+            "value": 1
+        }
+    },
+    {
+        "model": "main.ratingstar",
+        "pk": 2,
+        "fields": {
+            "value": 2
+        }
+    },
+    {
+        "model": "main.ratingstar",
+        "pk": 3,
+        "fields": {
+            "value": 3
+        }
+    },
+    {
+        "model": "main.ratingstar",
+        "pk": 4,
+        "fields": {
+            "value": 4
+        }
+    },
+    {
+        "model": "main.ratingstar",
+        "pk": 5,
+        "fields": {
+            "value": 5
+        }
+    },
+    {
+        "model": "users.user",
+        "pk": 1,
+        "fields": {
+            "password": "argon2$argon2id$v=19$m=102400,t=2,p=8$NUFGVzZ2bHhKTDh0YUFQc0hVb3RnbA$gMrcR/1IP4MEmNHFq9KbTg0J9K0b6XDrGqZFioIUCnQ",
+            "last_login": "2024-04-14T09:28:17.414Z",
+            "is_superuser": true,
+            "username": "admin",
+            "first_name": "",
+            "last_name": "",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2024-04-01T16:05:36.480Z",
+            "num_tel": "1312312312312312313",
+            "slug": "admin",
+            "photo": "",
+            "email": "admin@mail.ru",
+            "hashed_password": "weqwe13qweqweqweqwe",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "users.user",
+        "pk": 2,
+        "fields": {
+            "password": "argon2$argon2id$v=19$m=102400,t=2,p=8$YmljeU42R0tTTFVHeGZBUVIybFltZg$9X3loh92cTRnaNYE9QldTKkEJV7erEguiE2H+pfEyFE",
+            "last_login": "2024-04-07T08:39:57.909Z",
+            "is_superuser": false,
+            "username": "user",
+            "first_name": "qweqweqwe",
+            "last_name": "qweqweqwe",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2024-04-07T08:39:57.522Z",
+            "num_tel": "123123123123",
+            "slug": "qeqweqweqweqwe",
+            "photo": "",
+            "email": "qweqweqwe@mail.ru",
+            "hashed_password": "wZIgZAtZEKls$41772c6250665d9bcbabc7c48d2415f6c21797d61811940fd1c9c136711630da",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "users.user",
+        "pk": 3,
+        "fields": {
+            "password": "argon2$argon2id$v=19$m=102400,t=2,p=8$RGZqMFZCNUoweHNBdXhHaFh3UlA2Yg$QmEEDKOXVaL0rkuZHNWyc5IFobAhd2/xZNkfv4zDFlE",
+            "last_login": "2024-04-14T09:25:13.555Z",
+            "is_superuser": false,
+            "username": "lanterman",
+            "first_name": "qweqweqwe",
+            "last_name": "qweqweqe",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2024-04-07T10:18:50.362Z",
+            "num_tel": "1231231231231231",
+            "slug": "lanterman",
+            "photo": "",
+            "email": "qweqweqwe@mail.ru",
+            "hashed_password": "JBaLpBqMzIda$bd0d35ed587d7b86f943a82efe559c94264009177c831be7afb7286de4eff373",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "users.follower",
+        "pk": 1,
+        "fields": {
+            "follower_id": 3,
+            "subscription_id": 1,
+            "date": "2024-04-14T09:26:54.778Z",
+            "is_checked": false
+        }
+    },
+    {
+        "model": "users.follower",
+        "pk": 2,
+        "fields": {
+            "follower_id": 2,
+            "subscription_id": 3,
+            "date": "2024-04-14T09:27:03.044Z",
+            "is_checked": false
+        }
+    },
+    {
+        "model": "users.follower",
+        "pk": 3,
+        "fields": {
+            "follower_id": 1,
+            "subscription_id": 3,
+            "date": "2024-04-14T09:27:13.703Z",
+            "is_checked": true
+        }
+    },
+    {
+        "model": "users.chat",
+        "pk": 1,
+        "fields": {
+            "members": [
+                1,
+                2
+            ]
+        }
+    },
+    {
+        "model": "users.chat",
+        "pk": 2,
+        "fields": {
+            "members": [
+                1,
+                3
+            ]
+        }
+    },
+    {
+        "model": "users.message",
+        "pk": 1,
+        "fields": {
+            "chat_id": 1,
+            "author_id": 1,
+            "message": "Hi man",
+            "pub_date": "2024-04-14T09:27:29.086Z",
+            "is_readed": true
+        }
+    },
+    {
+        "model": "users.message",
+        "pk": 2,
+        "fields": {
+            "chat_id": 2,
+            "author_id": 3,
+            "message": "What's up?\r\n",
+            "pub_date": "2024-04-14T09:27:40.207Z",
+            "is_readed": false
+        }
+    }
+]    

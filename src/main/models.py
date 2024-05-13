@@ -38,7 +38,7 @@ class Publication(Abstract):
 
 
 class Group(Abstract):
-    photo = models.ImageField(upload_to='groups/', verbose_name='Аватарка')
+    photo = models.ImageField(upload_to='groups/', verbose_name='photo')
     followers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='groups_followers', verbose_name='followers')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='owner', on_delete=models.SET_NULL, null=True,
                               related_name='my_groups')

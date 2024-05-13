@@ -30,6 +30,4 @@ http://127.0.0.1:8000/
 P.S.
 Work for the future
 
-1. Include coresheaders, drf_yasg
-2. Set up user JWTTokens
-3. Set up OAuth2
+1. Tests
