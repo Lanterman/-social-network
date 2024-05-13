@@ -16,7 +16,7 @@ def create_salt(length: int = 12) -> str:
     return "".join(choice(string.ascii_letters) for _ in range(length))
 
 
-def password_hashing(password: str, salt: str | None = None) -> str:
+def password_hashing(password: str, salt: str or None = None) -> str: # type: ignore
     """Hashing a user password"""
 
     if not salt:

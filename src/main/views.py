@@ -67,7 +67,7 @@ class HomeView(DataMixin, UpdateView):
     context_object_name = 'user'
 
     @staticmethod
-    def check_if_i_am_follower(followers, user_id: int) -> bool | None:
+    def check_if_i_am_follower(followers, user_id: int) -> bool or None: # type: ignore
         """Checking if i'm a follower"""
 
         for follower in followers:
@@ -75,7 +75,7 @@ class HomeView(DataMixin, UpdateView):
                 return True
     
     @staticmethod
-    def check_if_i_am_sub(subs, user_id: int) -> bool | None:
+    def check_if_i_am_sub(subs, user_id: int) -> bool or None: # type: ignore
         """Checking if i'm a sub"""
 
         for sub in subs:

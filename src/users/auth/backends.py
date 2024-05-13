@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.backends import ModelBackend
 
-from config import settings
 from src.users.services import ValidateCustomPassword as ValidatePassword
 
 
@@ -13,8 +12,6 @@ class CustomAuthBackend(ModelBackend):
     """
     Custom authentication
     """
-
-    keyword = settings.JWT_SETTINGS["AUTH_HEADER_TYPES"]
 
     def authenticate(self, request, username=None, password=None, **kwargs):
         if username is None:

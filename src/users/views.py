@@ -28,7 +28,7 @@ class RegisterUser(CreateView):
         user.hashed_password = services.create_hashed_password(form.data["password1"])
         user.save()
 
-        login(self.request, user, backend='django.contrib.auth.backends.CustomAuthBackend')
+        login(self.request, user, backend='src.users.auth.backends.CustomAuthBackend')
         
         tasks.send_registration_message.delay(user.email)
         return redirect('news')

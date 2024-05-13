@@ -41,7 +41,7 @@ DEBUG = bool(os.getenv("DOC_DEBUG", os.environ["DEBUG"]))
 ALLOWED_HOSTS = json.loads(os.getenv("DOC_ALLOWED_HOSTS", os.environ["ALLOWED_HOSTS"]))
 
 CORS_ALLOWED_ORIGINS = json.loads(os.getenv("DOC_CORS_ALLOWED_ORIGINS", os.environ["CORS_ALLOWED_ORIGINS"]))
-# CORS_ORIGIN_ALLOW_ALL = bool(os.getenv("DOC_CORS_ORIGIN_ALLOW_ALL", os.environ["CORS_ORIGIN_ALLOW_ALL"]))
+CORS_ORIGIN_ALLOW_ALL = bool(os.getenv("DOC_CORS_ORIGIN_ALLOW_ALL", os.environ["CORS_ORIGIN_ALLOW_ALL"]))
 
 # Application definition
 INSTALLED_APPS = [
